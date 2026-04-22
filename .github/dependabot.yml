@@ -1,10 +1,44 @@
+# Canonical dependabot config — synced by Scripts/sync-dependabot.sh.
+#
+# Edits to this file are propagated to every sub-repo's .github/dependabot.yml
+# in the three target orgs. Per-repo modifications MUST be made here; the sync
+# script replaces the whole file.
+#
+# The github-actions ecosystem entry is retained even for repos whose CI
+# delegates entirely to reusable workflows (the `uses: ...@main` refs produce
+# no bumpable pins). Keeping the entry uniform costs nothing and survives the
+# future where a repo adds an inline step with real action pins.
 version: 2
 updates:
   - package-ecosystem: "swift"
     directory: "/"
     schedule:
       interval: "monthly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    groups:
+      swift:
+        patterns: ["*"]
+    labels:
+      - "dependencies"
+      - "swift"
+    commit-message:
+      prefix: "chore(deps)"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "monthly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    groups:
+      actions:
+        patterns: ["*"]
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(deps)"
