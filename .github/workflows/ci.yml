@@ -14,21 +14,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Production validation: Latest Swift on Linux with release build
-  linux-latest:
-    name: Ubuntu (Swift 6.2, release)
-    runs-on: ubuntu-latest
-    container: swift:6.2
-    steps:
-      - uses: actions/checkout@v6
+  # Build + test matrix — see swift-foundations/.github/.github/workflows/swift-ci.yml (layer wrapper)
+  ci:
+    uses: swift-foundations/.github/.github/workflows/swift-ci.yml@main
+    secrets: inherit
 
-      - name: Cache Swift packages
-        uses: actions/cache@v5
-        with:
-          path: .build
-          key: linux-swift62-spm-v5-${{ hashFiles('Package.swift', 'Package@*.swift') }}
-          restore-keys: linux-swift62-spm-v5-
-
-      - name: Test (release)
-        run: swift test -c release
-
+  # DocC umbrella-catalog pipeline per [DOC-019a] — see
+  # swift-institute/.github/.github/workflows/swift-docs.yml
+  docs:
+    uses: swift-institute/.github/.github/workflows/swift-docs.yml@main
+    secrets: inherit
