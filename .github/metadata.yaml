@@ -5,3 +5,5 @@ topics:
   - foundations
   - sql
 homepage: "https://swift-institute.org"
+readme:
+  family: F
