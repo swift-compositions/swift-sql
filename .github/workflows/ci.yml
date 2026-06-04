@@ -20,7 +20,7 @@ jobs:
     secrets: inherit
 
   # DocC umbrella-catalog pipeline per [DOC-019a] — see
-  # swift-institute/.github/.github/workflows/swift-docs.yml
+  # swift-foundations/.github/.github/workflows/swift-docs.yml
   docs:
-    uses: swift-institute/.github/.github/workflows/swift-docs.yml@main
+    uses: swift-foundations/.github/.github/workflows/swift-docs.yml@main
     secrets: inherit
