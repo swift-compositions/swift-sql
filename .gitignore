@@ -18,9 +18,12 @@ Thumbs.db
 !/Experiments/
 !/Research/
 !/Skills/
+!/Scripts/
 !/.github/
 !/Package.swift
+!/Package@swift-*.swift
 !/Lint.swift
+!/Lint/
 !/LICENSE
 !/LICENSE.md
 !/README.md
