@@ -1,6 +1,6 @@
 # .github/metadata.yaml
 # Triaged by AI-assisted bulk pass (2026-04-29).
-description: "A database-agnostic SQL query representation for Swift."
+description: "Namespace reserved for database-agnostic SQL query representation in Swift."
 topics:
   - foundations
   - sql
