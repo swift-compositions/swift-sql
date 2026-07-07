@@ -29,13 +29,14 @@ let package = Package(
             branch: "main",
             traits: ["Clocks"]
         ),
-        // Path-form (not URL-form) is required: swift-postgresql-standard's macro target includes
-        // `Structured Queries Primitives Support` sources via a RELATIVE symlink that only resolves
-        // in the canonical sibling workspace layout. A URL/mirror dependency clones the package into
-        // `.build/checkouts`, which breaks the symlink (the macro then can't see `Inflection.swift`
-        // → `'String' has no member 'lowerCamelCased'`). A path dependency is used in place, so the
-        // symlink resolves. See the target-level report on this upstream packaging constraint.
-        .package(path: "/Users/coen/Developer/swift-standards/swift-postgresql-standard"),
+        // URL-form: swift-postgresql-standard's macro target formerly included
+        // `Structured Queries Primitives Support` sources via a RELATIVE symlink that only
+        // resolved in the canonical sibling workspace layout — a URL/mirror dependency clones
+        // the package into `.build/checkouts`, which dangled the symlink (the macro then
+        // couldn't see `Inflection.swift` → `'String' has no member 'lowerCamelCased'`). That
+        // directory is now vendored as real files upstream, so the checkout resolves cleanly
+        // and the path-form workaround is no longer needed.
+        .package(url: "https://github.com/swift-standards/swift-postgresql-standard.git", branch: "main"),
     ],
     targets: [
         // MARK: - SQL (engine-free execution interface)
