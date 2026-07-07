@@ -9,7 +9,7 @@
 //
 // ===----------------------------------------------------------------------===//
 
-public import SQL
+internal import SQL
 
 extension SQL {
     /// The scripted ``SQL/Connection`` a ``SQL/TestDatabase`` hands to a scope body. Every verb
