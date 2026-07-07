@@ -118,6 +118,37 @@ struct FetchFixture {
     #expect(first == nil)
 }
 
+@Test func fetchAllWholeRowDecodesRecords() async throws {
+    let database = SQL.TestDatabase()
+    // Sorted keys ["id", "name"] match the table's declared column order (id, name).
+    await database.script(rows: [
+        ["id": .int64(1), "name": .text("alice")],
+        ["id": .int64(2), "name": .text("bob")],
+    ])
+    let records = try await FetchFixture.all.fetchAll(database)
+    #expect(records.count == 2)
+    #expect(records[0].id == 1)
+    #expect(records[0].name == "alice")
+    #expect(records[1].id == 2)
+    #expect(records[1].name == "bob")
+}
+
+@Test func fetchOneWholeRowDecodesFirstRecord() async throws {
+    let database = SQL.TestDatabase()
+    await database.script(rows: [["id": .int64(7), "name": .text("carol")]])
+    let record = try #require(
+        try await FetchFixture.where { $0.id == 7 }.fetchOne(database)
+    )
+    #expect(record.id == 7)
+    #expect(record.name == "carol")
+}
+
+@Test func fetchOneWholeRowReturnsNilOnEmptyResultSet() async throws {
+    let database = SQL.TestDatabase()
+    let record = try await FetchFixture.all.fetchOne(database)
+    #expect(record == nil)
+}
+
 @Test func insertReturningFetchTakesWriteScope() async throws {
     let database = SQL.TestDatabase()
     await database.script(rows: [["id": .int64(99)]])

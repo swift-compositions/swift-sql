@@ -68,6 +68,54 @@ extension Statement where QueryValue: QueryRepresentable, QueryValue.QueryOutput
     }
 }
 
+extension Statement where QueryValue == (), Joins == (), From: Sendable, From.QueryOutput: Sendable {
+    /// Runs this whole-row DSL statement on `database` and decodes every row into a `From` record.
+    ///
+    /// The whole-row shape: a statement with no `.select` narrowing — a bare `Table.all` /
+    /// `.where { … }` chain — carries `QueryValue == ()` with the selection being all of `From`'s
+    /// columns (the DSL's own spelling for this case: `S.QueryValue == (), S.Joins == ()` with the
+    /// effective selection `S.From`, see `CTE.With`). Each row decodes through the `@Table`-
+    /// generated `From.init(decoder:)`. `Joins == ()` keeps a join-without-select statement (whose
+    /// rows span multiple tables) from silently decoding just the first table — that shape must go
+    /// through `.select`/`.selectStar()` onto the tuple overloads.
+    public func fetchAll(
+        _ database: any SQL.Database
+    ) async throws(SQL.Error) -> [From.QueryOutput] {
+        let query = try SQL.Query(self)
+        return try await database.write { connection throws(SQL.Error) in
+            try await connection.fetchAll(query) { (row: any SQL.Row) throws(SQL.Error) -> From.QueryOutput in
+                var decoder = SQL.RowDecoder(row: row)
+                do {
+                    return try From(decoder: &decoder).queryOutput
+                } catch let error as SQL.Error {
+                    throw error
+                } catch {
+                    throw SQL.Error.decoding("\(error)")
+                }
+            }
+        }
+    }
+
+    /// Runs this whole-row DSL statement on `database` and decodes the first row, or `nil`.
+    public func fetchOne(
+        _ database: any SQL.Database
+    ) async throws(SQL.Error) -> From.QueryOutput? {
+        let query = try SQL.Query(self)
+        return try await database.write { connection throws(SQL.Error) in
+            try await connection.fetchOne(query) { (row: any SQL.Row) throws(SQL.Error) -> From.QueryOutput in
+                var decoder = SQL.RowDecoder(row: row)
+                do {
+                    return try From(decoder: &decoder).queryOutput
+                } catch let error as SQL.Error {
+                    throw error
+                } catch {
+                    throw SQL.Error.decoding("\(error)")
+                }
+            }
+        }
+    }
+}
+
 extension Statement {
     /// Runs this join-shaped DSL statement on `database` and decodes every row into a tuple.
     ///
