@@ -23,6 +23,7 @@ extension SQL {
     public actor TestDatabase: SQL.Database {
         private var recorded: [Statement] = []
         private var scripts: [[[String: SQL.Value]]] = []
+        private var enteredScopes: [Scope] = []
 
         public init() {}
 
@@ -32,8 +33,20 @@ extension SQL {
             public let bindings: [SQL.Value]
         }
 
+        /// A connection scope a body ran in, recorded so a test can assert routing — e.g. that the
+        /// statement-fetch sugar takes the write-capable scope (so an `INSERT … RETURNING` fetch is
+        /// never run inside a read scope).
+        public enum Scope: Sendable, Equatable {
+            case read
+            case write
+            case rollback
+        }
+
         /// The statements run so far, in execution order.
         public var executed: [Statement] { recorded }
+
+        /// The connection scopes entered so far, in entry order.
+        public var scopes: [Scope] { enteredScopes }
 
         /// Enqueues one scripted result set (an ordered list of rows) for the next `fetchAll` /
         /// `fetchOne` to consume.
@@ -49,22 +62,29 @@ extension SQL {
             scripts.isEmpty ? [] : scripts.removeFirst()
         }
 
+        private func enter(_ scope: Scope) {
+            enteredScopes.append(scope)
+        }
+
         public func read<Value: Sendable>(
             _ body: @Sendable (any SQL.Connection) async throws(SQL.Error) -> Value
         ) async throws(SQL.Error) -> Value {
-            try await body(SQL.TestConnection(database: self))
+            enter(.read)
+            return try await body(SQL.TestConnection(database: self))
         }
 
         public func write<Value: Sendable>(
             _ body: @Sendable (any SQL.Connection) async throws(SQL.Error) -> Value
         ) async throws(SQL.Error) -> Value {
-            try await body(SQL.TestConnection(database: self))
+            enter(.write)
+            return try await body(SQL.TestConnection(database: self))
         }
 
         public func withRollback<Value: Sendable>(
             _ body: @Sendable (any SQL.Connection) async throws(SQL.Error) -> Value
         ) async throws(SQL.Error) -> Value {
-            try await body(SQL.TestConnection(database: self))
+            enter(.rollback)
+            return try await body(SQL.TestConnection(database: self))
         }
     }
 }

@@ -17,12 +17,10 @@ extension Statement {
     ///
     /// The statement-first execution sugar matching the app's `statement.execute(db)` call shape.
     ///
-    /// - Note: Only execute-style running is bridged. Row-decoding sugar (`fetchAll` / `fetchOne`
-    ///   returning decoded records by driving the DSL `QueryDecoder`) is intentionally absent —
-    ///   see the target-level report: the DSL decoder is a positional, mutating cursor requiring
-    ///   `Optional`-per-column NULL detection and Foundation `UUID`/`Date`/`UInt64`/`Decimal`
-    ///   columns, none of which ``SQL/Row``'s by-name/by-index accessor model exposes, so the
-    ///   decoder cannot be driven over an `any SQL.Row` without new core surface.
+    /// - Note: This is the fire-and-forget verb (row count discarded). Row-decoding sugar —
+    ///   `fetchAll` / `fetchOne` returning decoded `QueryOutput` values by driving the DSL
+    ///   `QueryDecoder` over ``SQL/RowDecoder`` — lives in `Statement+Fetch.swift`, built on the
+    ///   by-index `…IfPresent` accessors added to ``SQL/Row``.
     public func execute(_ database: any SQL.Database) async throws(SQL.Error) {
         let query = try SQL.Query(self)
         _ = try await database.execute(query)

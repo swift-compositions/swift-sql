@@ -34,8 +34,12 @@ extension SQL {
 
         func stringIfPresent(_ column: String) throws(SQL.Error) -> String?
         func intIfPresent(_ column: String) throws(SQL.Error) -> Int?
+        func int64IfPresent(_ column: String) throws(SQL.Error) -> Int64?
+        func doubleIfPresent(_ column: String) throws(SQL.Error) -> Double?
+        func boolIfPresent(_ column: String) throws(SQL.Error) -> Bool?
         func uuidIfPresent(_ column: String) throws(SQL.Error) -> RFC_4122.UUID?
         func timestampIfPresent(_ column: String) throws(SQL.Error) -> Instant?
+        func bytesIfPresent(_ column: String) throws(SQL.Error) -> [UInt8]?
 
         // MARK: By column index
 
@@ -47,5 +51,21 @@ extension SQL {
         func uuid(at index: Int) throws(SQL.Error) -> RFC_4122.UUID
         func timestamp(at index: Int) throws(SQL.Error) -> Instant
         func bytes(at index: Int) throws(SQL.Error) -> [UInt8]
+
+        // MARK: By column index (optional)
+        //
+        // The positional NULL-aware accessors the DSL bridge's `SQL.RowDecoder` (a
+        // `Structured Queries Primitives` `QueryDecoder`) drives one column at a time: `nil`
+        // signals a `NULL` column, a type mismatch throws ``SQL/Error/decoding(_:)``. Symmetric
+        // with the by-name `…IfPresent` surface above.
+
+        func stringIfPresent(at index: Int) throws(SQL.Error) -> String?
+        func intIfPresent(at index: Int) throws(SQL.Error) -> Int?
+        func int64IfPresent(at index: Int) throws(SQL.Error) -> Int64?
+        func doubleIfPresent(at index: Int) throws(SQL.Error) -> Double?
+        func boolIfPresent(at index: Int) throws(SQL.Error) -> Bool?
+        func uuidIfPresent(at index: Int) throws(SQL.Error) -> RFC_4122.UUID?
+        func timestampIfPresent(at index: Int) throws(SQL.Error) -> Instant?
+        func bytesIfPresent(at index: Int) throws(SQL.Error) -> [UInt8]?
     }
 }
