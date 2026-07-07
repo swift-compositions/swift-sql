@@ -105,9 +105,11 @@ extension SQL.TestRow {
     private static func asInt(_ value: SQL.Value) throws(SQL.Error) -> Int {
         switch value {
         case .int(let int): return int
+
         case .int64(let int):
             guard let narrowed = Int(exactly: int) else { throw SQL.Error.decoding("int64 \(int) does not fit Int") }
             return narrowed
+
         default: throw SQL.Error.decoding("expected int, got \(value)")
         }
     }

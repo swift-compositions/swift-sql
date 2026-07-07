@@ -11,6 +11,10 @@
 
 public import SQL
 
+// `any SQL.Connection` / `any SQL.Row` / `any SQL.Database` existentials are the
+// deliberate engine-free membrane design: conformers are engine-specific and
+// heterogeneous; generics would leak the engine type into consumer signatures.
+// swiftlint:disable no_any_protocol_existential
 extension SQL {
     /// An engine-free, scripted ``SQL/Database`` for testing consumers without a live engine.
     ///
@@ -33,7 +37,7 @@ extension SQL {
             public let bindings: [SQL.Value]
         }
 
-        /// A connection scope a body ran in, recorded so a test can assert routing — e.g. that the
+        /// A connection scope a body ran in, recorded so a test can assert routing — for example that the
         /// statement-fetch sugar takes the write-capable scope (so an `INSERT … RETURNING` fetch is
         /// never run inside a read scope).
         public enum Scope: Sendable, Equatable {
@@ -88,3 +92,4 @@ extension SQL {
         }
     }
 }
+// swiftlint:enable no_any_protocol_existential

@@ -9,10 +9,9 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import Testing
-
 import SQL
 import SQL_Test_Support
+import Testing
 
 @Test func testDatabaseScriptsFetchAllThroughTestRow() async throws {
     let database = SQL.TestDatabase()

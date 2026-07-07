@@ -9,9 +9,8 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import Testing
-
 import SQL
+import Testing
 
 @Test func queryCarriesSQLAndBindings() {
     let query = SQL.Query(

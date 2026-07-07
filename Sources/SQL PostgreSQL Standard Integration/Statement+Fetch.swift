@@ -9,8 +9,8 @@
 //
 // ===----------------------------------------------------------------------===//
 
-public import SQL
 public import PostgreSQL_Standard
+public import SQL
 
 // The statement-first row-decoding sugar: `statement.fetchAll(db)` / `statement.fetchOne(db)`.
 // It lowers the DSL statement into a ``SQL/Query``, runs it, and drives ``SQL/RowDecoder`` over
@@ -25,6 +25,10 @@ public import PostgreSQL_Standard
 // write-capable scope. If the DSL later exposes a clean mutation-vs-select discriminator at the
 // `Statement` seam, the pure-`SELECT` overloads can be split back onto `read`.
 
+// `any SQL.Connection` / `any SQL.Row` / `any SQL.Database` existentials are the
+// deliberate engine-free membrane design: conformers are engine-specific and
+// heterogeneous; generics would leak the engine type into consumer signatures.
+// swiftlint:disable no_any_protocol_existential
 extension Statement where QueryValue: QueryRepresentable, QueryValue.QueryOutput: Sendable {
     /// Runs this single-value DSL statement on `database` and decodes every row.
     ///
@@ -165,3 +169,4 @@ extension Statement {
         }
     }
 }
+// swiftlint:enable no_any_protocol_existential

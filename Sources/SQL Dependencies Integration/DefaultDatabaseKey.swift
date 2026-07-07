@@ -12,6 +12,10 @@
 public import Dependencies
 public import SQL
 
+// `any SQL.Connection` / `any SQL.Row` / `any SQL.Database` existentials are the
+// deliberate engine-free membrane design: conformers are engine-specific and
+// heterogeneous; generics would leak the engine type into consumer signatures.
+// swiftlint:disable no_any_protocol_existential
 /// The dependency key backing ``Dependency/Values/defaultDatabase``. Both the live and test
 /// values are ``SQL/Unconfigured`` so an un-wired graph fails loudly at first use.
 private enum DefaultDatabaseKey: Dependency.Key {
@@ -27,3 +31,4 @@ extension Dependency.Values {
         set { self[DefaultDatabaseKey.self] = newValue }
     }
 }
+// swiftlint:enable no_any_protocol_existential

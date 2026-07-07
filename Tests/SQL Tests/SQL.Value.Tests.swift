@@ -9,10 +9,9 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import Testing
-
 import RFC_4122
 import SQL
+import Testing
 import Time_Primitive
 
 @Test func valueEquatable() {

@@ -9,10 +9,9 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import Testing
-
 import SQL
 import SQL_Dependencies_Integration
+import Testing
 
 @Test func unconfiguredReadThrowsConnection() async {
     let database = SQL.Unconfigured()

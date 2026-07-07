@@ -9,6 +9,10 @@
 //
 // ===----------------------------------------------------------------------===//
 
+// `any SQL.Connection` / `any SQL.Row` / `any SQL.Database` existentials are the
+// deliberate engine-free membrane design: conformers are engine-specific and
+// heterogeneous; generics would leak the engine type into consumer signatures.
+// swiftlint:disable no_any_protocol_existential
 extension SQL {
     /// A connection-scoped execution handle: the verbs that run a ``SQL/Statement``.
     ///
@@ -32,3 +36,4 @@ extension SQL {
         ) async throws(SQL.Error) -> Value?
     }
 }
+// swiftlint:enable no_any_protocol_existential

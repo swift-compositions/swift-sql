@@ -9,15 +9,14 @@
 //
 // ===----------------------------------------------------------------------===//
 
-public import SQL
-public import PostgreSQL_Standard
-
 // This target is the sanctioned Foundation opt-in: the Structured Queries `QueryBinding` carries
 // Foundation `UUID` / `Date` / `Data` payloads, which the map below lowers into institute
 // vocabulary (`RFC_4122.UUID`, `Instant`, `[UInt8]`). Foundation is reached only transitively
 // through the DSL — no `import Foundation`, and no new Foundation-typed public surface.
 internal import Foundation
+public import PostgreSQL_Standard
 internal import RFC_4122
+public import SQL
 internal import Time_Primitive
 
 extension SQL.Query {
@@ -75,7 +74,12 @@ extension SQL.Query {
         var nanos = Int32(((interval - Double(seconds)) * 1_000_000_000).rounded())
         if nanos < 0 { nanos = 0 }
         if nanos > 999_999_999 { nanos = 999_999_999 }
-        return (try? Instant(secondsSinceUnixEpoch: seconds, nanosecondFraction: nanos))
-            ?? Instant(secondsSinceUnixEpoch: seconds)
+        do throws(Instant.Error) {
+            return try Instant(secondsSinceUnixEpoch: seconds, nanosecondFraction: nanos)
+        } catch {
+            // Unreachable in practice (nanos is clamped to the valid range above);
+            // preserves the original optional-try fallback to whole seconds.
+            return Instant(secondsSinceUnixEpoch: seconds)
+        }
     }
 }

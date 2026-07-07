@@ -10,12 +10,11 @@
 // ===----------------------------------------------------------------------===//
 
 import Foundation
-import Testing
-
 import PostgreSQL_Standard
 import RFC_4122
 import SQL
 import SQL_Test_Support
+import Testing
 import Time_Primitive
 
 // `@testable` reaches the internal `SQL.RowDecoder` — the positional cursor is an implementation
@@ -154,7 +153,8 @@ struct FetchFixture {
     await database.script(rows: [["id": .int64(99)]])
     // INSERT … RETURNING is a fetch-with-effects: the sugar must run it in the write-capable scope,
     // never `read`.
-    let id = try await FetchFixture
+    let id =
+        try await FetchFixture
         .insert { FetchFixture.Draft(name: "carol") }
         .returning(\.id)
         .fetchOne(database)

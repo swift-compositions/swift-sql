@@ -16,6 +16,9 @@ internal import Structured_Queries_Primitives
 internal import Time_Primitive
 
 extension SQL {
+    // Signatures forced by external protocol Structured_Queries_Primitives.QueryDecoder
+    // (untyped throws); `any SQL.Row` is the deliberate engine-free row abstraction.
+    // swiftlint:disable typed_throws_required no_any_protocol_existential
     /// A positional `Structured Queries Primitives` `QueryDecoder` driven over an `any SQL.Row`.
     ///
     /// The DSL decodes a result row column-by-column through a mutating cursor: each `decode`
@@ -95,4 +98,5 @@ extension SQL {
             throw SQL.Error.decoding("decimal unsupported by the v0 seam")
         }
     }
+    // swiftlint:enable typed_throws_required no_any_protocol_existential
 }

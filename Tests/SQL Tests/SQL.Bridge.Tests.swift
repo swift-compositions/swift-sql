@@ -10,14 +10,13 @@
 // ===----------------------------------------------------------------------===//
 
 import Foundation
-import Testing
-
 import PostgreSQL_Standard
 import RFC_4122
 import SQL
-import SQL_Test_Support
-import Time_Primitive
 import SQL_PostgreSQL_Standard_Integration
+import SQL_Test_Support
+import Testing
+import Time_Primitive
 
 @Test func bridgeLowersSQLTextAndPositionalBindings() throws {
     let fragment: QueryFragment =

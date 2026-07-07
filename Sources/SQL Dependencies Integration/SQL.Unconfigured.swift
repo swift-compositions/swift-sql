@@ -11,6 +11,10 @@
 
 public import SQL
 
+// `any SQL.Connection` / `any SQL.Row` / `any SQL.Database` existentials are the
+// deliberate engine-free membrane design: conformers are engine-specific and
+// heterogeneous; generics would leak the engine type into consumer signatures.
+// swiftlint:disable no_any_protocol_existential
 extension SQL {
     /// The unconfigured default ``SQL/Database`` — every verb throws
     /// ``SQL/Error/connection(_:)`` telling the caller to wire a live database at boot.
@@ -43,3 +47,4 @@ extension SQL {
         }
     }
 }
+// swiftlint:enable no_any_protocol_existential

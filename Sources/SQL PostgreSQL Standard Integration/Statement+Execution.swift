@@ -9,9 +9,13 @@
 //
 // ===----------------------------------------------------------------------===//
 
-public import SQL
 public import PostgreSQL_Standard
+public import SQL
 
+// `any SQL.Connection` / `any SQL.Row` / `any SQL.Database` existentials are the
+// deliberate engine-free membrane design: conformers are engine-specific and
+// heterogeneous; generics would leak the engine type into consumer signatures.
+// swiftlint:disable no_any_protocol_existential
 extension Statement {
     /// Lowers this DSL statement into a ``SQL/Query`` and runs it on `database` in a write scope.
     ///
@@ -26,3 +30,4 @@ extension Statement {
         _ = try await database.execute(query)
     }
 }
+// swiftlint:enable no_any_protocol_existential
