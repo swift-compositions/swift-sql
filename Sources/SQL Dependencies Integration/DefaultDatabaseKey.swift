@@ -18,7 +18,9 @@ public import SQL
 // swiftlint:disable no_any_protocol_existential
 /// The dependency key backing ``Dependency/Values/defaultDatabase``. Both the live and test
 /// values are ``SQL/Unconfigured`` so an un-wired graph fails loudly at first use.
-private enum DefaultDatabaseKey: Dependency.Key {
+private enum DefaultDatabaseKey: Dependency.Key {}
+
+extension DefaultDatabaseKey {
     static let liveValue: any SQL.Database = SQL.Unconfigured()
     static let testValue: any SQL.Database = SQL.Unconfigured()
 }

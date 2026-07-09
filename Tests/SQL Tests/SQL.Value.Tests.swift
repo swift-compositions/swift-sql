@@ -14,14 +14,14 @@ import SQL
 import Testing
 import Time_Primitive
 
-@Test func valueEquatable() {
+@Test func `value equatable`() {
     #expect(SQL.Value.int(1) == .int(1))
     #expect(SQL.Value.null == .null)
     #expect(SQL.Value.text("a") != .text("b"))
     #expect(SQL.Value.int(1) != .int64(1))
 }
 
-@Test func uuidValueEquatableAndHashable() throws {
+@Test func `uuid value equatable and hashable`() throws {
     let uuid = try RFC_4122.UUID("550e8400-e29b-41d4-a716-446655440000")
     let other = try RFC_4122.UUID("550e8400-e29b-41d4-a716-446655440001")
     #expect(SQL.Value.uuid(uuid) == .uuid(uuid))
@@ -32,14 +32,14 @@ import Time_Primitive
     #expect(set.count == 1)
 }
 
-@Test func timestampValueEquatable() {
+@Test func `timestamp value equatable`() {
     let instant = Instant(secondsSinceUnixEpoch: 1_700_000_000)
     let later = Instant(secondsSinceUnixEpoch: 1_700_000_001)
     #expect(SQL.Value.timestamp(instant) == .timestamp(instant))
     #expect(SQL.Value.timestamp(instant) != .timestamp(later))
 }
 
-@Test func jsonbAndBlobValueEquatable() {
+@Test func `jsonb and blob value equatable`() {
     #expect(SQL.Value.jsonb([0x7b, 0x7d]) == .jsonb([0x7b, 0x7d]))
     #expect(SQL.Value.jsonb([0x7b, 0x7d]) != .blob([0x7b, 0x7d]))
     #expect(SQL.Value.blob([1, 2, 3]) == .blob([1, 2, 3]))

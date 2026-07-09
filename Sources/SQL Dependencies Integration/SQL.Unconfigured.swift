@@ -23,28 +23,30 @@ extension SQL {
     /// forgets to inject a real handle fails loudly at first use rather than silently no-op'ing.
     public struct Unconfigured: SQL.Database {
         public init() {}
+    }
+}
 
-        private static var unconfigured: SQL.Error {
-            .connection("defaultDatabase is not configured — wire a live SQL.Database at boot")
-        }
+extension SQL.Unconfigured {
+    private static var unconfigured: SQL.Error {
+        .connection("defaultDatabase is not configured — wire a live SQL.Database at boot")
+    }
 
-        public func read<Value: Sendable>(
-            _ body: @Sendable (any SQL.Connection) async throws(SQL.Error) -> Value
-        ) async throws(SQL.Error) -> Value {
-            throw Self.unconfigured
-        }
+    public func read<Value: Sendable>(
+        _ body: @Sendable (any SQL.Connection) async throws(SQL.Error) -> Value
+    ) async throws(SQL.Error) -> Value {
+        throw Self.unconfigured
+    }
 
-        public func write<Value: Sendable>(
-            _ body: @Sendable (any SQL.Connection) async throws(SQL.Error) -> Value
-        ) async throws(SQL.Error) -> Value {
-            throw Self.unconfigured
-        }
+    public func write<Value: Sendable>(
+        _ body: @Sendable (any SQL.Connection) async throws(SQL.Error) -> Value
+    ) async throws(SQL.Error) -> Value {
+        throw Self.unconfigured
+    }
 
-        public func withRollback<Value: Sendable>(
-            _ body: @Sendable (any SQL.Connection) async throws(SQL.Error) -> Value
-        ) async throws(SQL.Error) -> Value {
-            throw Self.unconfigured
-        }
+    public func withRollback<Value: Sendable>(
+        _ body: @Sendable (any SQL.Connection) async throws(SQL.Error) -> Value
+    ) async throws(SQL.Error) -> Value {
+        throw Self.unconfigured
     }
 }
 // swiftlint:enable no_any_protocol_existential

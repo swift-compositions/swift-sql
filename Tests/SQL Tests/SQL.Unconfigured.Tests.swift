@@ -13,16 +13,16 @@ import SQL
 import SQL_Dependencies_Integration
 import Testing
 
-@Test func unconfiguredReadThrowsConnection() async {
+@Test func `unconfigured read throws connection`() async {
     let database = SQL.Unconfigured()
     await #expect(throws: SQL.Error.self) {
         _ = try await database.read { _ in 0 }
     }
 }
 
-@Test func unconfiguredExecuteThrowsConnection() async {
+@Test func `unconfigured execute throws connection`() async {
     let database: any SQL.Database = SQL.Unconfigured()
-    do {
+    do throws(SQL.Error) {
         _ = try await database.execute("SELECT 1")
         Issue.record("expected a thrown error")
     } catch {

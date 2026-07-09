@@ -25,67 +25,69 @@ extension SQL {
             self.columns = columns
             self.order = columns.keys.sorted()
         }
-
-        private func value(_ column: String) throws(SQL.Error) -> SQL.Value {
-            guard let value = columns[column] else {
-                throw SQL.Error.decoding("no such column \"\(column)\"")
-            }
-            return value
-        }
-
-        private func value(at index: Int) throws(SQL.Error) -> SQL.Value {
-            guard index >= 0, index < order.count else {
-                throw SQL.Error.decoding("column index \(index) out of range")
-            }
-            return columns[order[index]] ?? .null
-        }
-
-        // MARK: By column name
-
-        public func string(_ column: String) throws(SQL.Error) -> String { try Self.asString(value(column)) }
-        public func int(_ column: String) throws(SQL.Error) -> Int { try Self.asInt(value(column)) }
-        public func int64(_ column: String) throws(SQL.Error) -> Int64 { try Self.asInt64(value(column)) }
-        public func double(_ column: String) throws(SQL.Error) -> Double { try Self.asDouble(value(column)) }
-        public func bool(_ column: String) throws(SQL.Error) -> Bool { try Self.asBool(value(column)) }
-        public func uuid(_ column: String) throws(SQL.Error) -> RFC_4122.UUID { try Self.asUUID(value(column)) }
-        public func timestamp(_ column: String) throws(SQL.Error) -> Instant { try Self.asTimestamp(value(column)) }
-        public func bytes(_ column: String) throws(SQL.Error) -> [UInt8] { try Self.asBytes(value(column)) }
-
-        public func stringIfPresent(_ column: String) throws(SQL.Error) -> String? { try Self.ifPresent(value(column), Self.asString) }
-        public func intIfPresent(_ column: String) throws(SQL.Error) -> Int? { try Self.ifPresent(value(column), Self.asInt) }
-        public func int64IfPresent(_ column: String) throws(SQL.Error) -> Int64? { try Self.ifPresent(value(column), Self.asInt64) }
-        public func doubleIfPresent(_ column: String) throws(SQL.Error) -> Double? { try Self.ifPresent(value(column), Self.asDouble) }
-        public func boolIfPresent(_ column: String) throws(SQL.Error) -> Bool? { try Self.ifPresent(value(column), Self.asBool) }
-        public func uuidIfPresent(_ column: String) throws(SQL.Error) -> RFC_4122.UUID? { try Self.ifPresent(value(column), Self.asUUID) }
-        public func timestampIfPresent(_ column: String) throws(SQL.Error) -> Instant? { try Self.ifPresent(value(column), Self.asTimestamp) }
-        public func bytesIfPresent(_ column: String) throws(SQL.Error) -> [UInt8]? { try Self.ifPresent(value(column), Self.asBytes) }
-
-        // MARK: By column index
-
-        public func string(at index: Int) throws(SQL.Error) -> String { try Self.asString(value(at: index)) }
-        public func int(at index: Int) throws(SQL.Error) -> Int { try Self.asInt(value(at: index)) }
-        public func int64(at index: Int) throws(SQL.Error) -> Int64 { try Self.asInt64(value(at: index)) }
-        public func double(at index: Int) throws(SQL.Error) -> Double { try Self.asDouble(value(at: index)) }
-        public func bool(at index: Int) throws(SQL.Error) -> Bool { try Self.asBool(value(at: index)) }
-        public func uuid(at index: Int) throws(SQL.Error) -> RFC_4122.UUID { try Self.asUUID(value(at: index)) }
-        public func timestamp(at index: Int) throws(SQL.Error) -> Instant { try Self.asTimestamp(value(at: index)) }
-        public func bytes(at index: Int) throws(SQL.Error) -> [UInt8] { try Self.asBytes(value(at: index)) }
-
-        // MARK: By column index (optional)
-        //
-        // An out-of-range index throws ``SQL/Error/decoding(_:)`` (matching the by-name "no such
-        // column" behaviour — an absent column is an error, not a silent `nil`); an in-range
-        // ``SQL/Value/null`` decodes to `nil`.
-
-        public func stringIfPresent(at index: Int) throws(SQL.Error) -> String? { try Self.ifPresent(value(at: index), Self.asString) }
-        public func intIfPresent(at index: Int) throws(SQL.Error) -> Int? { try Self.ifPresent(value(at: index), Self.asInt) }
-        public func int64IfPresent(at index: Int) throws(SQL.Error) -> Int64? { try Self.ifPresent(value(at: index), Self.asInt64) }
-        public func doubleIfPresent(at index: Int) throws(SQL.Error) -> Double? { try Self.ifPresent(value(at: index), Self.asDouble) }
-        public func boolIfPresent(at index: Int) throws(SQL.Error) -> Bool? { try Self.ifPresent(value(at: index), Self.asBool) }
-        public func uuidIfPresent(at index: Int) throws(SQL.Error) -> RFC_4122.UUID? { try Self.ifPresent(value(at: index), Self.asUUID) }
-        public func timestampIfPresent(at index: Int) throws(SQL.Error) -> Instant? { try Self.ifPresent(value(at: index), Self.asTimestamp) }
-        public func bytesIfPresent(at index: Int) throws(SQL.Error) -> [UInt8]? { try Self.ifPresent(value(at: index), Self.asBytes) }
     }
+}
+
+extension SQL.TestRow {
+    private func value(_ column: String) throws(SQL.Error) -> SQL.Value {
+        guard let value = columns[column] else {
+            throw SQL.Error.decoding("no such column \"\(column)\"")
+        }
+        return value
+    }
+
+    private func value(at index: Int) throws(SQL.Error) -> SQL.Value {
+        guard index >= 0, index < order.count else {
+            throw SQL.Error.decoding("column index \(index) out of range")
+        }
+        return columns[order[index]] ?? .null
+    }
+
+    // MARK: By column name
+
+    public func string(_ column: String) throws(SQL.Error) -> String { try Self.asString(value(column)) }
+    public func int(_ column: String) throws(SQL.Error) -> Int { try Self.asInt(value(column)) }
+    public func int64(_ column: String) throws(SQL.Error) -> Int64 { try Self.asInt64(value(column)) }
+    public func double(_ column: String) throws(SQL.Error) -> Double { try Self.asDouble(value(column)) }
+    public func bool(_ column: String) throws(SQL.Error) -> Bool { try Self.asBool(value(column)) }
+    public func uuid(_ column: String) throws(SQL.Error) -> RFC_4122.UUID { try Self.asUUID(value(column)) }
+    public func timestamp(_ column: String) throws(SQL.Error) -> Instant { try Self.asTimestamp(value(column)) }
+    public func bytes(_ column: String) throws(SQL.Error) -> [UInt8] { try Self.asBytes(value(column)) }
+
+    public func stringIfPresent(_ column: String) throws(SQL.Error) -> String? { try Self.ifPresent(value(column), Self.asString) }
+    public func intIfPresent(_ column: String) throws(SQL.Error) -> Int? { try Self.ifPresent(value(column), Self.asInt) }
+    public func int64IfPresent(_ column: String) throws(SQL.Error) -> Int64? { try Self.ifPresent(value(column), Self.asInt64) }
+    public func doubleIfPresent(_ column: String) throws(SQL.Error) -> Double? { try Self.ifPresent(value(column), Self.asDouble) }
+    public func boolIfPresent(_ column: String) throws(SQL.Error) -> Bool? { try Self.ifPresent(value(column), Self.asBool) }
+    public func uuidIfPresent(_ column: String) throws(SQL.Error) -> RFC_4122.UUID? { try Self.ifPresent(value(column), Self.asUUID) }
+    public func timestampIfPresent(_ column: String) throws(SQL.Error) -> Instant? { try Self.ifPresent(value(column), Self.asTimestamp) }
+    public func bytesIfPresent(_ column: String) throws(SQL.Error) -> [UInt8]? { try Self.ifPresent(value(column), Self.asBytes) }
+
+    // MARK: By column index
+
+    public func string(at index: Int) throws(SQL.Error) -> String { try Self.asString(value(at: index)) }
+    public func int(at index: Int) throws(SQL.Error) -> Int { try Self.asInt(value(at: index)) }
+    public func int64(at index: Int) throws(SQL.Error) -> Int64 { try Self.asInt64(value(at: index)) }
+    public func double(at index: Int) throws(SQL.Error) -> Double { try Self.asDouble(value(at: index)) }
+    public func bool(at index: Int) throws(SQL.Error) -> Bool { try Self.asBool(value(at: index)) }
+    public func uuid(at index: Int) throws(SQL.Error) -> RFC_4122.UUID { try Self.asUUID(value(at: index)) }
+    public func timestamp(at index: Int) throws(SQL.Error) -> Instant { try Self.asTimestamp(value(at: index)) }
+    public func bytes(at index: Int) throws(SQL.Error) -> [UInt8] { try Self.asBytes(value(at: index)) }
+
+    // MARK: By column index (optional)
+    //
+    // An out-of-range index throws ``SQL/Error/decoding(_:)`` (matching the by-name "no such
+    // column" behaviour — an absent column is an error, not a silent `nil`); an in-range
+    // ``SQL/Value/null`` decodes to `nil`.
+
+    public func stringIfPresent(at index: Int) throws(SQL.Error) -> String? { try Self.ifPresent(value(at: index), Self.asString) }
+    public func intIfPresent(at index: Int) throws(SQL.Error) -> Int? { try Self.ifPresent(value(at: index), Self.asInt) }
+    public func int64IfPresent(at index: Int) throws(SQL.Error) -> Int64? { try Self.ifPresent(value(at: index), Self.asInt64) }
+    public func doubleIfPresent(at index: Int) throws(SQL.Error) -> Double? { try Self.ifPresent(value(at: index), Self.asDouble) }
+    public func boolIfPresent(at index: Int) throws(SQL.Error) -> Bool? { try Self.ifPresent(value(at: index), Self.asBool) }
+    public func uuidIfPresent(at index: Int) throws(SQL.Error) -> RFC_4122.UUID? { try Self.ifPresent(value(at: index), Self.asUUID) }
+    public func timestampIfPresent(at index: Int) throws(SQL.Error) -> Instant? { try Self.ifPresent(value(at: index), Self.asTimestamp) }
+    public func bytesIfPresent(at index: Int) throws(SQL.Error) -> [UInt8]? { try Self.ifPresent(value(at: index), Self.asBytes) }
 }
 
 extension SQL.TestRow {

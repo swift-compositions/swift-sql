@@ -12,7 +12,7 @@
 import SQL
 import Testing
 
-@Test func queryCarriesSQLAndBindings() {
+@Test func `query carries SQL and bindings`() {
     let query = SQL.Query(
         sql: "SELECT * FROM t WHERE id = $1 AND name = $2",
         bindings: [.int(7), .text("repotraffic")]
@@ -22,7 +22,7 @@ import Testing
     #expect(query.bindings.last == .text("repotraffic"))
 }
 
-@Test func stringLiteralQueryHasNoBindings() {
+@Test func `string literal query has no bindings`() {
     let query: SQL.Query = "CREATE TABLE accounts (id UUID PRIMARY KEY)"
     #expect(query.sql == "CREATE TABLE accounts (id UUID PRIMARY KEY)")
     #expect(query.bindings.isEmpty)

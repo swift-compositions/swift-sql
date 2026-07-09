@@ -18,7 +18,7 @@ import SQL_Test_Support
 import Testing
 import Time_Primitive
 
-@Test func bridgeLowersSQLTextAndPositionalBindings() throws {
+@Test func `bridge lowers SQL text and positional bindings`() throws {
     let fragment: QueryFragment =
         "SELECT * FROM t WHERE id = \(QueryBinding.int(7)) AND name = \(QueryBinding.text("repotraffic"))"
     let query = try SQL.Query(SQLQueryExpression<()>(fragment))
@@ -27,14 +27,14 @@ import Time_Primitive
     #expect(query.bindings == [.int64(7), .text("repotraffic")])
 }
 
-@Test func bridgeMapsUUIDBinding() throws {
+@Test func `bridge maps UUID binding`() throws {
     let uuid = UUID()
     let fragment: QueryFragment = "SELECT \(QueryBinding.uuid(uuid))"
     let query = try SQL.Query(SQLQueryExpression<()>(fragment))
     #expect(query.bindings == [.uuid(RFC_4122.UUID(bytes: uuid.uuid))])
 }
 
-@Test func bridgeMapsDateBindingToInstant() throws {
+@Test func `bridge maps date binding to instant`() throws {
     let date = Date(timeIntervalSince1970: 1_700_000_000)
     let fragment: QueryFragment = "SELECT \(QueryBinding.date(date))"
     let query = try SQL.Query(SQLQueryExpression<()>(fragment))
@@ -46,20 +46,20 @@ import Time_Primitive
     #expect(instant.nanosecondFraction == 0)
 }
 
-@Test func bridgeMapsJSONBBinding() throws {
+@Test func `bridge maps JSONB binding`() throws {
     let fragment: QueryFragment = "SELECT \(QueryBinding.jsonb(Data([0x7b, 0x7d])))"
     let query = try SQL.Query(SQLQueryExpression<()>(fragment))
     #expect(query.bindings == [.jsonb([0x7b, 0x7d])])
 }
 
-@Test func bridgeThrowsBindingForUnsupportedCase() {
+@Test func `bridge throws binding for unsupported case`() {
     let fragment: QueryFragment = "SELECT \(QueryBinding.decimal(Decimal(1)))"
     #expect(throws: SQL.Error.self) {
         _ = try SQL.Query(SQLQueryExpression<()>(fragment))
     }
 }
 
-@Test func statementExecuteSugarRunsOnDatabase() async throws {
+@Test func `statement execute sugar runs on database`() async throws {
     let database = SQL.TestDatabase()
     let fragment: QueryFragment = "INSERT INTO t (id) VALUES (\(QueryBinding.int(5)))"
     try await SQLQueryExpression<()>(fragment).execute(database)

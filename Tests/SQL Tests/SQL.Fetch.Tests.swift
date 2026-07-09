@@ -32,7 +32,7 @@ struct FetchFixture {
 
 // MARK: - SQL.RowDecoder (positional cursor) tests
 
-@Test func decoderAdvancesCursorAcrossColumns() throws {
+@Test func `decoder advances cursor across columns`() throws {
     // Sorted key order ["a", "b"] → index 0 = 10, index 1 = 20.
     let row = SQL.TestRow(["a": .int64(10), "b": .int64(20)])
     var decoder = SQL.RowDecoder(row: row)
@@ -40,13 +40,13 @@ struct FetchFixture {
     #expect(try decoder.decode(Int64.self) == 20)
 }
 
-@Test func decoderReturnsNilForNullColumn() throws {
+@Test func `decoder returns nil for null column`() throws {
     let row = SQL.TestRow(["a": .null])
     var decoder = SQL.RowDecoder(row: row)
     #expect(try decoder.decode(Int64.self) == nil)
 }
 
-@Test func decoderThrowsDecodingOnTypeMismatch() {
+@Test func `decoder throws decoding on type mismatch`() {
     let row = SQL.TestRow(["a": .text("not a number")])
     var decoder = SQL.RowDecoder(row: row)
     #expect(throws: SQL.Error.self) {
@@ -54,13 +54,13 @@ struct FetchFixture {
     }
 }
 
-@Test func decoderBitcastsInt64ToUInt64() throws {
+@Test func `decoder bitcasts Int64 to UInt64`() throws {
     let row = SQL.TestRow(["a": .int64(-1)])
     var decoder = SQL.RowDecoder(row: row)
     #expect(try decoder.decode(UInt64.self) == UInt64.max)
 }
 
-@Test func decoderConvertsInstantToDate() throws {
+@Test func `decoder converts instant to date`() throws {
     let instant = try Instant(secondsSinceUnixEpoch: 1_700_000_000, nanosecondFraction: 500_000_000)
     let row = SQL.TestRow(["a": .timestamp(instant)])
     var decoder = SQL.RowDecoder(row: row)
@@ -68,7 +68,7 @@ struct FetchFixture {
     #expect(abs(date.timeIntervalSince1970 - 1_700_000_000.5) < 1e-6)
 }
 
-@Test func decoderConvertsRFCUUIDToFoundationUUID() throws {
+@Test func `decoder converts RFC UUID to foundation UUID`() throws {
     let bytes: (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8) =
         (0x55, 0x0e, 0x84, 0x00, 0xe2, 0x9b, 0x41, 0xd4, 0xa7, 0x16, 0x44, 0x66, 0x55, 0x44, 0x00, 0x00)
     let rfc = RFC_4122.UUID(bytes: bytes)
@@ -78,7 +78,7 @@ struct FetchFixture {
     #expect(decoded == Foundation.UUID(uuid: bytes))
 }
 
-@Test func decoderThrowsForUnsupportedDecimal() {
+@Test func `decoder throws for unsupported decimal`() {
     let row = SQL.TestRow(["a": .int64(1)])
     var decoder = SQL.RowDecoder(row: row)
     #expect(throws: SQL.Error.self) {
@@ -88,14 +88,14 @@ struct FetchFixture {
 
 // MARK: - Fetch sugar over SQL.TestDatabase
 
-@Test func fetchAllSingleValueDecodesColumn() async throws {
+@Test func `fetch all single value decodes column`() async throws {
     let database = SQL.TestDatabase()
     await database.script(rows: [["id": .int64(1)], ["id": .int64(2)], ["id": .int64(3)]])
     let ids = try await FetchFixture.select { $0.id }.fetchAll(database)
     #expect(ids == [1, 2, 3])
 }
 
-@Test func fetchAllPackDecodesTuple() async throws {
+@Test func `fetch all pack decodes tuple`() async throws {
     let database = SQL.TestDatabase()
     // Sorted keys ["id", "name"] match the select's column order (id, name).
     await database.script(rows: [
@@ -110,14 +110,14 @@ struct FetchFixture {
     #expect(rows[1].1 == "bob")
 }
 
-@Test func fetchOneReturnsNilOnEmptyResultSet() async throws {
+@Test func `fetch one returns nil on empty result set`() async throws {
     let database = SQL.TestDatabase()
     // No script enqueued → the scripted database yields an empty result set.
     let first = try await FetchFixture.select { $0.id }.fetchOne(database)
     #expect(first == nil)
 }
 
-@Test func fetchAllWholeRowDecodesRecords() async throws {
+@Test func `fetch all whole row decodes records`() async throws {
     let database = SQL.TestDatabase()
     // Sorted keys ["id", "name"] match the table's declared column order (id, name).
     await database.script(rows: [
@@ -132,7 +132,7 @@ struct FetchFixture {
     #expect(records[1].name == "bob")
 }
 
-@Test func fetchOneWholeRowDecodesFirstRecord() async throws {
+@Test func `fetch one whole row decodes first record`() async throws {
     let database = SQL.TestDatabase()
     await database.script(rows: [["id": .int64(7), "name": .text("carol")]])
     let record = try #require(
@@ -142,13 +142,13 @@ struct FetchFixture {
     #expect(record.name == "carol")
 }
 
-@Test func fetchOneWholeRowReturnsNilOnEmptyResultSet() async throws {
+@Test func `fetch one whole row returns nil on empty result set`() async throws {
     let database = SQL.TestDatabase()
     let record = try await FetchFixture.all.fetchOne(database)
     #expect(record == nil)
 }
 
-@Test func insertReturningFetchTakesWriteScope() async throws {
+@Test func `insert returning fetch takes write scope`() async throws {
     let database = SQL.TestDatabase()
     await database.script(rows: [["id": .int64(99)]])
     // INSERT … RETURNING is a fetch-with-effects: the sugar must run it in the write-capable scope,

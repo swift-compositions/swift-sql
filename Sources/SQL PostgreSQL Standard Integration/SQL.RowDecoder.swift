@@ -42,61 +42,65 @@ extension SQL {
         init(row: any SQL.Row) {
             self.row = row
         }
-
-        mutating func decode(_ columnType: [UInt8].Type) throws -> [UInt8]? {
-            defer { index += 1 }
-            return try row.bytesIfPresent(at: index)
-        }
-
-        mutating func decode(_ columnType: Double.Type) throws -> Double? {
-            defer { index += 1 }
-            return try row.doubleIfPresent(at: index)
-        }
-
-        mutating func decode(_ columnType: Int64.Type) throws -> Int64? {
-            defer { index += 1 }
-            return try row.int64IfPresent(at: index)
-        }
-
-        mutating func decode(_ columnType: UInt64.Type) throws -> UInt64? {
-            defer { index += 1 }
-            return try row.int64IfPresent(at: index).map { UInt64(bitPattern: $0) }
-        }
-
-        mutating func decode(_ columnType: String.Type) throws -> String? {
-            defer { index += 1 }
-            return try row.stringIfPresent(at: index)
-        }
-
-        mutating func decode(_ columnType: Bool.Type) throws -> Bool? {
-            defer { index += 1 }
-            return try row.boolIfPresent(at: index)
-        }
-
-        mutating func decode(_ columnType: Int.Type) throws -> Int? {
-            defer { index += 1 }
-            return try row.intIfPresent(at: index)
-        }
-
-        mutating func decode(_ columnType: Date.Type) throws -> Date? {
-            defer { index += 1 }
-            guard let instant = try row.timestampIfPresent(at: index) else { return nil }
-            return Date(
-                timeIntervalSince1970: Double(instant.secondsSinceUnixEpoch)
-                    + Double(instant.nanosecondFraction) / 1_000_000_000
-            )
-        }
-
-        mutating func decode(_ columnType: UUID.Type) throws -> UUID? {
-            defer { index += 1 }
-            guard let uuid = try row.uuidIfPresent(at: index) else { return nil }
-            return Foundation.UUID(uuid: uuid.bytes)
-        }
-
-        mutating func decode(_ columnType: Decimal.Type) throws -> Decimal? {
-            defer { index += 1 }
-            throw SQL.Error.decoding("decimal unsupported by the v0 seam")
-        }
     }
     // swiftlint:enable typed_throws_required no_any_protocol_existential
 }
+
+// swiftlint:disable typed_throws_required no_any_protocol_existential
+extension SQL.RowDecoder {
+    mutating func decode(_ columnType: [UInt8].Type) throws -> [UInt8]? {
+        defer { index += 1 }
+        return try row.bytesIfPresent(at: index)
+    }
+
+    mutating func decode(_ columnType: Double.Type) throws -> Double? {
+        defer { index += 1 }
+        return try row.doubleIfPresent(at: index)
+    }
+
+    mutating func decode(_ columnType: Int64.Type) throws -> Int64? {
+        defer { index += 1 }
+        return try row.int64IfPresent(at: index)
+    }
+
+    mutating func decode(_ columnType: UInt64.Type) throws -> UInt64? {
+        defer { index += 1 }
+        return try row.int64IfPresent(at: index).map { UInt64(bitPattern: $0) }
+    }
+
+    mutating func decode(_ columnType: String.Type) throws -> String? {
+        defer { index += 1 }
+        return try row.stringIfPresent(at: index)
+    }
+
+    mutating func decode(_ columnType: Bool.Type) throws -> Bool? {
+        defer { index += 1 }
+        return try row.boolIfPresent(at: index)
+    }
+
+    mutating func decode(_ columnType: Int.Type) throws -> Int? {
+        defer { index += 1 }
+        return try row.intIfPresent(at: index)
+    }
+
+    mutating func decode(_ columnType: Date.Type) throws -> Date? {
+        defer { index += 1 }
+        guard let instant = try row.timestampIfPresent(at: index) else { return nil }
+        return Date(
+            timeIntervalSince1970: Double(instant.secondsSinceUnixEpoch)
+                + Double(instant.nanosecondFraction) / 1_000_000_000
+        )
+    }
+
+    mutating func decode(_ columnType: UUID.Type) throws -> UUID? {
+        defer { index += 1 }
+        guard let uuid = try row.uuidIfPresent(at: index) else { return nil }
+        return Foundation.UUID(uuid: uuid.bytes)
+    }
+
+    mutating func decode(_ columnType: Decimal.Type) throws -> Decimal? {
+        defer { index += 1 }
+        throw SQL.Error.decoding("decimal unsupported by the v0 seam")
+    }
+}
+// swiftlint:enable typed_throws_required no_any_protocol_existential
