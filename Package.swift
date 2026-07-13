@@ -10,7 +10,6 @@ let package = Package(
     products: [
         .library(name: "SQL", targets: ["SQL"]),
         .library(name: "SQL Test Support", targets: ["SQL Test Support"]),
-        .library(name: "SQL Dependencies Integration", targets: ["SQL Dependencies Integration"]),
         .library(
             name: "SQL PostgreSQL Standard Integration",
             targets: ["SQL PostgreSQL Standard Integration"]
@@ -20,15 +19,6 @@ let package = Package(
         // Institute L1/L2 vocabulary the value/row surface is expressed in.
         .package(url: "https://github.com/swift-ietf/swift-rfc-4122.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-time-primitives.git", branch: "main"),
-        // Integration-only deps — each is imported by a single opt-in integration target.
-        // `traits: []` opts out of swift-dependencies' `Clocks` trait: the integration needs only
-        // the `Dependencies` product, and leaving `Clocks` active pulls in the trait-gated
-        // `Clocks Dependency` → `swift-clock-primitives` product edge (validated graph-wide).
-        .package(
-            url: "https://github.com/swift-foundations/swift-dependencies.git",
-            branch: "main",
-            traits: ["Clocks"]
-        ),
         // URL-form: swift-postgresql-standard's macro target formerly included
         // `Structured Queries Primitives Support` sources via a RELATIVE symlink that only
         // resolved in the canonical sibling workspace layout — a URL/mirror dependency clones
@@ -60,17 +50,6 @@ let package = Package(
             path: "Sources/SQL Test Support"
         ),
 
-        // MARK: - SQL Dependencies Integration (defaultDatabase key)
-
-        .target(
-            name: "SQL Dependencies Integration",
-            dependencies: [
-                "SQL",
-                .product(name: "Dependencies", package: "swift-dependencies"),
-            ],
-            path: "Sources/SQL Dependencies Integration"
-        ),
-
         // MARK: - SQL PostgreSQL Standard Integration (the DSL bridge)
 
         .target(
@@ -89,7 +68,6 @@ let package = Package(
             dependencies: [
                 "SQL",
                 "SQL Test Support",
-                "SQL Dependencies Integration",
                 "SQL PostgreSQL Standard Integration",
                 // The bridge tests construct DSL statements directly, so the test target imports
                 // the DSL module (QueryFragment / QueryBinding / SQLQueryExpression).
