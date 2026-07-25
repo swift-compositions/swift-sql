@@ -72,6 +72,11 @@ let package = Package(
                 // The bridge tests construct DSL statements directly, so the test target imports
                 // the DSL module (QueryFragment / QueryBinding / SQLQueryExpression).
                 .product(name: "PostgreSQL Standard", package: "swift-postgresql-standard"),
+                // `@Table` is declared in the macro-declaration target, which upstream split out
+                // of `PostgreSQL Standard` proper. A macro attribute is not reachable through the
+                // runtime library's `@_exported import`, so the fixture's `@Table` needs the
+                // macro product named here directly.
+                .product(name: "PostgreSQL Standard Macros", package: "swift-postgresql-standard"),
             ],
             path: "Tests/SQL Tests"
         ),

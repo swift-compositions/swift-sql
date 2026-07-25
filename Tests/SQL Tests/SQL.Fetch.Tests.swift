@@ -11,6 +11,10 @@
 
 import Foundation
 import PostgreSQL_Standard
+// `@Table` is declared in the macro-declaration module upstream split out of `PostgreSQL
+// Standard`; a macro attribute is not reachable through the runtime library's re-export, so the
+// fixture below needs this import directly. Matches swift-postgresql-standard's own test files.
+import PostgreSQL_Standard_Macros
 import RFC_4122
 import SQL
 import SQL_Test_Support
