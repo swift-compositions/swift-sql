@@ -9,7 +9,7 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import Foundation
+import Byte_Primitives
 import PostgreSQL_Standard
 // `@Table` is declared in the macro-declaration module upstream split out of `PostgreSQL
 // Standard`; a macro attribute is not reachable through the runtime library's re-export, so the
@@ -22,8 +22,8 @@ import Testing
 import Time_Primitive
 
 // `@testable` reaches the internal `SQL.RowDecoder` — the positional cursor is an implementation
-// detail of the fetch sugar (its Foundation-typed `QueryDecoder` witnesses are kept off the public
-// surface), so the decoder-direct tests below drive it under a testable import.
+// detail of the fetch sugar (its `QueryDecoder` witnesses are kept off the public surface), so
+// the decoder-direct tests below drive it under a testable import.
 @testable import SQL_PostgreSQL_Standard_Integration
 
 // MARK: - @Table fixture
@@ -64,30 +64,31 @@ struct FetchFixture {
     #expect(try decoder.decode(UInt64.self) == UInt64.max)
 }
 
-@Test func `decoder converts instant to date`() throws {
+@Test func `decoder returns the timestamp column as an instant`() throws {
     let instant = try Instant(secondsSinceUnixEpoch: 1_700_000_000, nanosecondFraction: 500_000_000)
     let row = SQL.TestRow(["a": .timestamp(instant)])
     var decoder = SQL.RowDecoder(row: row)
-    let date = try #require(try decoder.decode(Date.self))
-    #expect(abs(date.timeIntervalSince1970 - 1_700_000_000.5) < 1e-6)
+    // The requirement is stated in `Instant`, so the row's own timestamp is handed straight
+    // through — no epoch round-trip, and the nanosecond fraction survives exactly.
+    #expect(try decoder.decode(Instant.self) == instant)
 }
 
-@Test func `decoder converts RFC UUID to foundation UUID`() throws {
-    let bytes: (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8, UInt8) =
-        (0x55, 0x0e, 0x84, 0x00, 0xe2, 0x9b, 0x41, 0xd4, 0xa7, 0x16, 0x44, 0x66, 0x55, 0x44, 0x00, 0x00)
-    let rfc = RFC_4122.UUID(bytes: bytes)
-    let row = SQL.TestRow(["a": .uuid(rfc)])
+@Test func `decoder converts RFC UUID to a query binding UUID`() throws {
+    let raw: [UInt8] = [
+        0x55, 0x0e, 0x84, 0x00, 0xe2, 0x9b, 0x41, 0xd4,
+        0xa7, 0x16, 0x44, 0x66, 0x55, 0x44, 0x00, 0x00,
+    ]
+    let row = SQL.TestRow(["a": .uuid(try RFC_4122.UUID(raw))])
     var decoder = SQL.RowDecoder(row: row)
-    let decoded = try #require(try decoder.decode(UUID.self))
-    #expect(decoded == Foundation.UUID(uuid: bytes))
+    let decoded = try #require(try decoder.decode(QueryBinding.UUID.self))
+    #expect(decoded == QueryBinding.UUID(bytes: raw.map { Byte($0) }))
 }
 
-@Test func `decoder throws for unsupported decimal`() {
-    let row = SQL.TestRow(["a": .int64(1)])
+@Test func `decoder returns the blob column as bytes`() throws {
+    let raw: [UInt8] = [0xde, 0xad, 0xbe, 0xef]
+    let row = SQL.TestRow(["a": .blob(raw)])
     var decoder = SQL.RowDecoder(row: row)
-    #expect(throws: SQL.Error.self) {
-        _ = try decoder.decode(Decimal.self)
-    }
+    #expect(try decoder.decode([Byte].self) == raw.map { Byte($0) })
 }
 
 // MARK: - Fetch sugar over SQL.TestDatabase

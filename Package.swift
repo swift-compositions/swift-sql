@@ -19,6 +19,9 @@ let package = Package(
         // Institute L1/L2 vocabulary the value/row surface is expressed in.
         .package(url: "https://github.com/swift-ietf/swift-rfc-4122.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-time-primitives.git", branch: "main"),
+        // The DSL's Foundation-free `QueryBinding` / `QueryDecoder` surface states its byte
+        // payloads as `[Byte]`, so the bridge names `Byte` directly at the seam.
+        .package(url: "https://github.com/swift-primitives/swift-byte-primitives.git", branch: "main"),
         // URL-form: swift-postgresql-standard's macro target formerly included
         // `Structured Queries Primitives Support` sources via a RELATIVE symlink that only
         // resolved in the canonical sibling workspace layout — a URL/mirror dependency clones
@@ -56,6 +59,7 @@ let package = Package(
             name: "SQL PostgreSQL Standard Integration",
             dependencies: [
                 "SQL",
+                .product(name: "Byte Primitives", package: "swift-byte-primitives"),
                 .product(name: "PostgreSQL Standard", package: "swift-postgresql-standard"),
             ],
             path: "Sources/SQL PostgreSQL Standard Integration"
@@ -70,7 +74,9 @@ let package = Package(
                 "SQL Test Support",
                 "SQL PostgreSQL Standard Integration",
                 // The bridge tests construct DSL statements directly, so the test target imports
-                // the DSL module (QueryFragment / QueryBinding / SQLQueryExpression).
+                // the DSL module (QueryFragment / QueryBinding / SQLQueryExpression) and the
+                // `Byte` vocabulary its byte-payload bindings are stated in.
+                .product(name: "Byte Primitives", package: "swift-byte-primitives"),
                 .product(name: "PostgreSQL Standard", package: "swift-postgresql-standard"),
                 // `@Table` is declared in the macro-declaration target, which upstream split out
                 // of `PostgreSQL Standard` proper. A macro attribute is not reachable through the

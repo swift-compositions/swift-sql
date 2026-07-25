@@ -9,7 +9,7 @@
 //
 // ===----------------------------------------------------------------------===//
 
-internal import Foundation
+internal import Byte_Primitives
 internal import RFC_4122
 internal import SQL
 internal import Structured_Queries_Primitives
@@ -25,14 +25,14 @@ extension SQL {
     /// reads the current column, then advances `index`. `nil` signals a `NULL` column (the DSL's
     /// `Optional` machinery turns a required-column `nil` into `missingRequiredColumn`); a type
     /// mismatch surfaces as ``SQL/Error/decoding(_:)`` from the underlying by-index `…IfPresent`
-    /// accessor. Foundation `Date`/`UUID` are reconstituted from institute vocabulary (`Instant`,
-    /// ``RFC_4122/UUID``); `UInt64` is the bit-pattern of the signed 64-bit column; `Decimal` is an
-    /// unsupported v0 seam.
+    /// accessor. Every requirement is now stated in institute vocabulary — `Instant` for a
+    /// timestamp column, `QueryBinding.UUID` for an identifier, `[Byte]` for `blob`/`jsonb` — so a
+    /// timestamp is handed straight through and an identifier only changes byte container.
+    /// `UInt64` is the bit-pattern of the signed 64-bit column.
     ///
     /// The type is deliberately `internal`: it is an implementation detail of the fetch sugar, so
-    /// the Foundation types the external `QueryDecoder` protocol forces into these witness
-    /// signatures never leak onto this target's public surface (the membrane keeps Foundation an
-    /// `internal import`). The conformance methods are untyped-`throws` because the external
+    /// the witness signatures the external `QueryDecoder` protocol forces never leak onto this
+    /// target's public surface. The conformance methods are untyped-`throws` because the external
     /// `QueryDecoder` protocol requirements are untyped `throws` — the constraint is imposed by the
     /// DSL, not chosen here; every error actually thrown is a ``SQL/Error``.
     struct RowDecoder: QueryDecoder {
@@ -48,9 +48,9 @@ extension SQL {
 
 // swiftlint:disable typed_throws_required no_any_protocol_existential
 extension SQL.RowDecoder {
-    mutating func decode(_ columnType: [UInt8].Type) throws -> [UInt8]? {
+    mutating func decode(_ columnType: [Byte].Type) throws -> [Byte]? {
         defer { index += 1 }
-        return try row.bytesIfPresent(at: index)
+        return try row.bytesIfPresent(at: index)?.map { Byte($0) }
     }
 
     mutating func decode(_ columnType: Double.Type) throws -> Double? {
@@ -83,24 +83,15 @@ extension SQL.RowDecoder {
         return try row.intIfPresent(at: index)
     }
 
-    mutating func decode(_ columnType: Date.Type) throws -> Date? {
+    mutating func decode(_ columnType: Instant.Type) throws -> Instant? {
         defer { index += 1 }
-        guard let instant = try row.timestampIfPresent(at: index) else { return nil }
-        return Date(
-            timeIntervalSince1970: Double(instant.secondsSinceUnixEpoch)
-                + Double(instant.nanosecondFraction) / 1_000_000_000
-        )
+        return try row.timestampIfPresent(at: index)
     }
 
-    mutating func decode(_ columnType: UUID.Type) throws -> UUID? {
+    mutating func decode(_ columnType: QueryBinding.UUID.Type) throws -> QueryBinding.UUID? {
         defer { index += 1 }
         guard let uuid = try row.uuidIfPresent(at: index) else { return nil }
-        return Foundation.UUID(uuid: uuid.bytes)
-    }
-
-    mutating func decode(_ columnType: Decimal.Type) throws -> Decimal? {
-        defer { index += 1 }
-        throw SQL.Error.decoding("decimal unsupported by the v0 seam")
+        return QueryBinding.UUID(bytes: uuid.byteArray.map { Byte($0) })
     }
 }
 // swiftlint:enable typed_throws_required no_any_protocol_existential

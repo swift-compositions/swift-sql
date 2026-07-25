@@ -9,15 +9,14 @@
 //
 // ===----------------------------------------------------------------------===//
 
-// This target is the sanctioned Foundation opt-in: the Structured Queries `QueryBinding` carries
-// Foundation `UUID` / `Date` / `Data` payloads, which the map below lowers into institute
-// vocabulary (`RFC_4122.UUID`, `Instant`, `[UInt8]`). Foundation is reached only transitively
-// through the DSL — no `import Foundation`, and no new Foundation-typed public surface.
-internal import Foundation
+// The Structured Queries `QueryBinding` is now stated in institute vocabulary (`Instant`,
+// `QueryBinding.UUID`, `[Byte]`), so the map below is a pure container change: a `date` binding
+// already IS the `Instant` ``SQL/Value`` carries, and the byte cases only re-domain `Byte` onto
+// the engine-free `[UInt8]` payload. No Foundation is reached, transitively or otherwise.
+internal import Byte_Primitives
 public import PostgreSQL_Standard
 internal import RFC_4122
 public import SQL
-internal import Time_Primitive
 
 extension SQL.Query {
     /// Lowers a Structured Queries DSL statement into an engine-free ``SQL/Query``.
@@ -46,10 +45,10 @@ extension SQL.Query {
         case .double(let double): return .double(double)
         case .bool(let bool): return .bool(bool)
         case .null: return .null
-        case .uuid(let uuid): return .uuid(RFC_4122.UUID(bytes: uuid.uuid))
-        case .date(let date): return .timestamp(Self.instant(from: date))
-        case .blob(let bytes): return .blob(bytes)
-        case .jsonb(let data): return .jsonb(Array(data))
+        case .uuid(let uuid): return .uuid(try Self.identifier(from: uuid))
+        case .date(let instant): return .timestamp(instant)
+        case .blob(let bytes): return .blob(bytes.map(\.underlying))
+        case .jsonb(let bytes): return .jsonb(bytes.map(\.underlying))
         case .decimal: throw SQL.Error.binding("decimal unsupported by the v0 seam")
         case .boolArray: throw SQL.Error.binding("boolArray unsupported by the v0 seam")
         case .stringArray: throw SQL.Error.binding("stringArray unsupported by the v0 seam")
@@ -66,20 +65,17 @@ extension SQL.Query {
         }
     }
 
-    /// Converts a Foundation `Date` to an `Instant`, truncating to whole seconds and rounding the
-    /// sub-second remainder to the nearest nanosecond (clamped to a valid fraction).
-    private static func instant(from date: Date) -> Instant {
-        let interval = date.timeIntervalSince1970
-        let seconds = Int64(interval.rounded(.down))
-        var nanos = Int32(((interval - Double(seconds)) * 1_000_000_000).rounded())
-        if nanos < 0 { nanos = 0 }
-        if nanos > 999_999_999 { nanos = 999_999_999 }
-        do throws(Instant.Error) {
-            return try Instant(secondsSinceUnixEpoch: seconds, nanosecondFraction: nanos)
+    /// Re-domains a `QueryBinding.UUID`'s raw bytes onto ``RFC_4122/UUID``.
+    ///
+    /// The binding's byte count is deliberately unenforced upstream (a malformed binding must not
+    /// trap a query), so the 16-byte width is checked here and reported as a binding failure.
+    private static func identifier(
+        from uuid: QueryBinding.UUID
+    ) throws(SQL.Error) -> RFC_4122.UUID {
+        do throws(RFC_4122.UUID.Error) {
+            return try RFC_4122.UUID(uuid.bytes.map(\.underlying))
         } catch {
-            // Unreachable in practice (nanos is clamped to the valid range above);
-            // preserves the original optional-try fallback to whole seconds.
-            return Instant(secondsSinceUnixEpoch: seconds)
+            throw SQL.Error.binding("uuid binding is not exactly 16 bytes")
         }
     }
 }
