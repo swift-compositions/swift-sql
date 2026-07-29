@@ -10,6 +10,22 @@ let package = Package(
     products: [
         .library(name: "SQL", targets: ["SQL"]),
         .library(name: "SQL Test Support", targets: ["SQL Test Support"]),
+        .library(
+            name: "SQL PostgreSQL Standard Integration",
+            targets: ["SQL PostgreSQL Standard Integration"]
+        ),
+    ],
+    traits: [
+        .trait(
+            name: "PostgreSQLStandardIntegration",
+            description: """
+                Build the PostgreSQL Standard DSL bridge.
+
+                OFF by default, and the default is the point: the dialect dependency is what                 takes this package's resolved closure from 29 packages to 154.
+
+                An opt-in *product* does not avoid that. SwiftPM resolves a package's                 `dependencies:` for the whole package regardless of which product a consumer                 imports — products gate linking, only a trait gates resolution.
+                """
+        )
     ],
     dependencies: [
         // Institute L1/L2 vocabulary the value/row surface is expressed in. These are the only
@@ -18,6 +34,10 @@ let package = Package(
         // swift-postgresql-standard as `PostgreSQL Standard SQL Integration`.
         .package(url: "https://github.com/swift-ietf/swift-rfc-4122.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-time-primitives.git", branch: "main"),
+        // Bridge-only, referenced solely under the `PostgreSQLStandardIntegration` trait so they
+        // are pruned from resolution when it is off.
+        .package(url: "https://github.com/swift-primitives/swift-byte-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-standards/swift-postgresql-standard.git", branch: "main"),
     ],
     targets: [
         // MARK: - SQL (engine-free execution interface)
@@ -41,6 +61,30 @@ let package = Package(
             path: "Sources/SQL Test Support"
         ),
 
+        // MARK: - SQL PostgreSQL Standard Integration (the DSL bridge)
+        //
+        // Placement is the ratified 2026-07-06 architecture decision: the bridge lives here, and
+        // swift-sql (L3 foundations) -> swift-postgresql-standard (L2 standards) is downward and
+        // legal. The trait gates the resolve cost; it does not change the direction.
+
+        .target(
+            name: "SQL PostgreSQL Standard Integration",
+            dependencies: [
+                "SQL",
+                .product(
+                    name: "Byte Primitives",
+                    package: "swift-byte-primitives",
+                    condition: .when(traits: ["PostgreSQLStandardIntegration"])
+                ),
+                .product(
+                    name: "PostgreSQL Standard",
+                    package: "swift-postgresql-standard",
+                    condition: .when(traits: ["PostgreSQLStandardIntegration"])
+                ),
+            ],
+            path: "Sources/SQL PostgreSQL Standard Integration"
+        ),
+
         // MARK: - Tests
 
         .testTarget(
@@ -48,6 +92,24 @@ let package = Package(
             dependencies: [
                 "SQL",
                 "SQL Test Support",
+                "SQL PostgreSQL Standard Integration",
+                .product(
+                    name: "Byte Primitives",
+                    package: "swift-byte-primitives",
+                    condition: .when(traits: ["PostgreSQLStandardIntegration"])
+                ),
+                .product(
+                    name: "PostgreSQL Standard",
+                    package: "swift-postgresql-standard",
+                    condition: .when(traits: ["PostgreSQLStandardIntegration"])
+                ),
+                // `@Table` is a macro attribute, unreachable through the runtime library's
+                // `@_exported import`, so the fixtures need the macro product directly.
+                .product(
+                    name: "PostgreSQL Standard Macros",
+                    package: "swift-postgresql-standard",
+                    condition: .when(traits: ["PostgreSQLStandardIntegration"])
+                ),
             ],
             path: "Tests/SQL Tests"
         ),
