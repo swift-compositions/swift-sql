@@ -10,26 +10,14 @@ let package = Package(
     products: [
         .library(name: "SQL", targets: ["SQL"]),
         .library(name: "SQL Test Support", targets: ["SQL Test Support"]),
-        .library(
-            name: "SQL PostgreSQL Standard Integration",
-            targets: ["SQL PostgreSQL Standard Integration"]
-        ),
     ],
     dependencies: [
-        // Institute L1/L2 vocabulary the value/row surface is expressed in.
+        // Institute L1/L2 vocabulary the value/row surface is expressed in. These are the only
+        // dependencies the engine-free core has: the DSL bridge that used to live here — and
+        // brought `swift-postgresql-standard` and `swift-byte-primitives` with it — now lives in
+        // swift-postgresql-standard as `PostgreSQL Standard SQL Integration`.
         .package(url: "https://github.com/swift-ietf/swift-rfc-4122.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-time-primitives.git", branch: "main"),
-        // The DSL's Foundation-free `QueryBinding` / `QueryDecoder` surface states its byte
-        // payloads as `[Byte]`, so the bridge names `Byte` directly at the seam.
-        .package(url: "https://github.com/swift-primitives/swift-byte-primitives.git", branch: "main"),
-        // URL-form: swift-postgresql-standard's macro target formerly included
-        // `Structured Queries Primitives Support` sources via a RELATIVE symlink that only
-        // resolved in the canonical sibling workspace layout — a URL/mirror dependency clones
-        // the package into `.build/checkouts`, which dangled the symlink (the macro then
-        // couldn't see `Inflection.swift` → `'String' has no member 'lowerCamelCased'`). That
-        // directory is now vendored as real files upstream, so the checkout resolves cleanly
-        // and the path-form workaround is no longer needed.
-        .package(url: "https://github.com/swift-standards/swift-postgresql-standard.git", branch: "main"),
     ],
     targets: [
         // MARK: - SQL (engine-free execution interface)
@@ -53,18 +41,6 @@ let package = Package(
             path: "Sources/SQL Test Support"
         ),
 
-        // MARK: - SQL PostgreSQL Standard Integration (the DSL bridge)
-
-        .target(
-            name: "SQL PostgreSQL Standard Integration",
-            dependencies: [
-                "SQL",
-                .product(name: "Byte Primitives", package: "swift-byte-primitives"),
-                .product(name: "PostgreSQL Standard", package: "swift-postgresql-standard"),
-            ],
-            path: "Sources/SQL PostgreSQL Standard Integration"
-        ),
-
         // MARK: - Tests
 
         .testTarget(
@@ -72,17 +48,6 @@ let package = Package(
             dependencies: [
                 "SQL",
                 "SQL Test Support",
-                "SQL PostgreSQL Standard Integration",
-                // The bridge tests construct DSL statements directly, so the test target imports
-                // the DSL module (QueryFragment / QueryBinding / SQLQueryExpression) and the
-                // `Byte` vocabulary its byte-payload bindings are stated in.
-                .product(name: "Byte Primitives", package: "swift-byte-primitives"),
-                .product(name: "PostgreSQL Standard", package: "swift-postgresql-standard"),
-                // `@Table` is declared in the macro-declaration target, which upstream split out
-                // of `PostgreSQL Standard` proper. A macro attribute is not reachable through the
-                // runtime library's `@_exported import`, so the fixture's `@Table` needs the
-                // macro product named here directly.
-                .product(name: "PostgreSQL Standard Macros", package: "swift-postgresql-standard"),
             ],
             path: "Tests/SQL Tests"
         ),
