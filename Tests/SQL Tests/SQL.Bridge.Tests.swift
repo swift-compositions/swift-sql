@@ -67,8 +67,60 @@ import Time_Primitive
     #expect(query.bindings == [.blob([0xde, 0xad])])
 }
 
-@Test func `bridge throws binding for unsupported case`() {
-    let fragment: QueryFragment = "SELECT \(QueryBinding.decimal("1"))"
+@Test func `bridge carries a decimal as its exact digit string`() throws {
+    // Deliberately wider than any fixed-width decimal type accepts: `numeric` admits it, so
+    // the seam must carry the digits verbatim rather than parse and narrow them.
+    let digits = "123456789012345678901234567890123456789.000000000000000000001"
+    let fragment: QueryFragment = "SELECT \(QueryBinding.decimal(digits))"
+    let query = try SQL.Query(SQLQueryExpression<()>(fragment))
+    #expect(query.bindings == [.decimal(digits)])
+}
+
+@Test func `bridge maps every element-typed array onto the recursive array case`() throws {
+    let raw: [UInt8] = [
+        0x55, 0x0e, 0x84, 0x00, 0xe2, 0x9b, 0x41, 0xd4,
+        0xa7, 0x16, 0x44, 0x66, 0x55, 0x44, 0x00, 0x00,
+    ]
+    let uuid = try RFC_4122.UUID(raw)
+    let binding = QueryBinding.UUID(bytes: raw.map { Byte($0) })
+
+    let cases: [(QueryBinding, SQL.Value)] = [
+        (.boolArray([true, false]), .array([.bool(true), .bool(false)])),
+        (.stringArray(["a", "b"]), .array([.text("a"), .text("b")])),
+        (.intArray([1, 2]), .array([.int(1), .int(2)])),
+        (.int16Array([1, 2]), .array([.int64(1), .int64(2)])),
+        (.int32Array([1, 2]), .array([.int64(1), .int64(2)])),
+        (.int64Array([1, 2]), .array([.int64(1), .int64(2)])),
+        (.doubleArray([1.5]), .array([.double(1.5)])),
+        (.uuidArray([binding]), .array([.uuid(uuid)])),
+    ]
+
+    for (binding, expected) in cases {
+        let fragment: QueryFragment = "SELECT \(binding)"
+        let query = try SQL.Query(SQLQueryExpression<()>(fragment))
+        #expect(query.bindings == [expected])
+    }
+}
+
+@Test func `bridge maps a generic array elementwise rather than degrading it to null`() throws {
+    // The postgres-nio path binds NULL here, discarding caller data. The recursive case gives
+    // this binding the same fidelity as the typed arrays.
+    let fragment: QueryFragment = "SELECT \(QueryBinding.genericArray([.int(1), .text("a"), .null]))"
+    let query = try SQL.Query(SQLQueryExpression<()>(fragment))
+    #expect(query.bindings == [.array([.int64(1), .text("a"), .null])])
+}
+
+@Test func `bridge maps a nested array`() throws {
+    let fragment: QueryFragment = "SELECT \(QueryBinding.genericArray([.intArray([1, 2])]))"
+    let query = try SQL.Query(SQLQueryExpression<()>(fragment))
+    #expect(query.bindings == [.array([.array([.int(1), .int(2)])])])
+}
+
+private struct BindingProbeError: Swift.Error {}
+
+@Test func `bridge throws binding for an invalid binding`() {
+    let binding = QueryBinding.invalid(QueryBindingError(underlyingError: BindingProbeError()))
+    let fragment: QueryFragment = "SELECT \(binding)"
     #expect(throws: SQL.Error.self) {
         _ = try SQL.Query(SQLQueryExpression<()>(fragment))
     }

@@ -32,6 +32,29 @@ extension SQL {
         case blob([UInt8])
         /// UTF-8 JSON bytes, bound to a `jsonb`-style column.
         case jsonb([UInt8])
+        /// An arbitrary-precision numeric, carried as its **exact digit string**.
+        ///
+        /// Never exponent notation, and never routed through a fixed-width decimal type:
+        /// PostgreSQL `numeric` admits on the order of 131,072 integral digits, where
+        /// `decimal128` admits 34. Narrowing here would silently truncate a value the
+        /// database accepts, so the seam carries the digits verbatim and lets the engine
+        /// parse them.
+        case decimal(String)
+        /// An array, bound to a PostgreSQL array-typed column.
+        ///
+        /// The DSL distinguishes eleven element-typed array bindings (`int16Array`,
+        /// `int32Array`, `uuidArray`, and so on). This seam deliberately carries **one**
+        /// recursive case instead of mirroring all eleven, because element type is the
+        /// DSL's concern and not the execution seam's: a binding is transmitted in text
+        /// format with an unspecified parameter type, so what an engine needs from this
+        /// vocabulary is the element *values* and enough structure to quote and delimit
+        /// them. Recursion also gives nested arrays and the DSL's heterogeneous
+        /// `genericArray` a total mapping, rather than the silent NULL substitution that
+        /// case currently receives.
+        ///
+        /// Element-type fidelity is not lost — it remains in the DSL binding the bridge
+        /// maps from. It is simply not re-encoded here.
+        indirect case array([SQL.Value])
         case null
     }
 }
