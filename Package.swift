@@ -26,7 +26,7 @@ let package = Package(
         // retain through iteration. The SQL product remains pool-independent.
         .package(
             url: "https://github.com/swift-primitives/swift-pool-primitives.git",
-            revision: "b7c710c945b7c8467b4521c3a2d5b00539275593"
+            branch: "main"
         ),
         .package(url: "https://github.com/swift-primitives/swift-byte-primitives.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-structured-queries-primitives.git", branch: "main"),
