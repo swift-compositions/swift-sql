@@ -8,50 +8,23 @@
 // ===----------------------------------------------------------------------===//
 
 extension SQL.Cursor {
-    actor Storage {
-        private let source: @Sendable () async throws(SQL.Error) -> Element?
-        private let release: @Sendable () async -> Void
-        private var isTerminal = false
+    @usableFromInline
+    class Storage {
+        @usableFromInline
+        init() {}
+    }
+}
 
-        init(
-            next: @escaping @Sendable () async throws(SQL.Error) -> Element?,
-            close: @escaping @Sendable () async -> Void
-        ) {
-            source = next
-            release = close
-        }
+extension SQL.Cursor.Storage {
+    @usableFromInline
+    nonisolated(nonsending)
+    func next() async -> SQL.Cursor<Element>.Next {
+        preconditionFailure("SQL.Cursor.Storage.next must be overridden")
+    }
 
-        func next() async throws(SQL.Error) -> Element? {
-            if isTerminal { return nil }
-            if Task.isCancelled {
-                await close()
-                throw SQL.Error.cancelled
-            }
-
-            do throws(SQL.Error) {
-                return try await withTaskCancellationHandler(operation: {
-                    guard let element = try await source() else {
-                        await close()
-                        return nil
-                    }
-                    if Task.isCancelled {
-                        await close()
-                        throw SQL.Error.cancelled
-                    }
-                    return element
-                }, onCancel: {
-                    Task { await self.close() }
-                })
-            } catch {
-                await close()
-                throw error
-            }
-        }
-
-        func close() async {
-            guard !isTerminal else { return }
-            isTerminal = true
-            await release()
-        }
+    @usableFromInline
+    nonisolated(nonsending)
+    func close() async -> Result<Void, SQL.Error> {
+        preconditionFailure("SQL.Cursor.Storage.close must be overridden")
     }
 }

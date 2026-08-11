@@ -27,9 +27,7 @@ extension SQL {
     public actor TestDatabase: SQL.Database {
         private var recorded: [Statement] = []
         private var scripts: [[[String: SQL.Value]]] = []
-        private var cursors: [Int: [[String: SQL.Value]]] = [:]
-        private var cursorIdentifiers = 0
-        private var cursorReleaseCount = 0
+        nonisolated let cursorStorage = SQL.TestDatabase.Cursor.Storage()
         private var enteredScopes: [Scope] = []
 
         public init() {}
@@ -59,7 +57,7 @@ extension SQL.TestDatabase {
     public var scopes: [Scope] { enteredScopes }
 
     /// The number of provider cursor releases observed so far.
-    public var closedCursors: Int { cursorReleaseCount }
+    public var closedCursors: Int { cursorStorage.closed }
 
     /// Enqueues one scripted result set (an ordered list of rows) for the next `fetchAll` /
     /// `fetchOne` to consume.
@@ -76,22 +74,15 @@ extension SQL.TestDatabase {
     }
 
     func openCursor() -> Int {
-        let identifier = cursorIdentifiers
-        cursorIdentifiers += 1
-        cursors[identifier] = nextResultSet()
-        return identifier
+        cursorStorage.open(nextResultSet())
     }
 
     func nextCursorRow(_ identifier: Int) -> [String: SQL.Value]? {
-        guard var rows = cursors[identifier], !rows.isEmpty else { return nil }
-        let row = rows.removeFirst()
-        cursors[identifier] = rows
-        return row
+        cursorStorage.next(identifier)
     }
 
-    func closeCursor(_ identifier: Int) {
-        guard cursors.removeValue(forKey: identifier) != nil else { return }
-        cursorReleaseCount += 1
+    nonisolated func closeCursor(_ identifier: Int) {
+        cursorStorage.close(identifier)
     }
 
     private func enter(_ scope: Scope) {

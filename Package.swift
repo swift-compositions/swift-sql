@@ -34,6 +34,12 @@ let package = Package(
         // swift-postgresql-standard as `PostgreSQL Standard SQL Integration`.
         .package(url: "https://github.com/swift-ietf/swift-rfc-4122.git", branch: "main"),
         .package(url: "https://github.com/swift-primitives/swift-time-primitives.git", branch: "main"),
+        // Source-law fixture for the public move-only checked-out handle that `SQL.Cursor` must
+        // retain through iteration. The SQL product remains pool-independent.
+        .package(
+            url: "https://github.com/swift-primitives/swift-pool-primitives.git",
+            revision: "b7c710c945b7c8467b4521c3a2d5b00539275593"
+        ),
         // Bridge-only, referenced solely under the `PostgreSQLStandardIntegration` trait so they
         // are pruned from resolution when it is off.
         .package(url: "https://github.com/swift-primitives/swift-byte-primitives.git", branch: "main"),
@@ -93,6 +99,7 @@ let package = Package(
                 "SQL",
                 "SQL Test Support",
                 "SQL PostgreSQL Standard Integration",
+                .product(name: "Pool Primitives", package: "swift-pool-primitives"),
                 .product(
                     name: "Byte Primitives",
                     package: "swift-byte-primitives",

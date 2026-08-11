@@ -44,25 +44,40 @@ database backs it.
 ## Streaming rows
 
 `SQL.Connection.fetchCursor(_:decode:)` opens a connection-scoped,
-pull-driven `SQL.Cursor`. It does not collect rows: each iterator advance asks
-the provider for one more decoded value. Consume it inside the `read` or
-transaction scope that supplied the connection.
+pull-driven `SQL.Cursor`. It does not collect rows: each cursor advance asks
+the provider for one more decoded value. The cursor is noncopyable and
+non-Sendable; each advance consumes it and returns the only continuation with
+the decoded element.
 
 ```swift
+func printRows(_ cursor: consuming SQL.Cursor<Int64>) async throws(SQL.Error) {
+    let next = await cursor.next()
+    switch consume next {
+    case .element(let id, let cursor):
+        print(id)
+        try await printRows(cursor)
+    case .exhausted:
+        return
+    case .failure(let error):
+        throw error
+    }
+}
+
 try await database.read { connection in
-    let cursor = try await connection.fetchCursor(SQL.Query(sql: "SELECT id FROM users")) { row in
+    let cursor = try await connection.fetchCursor(
+        SQL.Query(sql: "SELECT id FROM users")
+    ) { row in
         try row.int64("id")
     }
-    for try await id in cursor {
-        print(id)
-    }
+    try await printRows(cursor)
 }
 ```
 
-The cursor releases provider resources exactly once when it is exhausted,
-closed, cancelled, or fails. A cursor is a single shared stream: do not create
-concurrent consumers from copied cursors or iterators. Providers map all driver
-errors to `SQL.Error`; cancellation is reported as `SQL.Error.cancelled`.
+The cursor uniquely retains the provider context across every continuation.
+Exhaustion and successful close resolve it reusable; iteration failure, close
+failure, and cancellation resolve it invalid. Dropping a live cursor invokes the
+provider's synchronous invalid fallback. Providers map all driver errors to
+`SQL.Error`; cancellation is reported as `SQL.Error.cancelled`.
 
 ## License
 

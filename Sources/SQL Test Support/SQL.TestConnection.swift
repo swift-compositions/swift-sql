@@ -57,17 +57,35 @@ extension SQL.TestConnection {
 
     func fetchCursor<Value: Sendable>(
         _ statement: some SQL.Statement,
-        decode: @escaping @Sendable (any SQL.Row) throws(SQL.Error) -> Value
-    ) async throws(SQL.Error) -> SQL.Cursor<Value> {
+        decode: @escaping (any SQL.Row) throws(SQL.Error) -> Value
+    ) async throws(SQL.Error) -> sending SQL.Cursor<Value> {
         await database.record(statement.sql, statement.bindings)
         let identifier = await database.openCursor()
         return SQL.Cursor(
-            next: {
-                guard let columns = await self.database.nextCursorRow(identifier) else { return nil }
-                return try decode(SQL.TestRow(columns))
+            context: SQL.TestConnection.Cursor(
+                database: database,
+                identifier: identifier,
+                decode: decode
+            ),
+            next: { context in
+                guard let columns = await context.database.nextCursorRow(context.identifier) else {
+                    return .exhausted(context)
+                }
+                do throws(SQL.Error) {
+                    return .element(try context.decode(SQL.TestRow(columns)), context)
+                } catch {
+                    return .failure(error, context)
+                }
             },
-            close: {
-                await self.database.closeCursor(identifier)
+            close: { context in .success(context) },
+            reuse: { context in
+                context.database.closeCursor(context.identifier)
+            },
+            invalidate: { context in
+                context.database.closeCursor(context.identifier)
+            },
+            abandon: { context in
+                context.database.closeCursor(context.identifier)
             }
         )
     }
