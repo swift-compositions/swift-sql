@@ -34,6 +34,15 @@ extension SQL {
             _ statement: some SQL.Statement,
             decode: (any SQL.Row) throws(SQL.Error) -> Value
         ) async throws(SQL.Error) -> Value?
+
+        /// Opens a pull-driven cursor and decodes at most one row for each iterator advance.
+        ///
+        /// The returned cursor is bound to this connection. Its provider must retain the lease until
+        /// the cursor terminates, and map driver failures into ``SQL/Error``.
+        func fetchCursor<Value: Sendable>(
+            _ statement: some SQL.Statement,
+            decode: @escaping @Sendable (any SQL.Row) throws(SQL.Error) -> Value
+        ) async throws(SQL.Error) -> SQL.Cursor<Value>
     }
 }
 // swiftlint:enable no_any_protocol_existential

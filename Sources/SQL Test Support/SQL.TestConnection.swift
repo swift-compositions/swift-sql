@@ -17,8 +17,9 @@ internal import SQL
 // swiftlint:disable no_any_protocol_existential
 extension SQL {
     /// The scripted ``SQL/Connection`` a ``SQL/TestDatabase`` hands to a scope body. Every verb
-    /// records its statement on the owning database; `fetchAll` / `fetchOne` decode the database's
-    /// next scripted result set through ``SQL/TestRow``.
+    /// records its statement on the owning database. `fetchAll` / `fetchOne` decode the database's
+    /// next scripted result set through ``SQL/TestRow``; `fetchCursor` supplies one scripted row
+    /// per cursor advance and records its terminal release.
     struct TestConnection: SQL.Connection {
         let database: SQL.TestDatabase
     }
@@ -52,6 +53,23 @@ extension SQL.TestConnection {
         let rows = await database.nextResultSet()
         guard let first = rows.first else { return nil }
         return try decode(SQL.TestRow(first))
+    }
+
+    func fetchCursor<Value: Sendable>(
+        _ statement: some SQL.Statement,
+        decode: @escaping @Sendable (any SQL.Row) throws(SQL.Error) -> Value
+    ) async throws(SQL.Error) -> SQL.Cursor<Value> {
+        await database.record(statement.sql, statement.bindings)
+        let identifier = await database.openCursor()
+        return SQL.Cursor(
+            next: {
+                guard let columns = await self.database.nextCursorRow(identifier) else { return nil }
+                return try decode(SQL.TestRow(columns))
+            },
+            close: {
+                await self.database.closeCursor(identifier)
+            }
+        )
     }
 }
 // swiftlint:enable no_any_protocol_existential

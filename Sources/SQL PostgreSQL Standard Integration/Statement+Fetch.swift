@@ -32,6 +32,40 @@
     // heterogeneous; generics would leak the engine type into consumer signatures.
     // swiftlint:disable no_any_protocol_existential
     extension Statement where QueryValue: QueryRepresentable, QueryValue.QueryOutput: Sendable {
+        /// Runs this single-value DSL statement on one connection and decodes every row.
+        public func fetchAll(
+            _ connection: any SQL.Connection
+        ) async throws(SQL.Error) -> [QueryValue.QueryOutput] {
+            let query = try SQL.Query(self)
+            return try await connection.fetchAll(query) { (row: any SQL.Row) throws(SQL.Error) -> QueryValue.QueryOutput in
+                var decoder = SQL.RowDecoder(row: row)
+                do {
+                    return try QueryValue(decoder: &decoder).queryOutput
+                } catch let error as SQL.Error {
+                    throw error
+                } catch {
+                    throw SQL.Error.decoding("\(error)")
+                }
+            }
+        }
+
+        /// Runs this single-value DSL statement on one connection and decodes its first row.
+        public func fetchOne(
+            _ connection: any SQL.Connection
+        ) async throws(SQL.Error) -> QueryValue.QueryOutput? {
+            let query = try SQL.Query(self)
+            return try await connection.fetchOne(query) { (row: any SQL.Row) throws(SQL.Error) -> QueryValue.QueryOutput in
+                var decoder = SQL.RowDecoder(row: row)
+                do {
+                    return try QueryValue(decoder: &decoder).queryOutput
+                } catch let error as SQL.Error {
+                    throw error
+                } catch {
+                    throw SQL.Error.decoding("\(error)")
+                }
+            }
+        }
+
         /// Runs this single-value DSL statement on `database` and decodes every row.
         ///
         /// The statement's `QueryValue` is a single ``QueryRepresentable`` (a column value or a
@@ -75,6 +109,40 @@
     }
 
     extension Statement where QueryValue == (), Joins == (), From: Sendable, From.QueryOutput: Sendable {
+        /// Runs this whole-row DSL statement on one connection and decodes every record.
+        public func fetchAll(
+            _ connection: any SQL.Connection
+        ) async throws(SQL.Error) -> [From.QueryOutput] {
+            let query = try SQL.Query(self)
+            return try await connection.fetchAll(query) { (row: any SQL.Row) throws(SQL.Error) -> From.QueryOutput in
+                var decoder = SQL.RowDecoder(row: row)
+                do {
+                    return try From(decoder: &decoder).queryOutput
+                } catch let error as SQL.Error {
+                    throw error
+                } catch {
+                    throw SQL.Error.decoding("\(error)")
+                }
+            }
+        }
+
+        /// Runs this whole-row DSL statement on one connection and decodes its first record.
+        public func fetchOne(
+            _ connection: any SQL.Connection
+        ) async throws(SQL.Error) -> From.QueryOutput? {
+            let query = try SQL.Query(self)
+            return try await connection.fetchOne(query) { (row: any SQL.Row) throws(SQL.Error) -> From.QueryOutput in
+                var decoder = SQL.RowDecoder(row: row)
+                do {
+                    return try From(decoder: &decoder).queryOutput
+                } catch let error as SQL.Error {
+                    throw error
+                } catch {
+                    throw SQL.Error.decoding("\(error)")
+                }
+            }
+        }
+
         /// Runs this whole-row DSL statement on `database` and decodes every row into a `From` record.
         ///
         /// The whole-row shape: a statement with no `.select` narrowing — a bare `Table.all` /
@@ -123,6 +191,44 @@
     }
 
     extension Statement {
+        /// Runs this join-shaped DSL statement on one connection and decodes every tuple row.
+        @_disfavoredOverload
+        public func fetchAll<each C: QueryRepresentable>(
+            _ connection: any SQL.Connection
+        ) async throws(SQL.Error) -> [(repeat (each C).QueryOutput)]
+        where QueryValue == (repeat each C), repeat each C: Sendable, repeat (each C).QueryOutput: Sendable {
+            let query = try SQL.Query(self)
+            return try await connection.fetchAll(query) { (row: any SQL.Row) throws(SQL.Error) -> (repeat (each C).QueryOutput) in
+                var decoder = SQL.RowDecoder(row: row)
+                do {
+                    return try decoder.decodeColumns((repeat each C).self)
+                } catch let error as SQL.Error {
+                    throw error
+                } catch {
+                    throw SQL.Error.decoding("\(error)")
+                }
+            }
+        }
+
+        /// Runs this join-shaped DSL statement on one connection and decodes its first tuple row.
+        @_disfavoredOverload
+        public func fetchOne<each C: QueryRepresentable>(
+            _ connection: any SQL.Connection
+        ) async throws(SQL.Error) -> (repeat (each C).QueryOutput)?
+        where QueryValue == (repeat each C), repeat each C: Sendable, repeat (each C).QueryOutput: Sendable {
+            let query = try SQL.Query(self)
+            return try await connection.fetchOne(query) { (row: any SQL.Row) throws(SQL.Error) -> (repeat (each C).QueryOutput) in
+                var decoder = SQL.RowDecoder(row: row)
+                do {
+                    return try decoder.decodeColumns((repeat each C).self)
+                } catch let error as SQL.Error {
+                    throw error
+                } catch {
+                    throw SQL.Error.decoding("\(error)")
+                }
+            }
+        }
+
         /// Runs this join-shaped DSL statement on `database` and decodes every row into a tuple.
         ///
         /// The pack overload covers statements whose `QueryValue` is a tuple `(repeat each C)` — the

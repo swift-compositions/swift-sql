@@ -22,6 +22,8 @@ extension SQL {
         case transaction(String)
         /// A migration failed; the string names the migration.
         case migration(String)
+        /// Iteration was cancelled before a cursor reached its terminal state.
+        case cancelled
         /// A statement binding could not be represented as a ``SQL/Value`` — raised by the DSL
         /// bridge when a source binding has no counterpart in the v0 seam.
         case binding(String)

@@ -41,6 +41,29 @@ Driver-specific failures are mapped into it at the integration boundary, so a
 caller written against the protocols handles one error type regardless of which
 database backs it.
 
+## Streaming rows
+
+`SQL.Connection.fetchCursor(_:decode:)` opens a connection-scoped,
+pull-driven `SQL.Cursor`. It does not collect rows: each iterator advance asks
+the provider for one more decoded value. Consume it inside the `read` or
+transaction scope that supplied the connection.
+
+```swift
+try await database.read { connection in
+    let cursor = try await connection.fetchCursor(SQL.Query(sql: "SELECT id FROM users")) { row in
+        try row.int64("id")
+    }
+    for try await id in cursor {
+        print(id)
+    }
+}
+```
+
+The cursor releases provider resources exactly once when it is exhausted,
+closed, cancelled, or fails. A cursor is a single shared stream: do not create
+concurrent consumers from copied cursors or iterators. Providers map all driver
+errors to `SQL.Error`; cancellation is reported as `SQL.Error.cancelled`.
+
 ## License
 
 Apache 2.0. See [LICENSE.md](LICENSE.md).
