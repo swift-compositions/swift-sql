@@ -15,18 +15,6 @@ let package = Package(
             targets: ["SQL PostgreSQL Standard Integration"]
         ),
     ],
-    traits: [
-        .trait(
-            name: "PostgreSQLStandardIntegration",
-            description: """
-                Build the PostgreSQL Standard DSL bridge.
-
-                OFF by default, and the default is the point: the dialect dependency is what                 takes this package's resolved closure from 29 packages to 154.
-
-                An opt-in *product* does not avoid that. SwiftPM resolves a package's                 `dependencies:` for the whole package regardless of which product a consumer                 imports — products gate linking, only a trait gates resolution.
-                """
-        )
-    ],
     dependencies: [
         // Institute L1/L2 vocabulary the value/row surface is expressed in. These are the only
         // dependencies the engine-free core has: the DSL bridge that used to live here — and
@@ -40,9 +28,8 @@ let package = Package(
             url: "https://github.com/swift-primitives/swift-pool-primitives.git",
             revision: "b7c710c945b7c8467b4521c3a2d5b00539275593"
         ),
-        // Bridge-only, referenced solely under the `PostgreSQLStandardIntegration` trait so they
-        // are pruned from resolution when it is off.
         .package(url: "https://github.com/swift-primitives/swift-byte-primitives.git", branch: "main"),
+        .package(url: "https://github.com/swift-primitives/swift-structured-queries-primitives.git", branch: "main"),
         .package(url: "https://github.com/swift-standards/swift-postgresql-standard.git", branch: "main"),
     ],
     targets: [
@@ -71,22 +58,20 @@ let package = Package(
         //
         // Placement is the ratified 2026-07-06 architecture decision: the bridge lives here, and
         // swift-sql (L3 foundations) -> swift-postgresql-standard (L2 standards) is downward and
-        // legal. The trait gates the resolve cost; it does not change the direction.
+        // legal.
 
         .target(
             name: "SQL PostgreSQL Standard Integration",
             dependencies: [
                 "SQL",
+                .product(name: "Byte Primitives", package: "swift-byte-primitives"),
+                .product(name: "PostgreSQL Standard", package: "swift-postgresql-standard"),
+                .product(name: "RFC 4122", package: "swift-rfc-4122"),
                 .product(
-                    name: "Byte Primitives",
-                    package: "swift-byte-primitives",
-                    condition: .when(traits: ["PostgreSQLStandardIntegration"])
+                    name: "Structured Queries Primitives",
+                    package: "swift-structured-queries-primitives"
                 ),
-                .product(
-                    name: "PostgreSQL Standard",
-                    package: "swift-postgresql-standard",
-                    condition: .when(traits: ["PostgreSQLStandardIntegration"])
-                ),
+                .product(name: "Time Primitive", package: "swift-time-primitives"),
             ],
             path: "Sources/SQL PostgreSQL Standard Integration"
         ),
@@ -100,23 +85,16 @@ let package = Package(
                 "SQL Test Support",
                 "SQL PostgreSQL Standard Integration",
                 .product(name: "Pool Primitives", package: "swift-pool-primitives"),
-                .product(
-                    name: "Byte Primitives",
-                    package: "swift-byte-primitives",
-                    condition: .when(traits: ["PostgreSQLStandardIntegration"])
-                ),
-                .product(
-                    name: "PostgreSQL Standard",
-                    package: "swift-postgresql-standard",
-                    condition: .when(traits: ["PostgreSQLStandardIntegration"])
-                ),
+                .product(name: "Byte Primitives", package: "swift-byte-primitives"),
+                .product(name: "PostgreSQL Standard", package: "swift-postgresql-standard"),
                 // `@Table` is a macro attribute, unreachable through the runtime library's
                 // `@_exported import`, so the fixtures need the macro product directly.
                 .product(
                     name: "PostgreSQL Standard Macros",
-                    package: "swift-postgresql-standard",
-                    condition: .when(traits: ["PostgreSQLStandardIntegration"])
+                    package: "swift-postgresql-standard"
                 ),
+                .product(name: "RFC 4122", package: "swift-rfc-4122"),
+                .product(name: "Time Primitive", package: "swift-time-primitives"),
             ],
             path: "Tests/SQL Tests"
         ),

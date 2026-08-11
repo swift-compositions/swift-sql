@@ -9,39 +9,35 @@
 //
 // ===----------------------------------------------------------------------===//
 
-#if PostgreSQLStandardIntegration
+public import PostgreSQL_Standard
+public import SQL
 
-    public import PostgreSQL_Standard
-    public import SQL
-
-    // `any SQL.Connection` / `any SQL.Row` / `any SQL.Database` existentials are the
-    // deliberate engine-free membrane design: conformers are engine-specific and
-    // heterogeneous; generics would leak the engine type into consumer signatures.
-    // swiftlint:disable no_any_protocol_existential
-    extension Statement {
-        /// Lowers this DSL statement into a ``SQL/Query`` and runs it on one connection.
-        ///
-        /// This is the connection-scoped form for a caller already inside an ``SQL/Reader`` or
-        /// ``SQL/Database`` transaction body. It neither acquires a connection nor changes that
-        /// body's transaction boundary.
-        public func execute(_ connection: any SQL.Connection) async throws(SQL.Error) {
-            let query = try SQL.Query(self)
-            _ = try await connection.execute(query)
-        }
-
-        /// Lowers this DSL statement into a ``SQL/Query`` and runs it on `database` in a write scope.
-        ///
-        /// The statement-first execution sugar matching the app's `statement.execute(db)` call shape.
-        ///
-        /// - Note: This is the fire-and-forget verb (row count discarded). Row-decoding sugar —
-        ///   `fetchAll` / `fetchOne` returning decoded `QueryOutput` values by driving the DSL
-        ///   `QueryDecoder` over ``SQL/RowDecoder`` — lives in `Statement+Fetch.swift`, built on the
-        ///   by-index `…IfPresent` accessors added to ``SQL/Row``.
-        public func execute(_ database: any SQL.Database) async throws(SQL.Error) {
-            let query = try SQL.Query(self)
-            _ = try await database.execute(query)
-        }
+// `any SQL.Connection` / `any SQL.Row` / `any SQL.Database` existentials are the
+// deliberate engine-free membrane design: conformers are engine-specific and
+// heterogeneous; generics would leak the engine type into consumer signatures.
+// swiftlint:disable no_any_protocol_existential
+extension Statement {
+    /// Lowers this DSL statement into a ``SQL/Query`` and runs it on one connection.
+    ///
+    /// This is the connection-scoped form for a caller already inside an ``SQL/Reader`` or
+    /// ``SQL/Database`` transaction body. It neither acquires a connection nor changes that
+    /// body's transaction boundary.
+    public func execute(_ connection: any SQL.Connection) async throws(SQL.Error) {
+        let query = try SQL.Query(self)
+        _ = try await connection.execute(query)
     }
-// swiftlint:enable no_any_protocol_existential
 
-#endif  // PostgreSQLStandardIntegration
+    /// Lowers this DSL statement into a ``SQL/Query`` and runs it on `database` in a write scope.
+    ///
+    /// The statement-first execution sugar matching the app's `statement.execute(db)` call shape.
+    ///
+    /// - Note: This is the fire-and-forget verb (row count discarded). Row-decoding sugar —
+    ///   `fetchAll` / `fetchOne` returning decoded `QueryOutput` values by driving the DSL
+    ///   `QueryDecoder` over ``SQL/RowDecoder`` — lives in `Statement+Fetch.swift`, built on the
+    ///   by-index `…IfPresent` accessors added to ``SQL/Row``.
+    public func execute(_ database: any SQL.Database) async throws(SQL.Error) {
+        let query = try SQL.Query(self)
+        _ = try await database.execute(query)
+    }
+}
+// swiftlint:enable no_any_protocol_existential
