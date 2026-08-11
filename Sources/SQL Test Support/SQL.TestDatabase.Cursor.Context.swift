@@ -9,11 +9,11 @@
 
 internal import SQL
 
-// `any SQL.Row` is the parameter type in swift-sql's own `SQL.Connection` requirement.
+// `any SQL.Row` is the parameter type in swift-sql's own `SQL.Reader` requirement.
 // swiftlint:disable no_any_protocol_existential
-extension SQL.TestConnection {
-    /// The scripted cursor's uniquely owned continuation state.
-    struct Cursor<Value: Sendable>: ~Copyable {
+extension SQL.TestDatabase.Cursor {
+    /// A scripted cursor's uniquely owned continuation state.
+    struct Context<Value: Sendable>: ~Copyable {
         let database: SQL.TestDatabase
         let identifier: Int
         let decode: (any SQL.Row) throws(SQL.Error) -> Value

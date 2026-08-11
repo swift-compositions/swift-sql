@@ -14,12 +14,23 @@
 // heterogeneous; generics would leak the engine type into consumer signatures.
 // swiftlint:disable no_any_protocol_existential
 extension SQL {
-    /// A read-scoped database handle: runs a body against a leased ``SQL/Connection``.
+    /// A database reading interface: scopes a leased ``SQL/Connection`` or transfers one into a
+    /// cursor.
     ///
     /// `read` establishes a connection scope (a leased pool connection, or a read transaction,
-    /// as the conformer sees fit) and runs `body` against it. The narrower half of the
-    /// read/write split — see ``SQL/Database`` for the write and rollback scopes.
+    /// as the conformer sees fit) and runs `body` against it. `cursor(_:decode:)` instead transfers
+    /// unique ownership of that lease to the caller. This is the narrower half of the read/write
+    /// split — see ``SQL/Database`` for the write and rollback scopes.
     public protocol Reader: Sendable {
+        /// Opens a cursor whose uniquely owned provider context transfers into the caller.
+        ///
+        /// The reader, rather than a scoped SQL connection, owns this operation because only the
+        /// database implementation can consume a checked-out lease into the returned cursor.
+        func cursor<Value: Sendable>(
+            _ statement: some SQL.Statement,
+            decode: sending @escaping (any SQL.Row) throws(SQL.Error) -> Value
+        ) async throws(SQL.Error) -> sending SQL.Cursor<Value>
+
         /// Runs `body` against a connection in a read scope, returning its result.
         func read<Value: Sendable>(
             _ body: @Sendable (any SQL.Connection) async throws(SQL.Error) -> Value

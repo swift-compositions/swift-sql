@@ -18,6 +18,28 @@ extension `Cursor Tests`.Integration {
     }
 
     @Test
+    func `database transfers a checked out handle from its actor into the caller region`() async throws {
+        let dropped = Mutex(0)
+        let database = PoolDatabase(dropped: dropped)
+        try await database.fill()
+
+        let cursor = try await database.cursor(
+            SQL.Query(sql: "SELECT id FROM users")
+        ) { _ throws(SQL.Error) in
+            1
+        }
+        let outstanding = await database.outstanding
+        #expect(outstanding == 1)
+
+        discard cursor
+
+        #expect(dropped.withLock { $0 } == 1)
+        let terminalOutstanding = await database.outstanding
+        #expect(terminalOutstanding == 0)
+        await database.shutdown()
+    }
+
+    @Test
     func `cursor retains a checked out handle through continuation and reuses it on exhaustion`() async throws {
         let dropped = Mutex(0)
         let pool = Pool.Bounded<Session>(

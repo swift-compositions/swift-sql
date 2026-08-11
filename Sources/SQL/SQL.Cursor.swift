@@ -8,7 +8,7 @@
 // ===----------------------------------------------------------------------===//
 
 extension SQL {
-    /// A connection-scoped, pull-driven stream of decoded rows.
+    /// A reader-owned, pull-driven stream of decoded rows.
     ///
     /// A cursor uniquely owns its provider context. It is deliberately noncopyable and
     /// non-Sendable: each call to ``next()`` consumes the cursor and either returns one element

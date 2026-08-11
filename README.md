@@ -43,11 +43,11 @@ database backs it.
 
 ## Streaming rows
 
-`SQL.Connection.fetchCursor(_:decode:)` opens a connection-scoped,
-pull-driven `SQL.Cursor`. It does not collect rows: each cursor advance asks
-the provider for one more decoded value. The cursor is noncopyable and
-non-Sendable; each advance consumes it and returns the only continuation with
-the decoded element.
+`SQL.Reader.cursor(_:decode:)` asks the database owner to transfer a checked-out
+lease into a pull-driven `SQL.Cursor`. It does not collect rows: each cursor
+advance asks the provider for one more decoded value. The cursor is noncopyable
+and non-Sendable; each advance consumes it and returns the only continuation
+with the decoded element.
 
 ```swift
 func printRows(_ cursor: consuming SQL.Cursor<Int64>) async throws(SQL.Error) {
@@ -63,14 +63,12 @@ func printRows(_ cursor: consuming SQL.Cursor<Int64>) async throws(SQL.Error) {
     }
 }
 
-try await database.read { connection in
-    let cursor = try await connection.fetchCursor(
-        SQL.Query(sql: "SELECT id FROM users")
-    ) { row in
-        try row.int64("id")
-    }
-    try await printRows(cursor)
+let cursor = try await database.cursor(
+    SQL.Query(sql: "SELECT id FROM users")
+) { row in
+    try row.int64("id")
 }
+try await printRows(cursor)
 ```
 
 The cursor uniquely retains the provider context across every continuation.

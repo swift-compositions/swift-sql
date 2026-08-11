@@ -16,9 +16,9 @@
 extension SQL {
     /// A connection-scoped execution handle: the verbs that run a ``SQL/Statement``.
     ///
-    /// A connection is what a ``SQL/Reader/read(_:)`` or ``SQL/Database/write(_:)`` body receives.
-    /// The query methods accept any ``SQL/Statement`` and never surface an engine type; decode
-    /// closures receive an `any SQL.Row` consumed synchronously.
+    /// A connection is what a reader or database scope body receives.
+    /// Its operations complete inside that lease scope. A cursor is opened on SQL.Reader so the
+    /// database owner can transfer the lease itself into the returned move-only value.
     public protocol Connection: Sendable {
         /// Executes a statement and returns the number of rows the server produced.
         func execute(_ statement: some SQL.Statement) async throws(SQL.Error) -> Int
@@ -34,15 +34,6 @@ extension SQL {
             _ statement: some SQL.Statement,
             decode: (any SQL.Row) throws(SQL.Error) -> Value
         ) async throws(SQL.Error) -> Value?
-
-        /// Opens a pull-driven cursor and decodes at most one row for each cursor advance.
-        ///
-        /// The returned cursor uniquely owns its provider context until it terminates. The provider
-        /// maps driver failures into ``SQL/Error`` and transfers the cursor into the caller's region.
-        func fetchCursor<Value: Sendable>(
-            _ statement: some SQL.Statement,
-            decode: @escaping (any SQL.Row) throws(SQL.Error) -> Value
-        ) async throws(SQL.Error) -> sending SQL.Cursor<Value>
     }
 }
 // swiftlint:enable no_any_protocol_existential

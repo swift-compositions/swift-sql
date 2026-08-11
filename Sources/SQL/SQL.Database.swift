@@ -16,6 +16,9 @@
 extension SQL {
     /// A full database handle: a ``SQL/Reader`` that also opens write and rollback scopes.
     ///
+    /// Its inherited `cursor(_:decode:)` operation transfers one read lease directly into the
+    /// returned cursor while these transaction operations remain scoped.
+    ///
     /// The read/write split is the whole point of the handle. `write` runs its body inside a
     /// write transaction — `BEGIN`, the body against a connection-scoped handle, then `COMMIT`
     /// on success or `ROLLBACK` on a thrown error. `withRollback` runs its body inside a

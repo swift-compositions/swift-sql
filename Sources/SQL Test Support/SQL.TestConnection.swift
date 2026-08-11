@@ -18,8 +18,7 @@ internal import SQL
 extension SQL {
     /// The scripted ``SQL/Connection`` a ``SQL/TestDatabase`` hands to a scope body. Every verb
     /// records its statement on the owning database. `fetchAll` / `fetchOne` decode the database's
-    /// next scripted result set through ``SQL/TestRow``; `fetchCursor` supplies one scripted row
-    /// per cursor advance and records its terminal release.
+    /// next scripted result set through ``SQL/TestRow``.
     struct TestConnection: SQL.Connection {
         let database: SQL.TestDatabase
     }
@@ -53,41 +52,6 @@ extension SQL.TestConnection {
         let rows = await database.nextResultSet()
         guard let first = rows.first else { return nil }
         return try decode(SQL.TestRow(first))
-    }
-
-    func fetchCursor<Value: Sendable>(
-        _ statement: some SQL.Statement,
-        decode: @escaping (any SQL.Row) throws(SQL.Error) -> Value
-    ) async throws(SQL.Error) -> sending SQL.Cursor<Value> {
-        await database.record(statement.sql, statement.bindings)
-        let identifier = await database.openCursor()
-        return SQL.Cursor(
-            context: SQL.TestConnection.Cursor(
-                database: database,
-                identifier: identifier,
-                decode: decode
-            ),
-            next: { context in
-                guard let columns = await context.database.nextCursorRow(context.identifier) else {
-                    return .exhausted(context)
-                }
-                do throws(SQL.Error) {
-                    return .element(try context.decode(SQL.TestRow(columns)), context)
-                } catch {
-                    return .failure(error, context)
-                }
-            },
-            close: { context in .success(context) },
-            reuse: { context in
-                context.database.closeCursor(context.identifier)
-            },
-            invalidate: { context in
-                context.database.closeCursor(context.identifier)
-            },
-            abandon: { context in
-                context.database.closeCursor(context.identifier)
-            }
-        )
     }
 }
 // swiftlint:enable no_any_protocol_existential
