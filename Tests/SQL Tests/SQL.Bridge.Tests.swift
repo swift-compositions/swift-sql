@@ -49,7 +49,10 @@
     }
 
     @Test func `bridge maps date binding to instant`() throws {
-        let instant = try Instant(secondsSinceUnixEpoch: 1_700_000_000, nanosecondFraction: 500_000_000)
+        let instant = try Instant(
+            secondsSinceUnixEpoch: 1_700_000_000,
+            nanosecondFraction: 500_000_000
+        )
         let fragment: QueryFragment = "SELECT \(QueryBinding.date(instant))"
         let query = try SQL.Query(SQLQueryExpression<()>(fragment))
         // The binding already carries an `Instant`, so the bridge hands it through unchanged — no
@@ -107,7 +110,8 @@
     @Test func `bridge maps a generic array elementwise rather than degrading it to null`() throws {
         // The postgres-nio path binds NULL here, discarding caller data. The recursive case gives
         // this binding the same fidelity as the typed arrays.
-        let fragment: QueryFragment = "SELECT \(QueryBinding.genericArray([.int(1), .text("a"), .null]))"
+        let fragment: QueryFragment =
+            "SELECT \(QueryBinding.genericArray([.int(1), .text("a"), .null]))"
         let query = try SQL.Query(SQLQueryExpression<()>(fragment))
         #expect(query.bindings == [.array([.int64(1), .text("a"), .null])])
     }

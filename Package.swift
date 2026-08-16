@@ -33,11 +33,20 @@ let package = Package(
         // brought `swift-postgresql-standard` and `swift-byte-primitives` with it — now lives in
         // swift-postgresql-standard as `PostgreSQL Standard SQL Integration`.
         .package(url: "https://github.com/swift-ietf/swift-rfc-4122.git", branch: "main"),
-        .package(url: "https://github.com/swift-primitives/swift-time-primitives.git", branch: "main"),
+        .package(
+            url: "https://github.com/swift-primitives/swift-time-primitives.git",
+            branch: "main"
+        ),
         // Bridge-only, referenced solely under the `PostgreSQLStandardIntegration` trait so they
         // are pruned from resolution when it is off.
-        .package(url: "https://github.com/swift-primitives/swift-byte-primitives.git", branch: "main"),
-        .package(url: "https://github.com/swift-standards/swift-postgresql-standard.git", branch: "main"),
+        .package(
+            url: "https://github.com/swift-primitives/swift-byte-primitives.git",
+            branch: "main"
+        ),
+        .package(
+            url: "https://github.com/swift-standards/swift-postgresql-standard.git",
+            branch: "main"
+        ),
     ],
     targets: [
         // MARK: - SQL (engine-free execution interface)

@@ -67,7 +67,10 @@
     }
 
     @Test func `decoder returns the timestamp column as an instant`() throws {
-        let instant = try Instant(secondsSinceUnixEpoch: 1_700_000_000, nanosecondFraction: 500_000_000)
+        let instant = try Instant(
+            secondsSinceUnixEpoch: 1_700_000_000,
+            nanosecondFraction: 500_000_000
+        )
         let row = SQL.TestRow(["a": .timestamp(instant)])
         var decoder = SQL.RowDecoder(row: row)
         // The requirement is stated in `Instant`, so the row's own timestamp is handed straight
