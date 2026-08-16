@@ -41,7 +41,8 @@
         ) async throws(SQL.Error) -> [QueryValue.QueryOutput] {
             let query = try SQL.Query(self)
             return try await database.write { connection throws(SQL.Error) in
-                try await connection.fetchAll(query) { (row: any SQL.Row) throws(SQL.Error) -> QueryValue.QueryOutput in
+                try await connection.fetchAll(query) {
+                    (row: any SQL.Row) throws(SQL.Error) -> QueryValue.QueryOutput in
                     var decoder = SQL.RowDecoder(row: row)
                     do {
                         return try QueryValue(decoder: &decoder).queryOutput
@@ -60,7 +61,8 @@
         ) async throws(SQL.Error) -> QueryValue.QueryOutput? {
             let query = try SQL.Query(self)
             return try await database.write { connection throws(SQL.Error) in
-                try await connection.fetchOne(query) { (row: any SQL.Row) throws(SQL.Error) -> QueryValue.QueryOutput in
+                try await connection.fetchOne(query) {
+                    (row: any SQL.Row) throws(SQL.Error) -> QueryValue.QueryOutput in
                     var decoder = SQL.RowDecoder(row: row)
                     do {
                         return try QueryValue(decoder: &decoder).queryOutput
@@ -74,7 +76,8 @@
         }
     }
 
-    extension Statement where QueryValue == (), Joins == (), From: Sendable, From.QueryOutput: Sendable {
+    extension Statement
+    where QueryValue == (), Joins == (), From: Sendable, From.QueryOutput: Sendable {
         /// Runs this whole-row DSL statement on `database` and decodes every row into a `From` record.
         ///
         /// The whole-row shape: a statement with no `.select` narrowing — a bare `Table.all` /
@@ -89,7 +92,8 @@
         ) async throws(SQL.Error) -> [From.QueryOutput] {
             let query = try SQL.Query(self)
             return try await database.write { connection throws(SQL.Error) in
-                try await connection.fetchAll(query) { (row: any SQL.Row) throws(SQL.Error) -> From.QueryOutput in
+                try await connection.fetchAll(query) {
+                    (row: any SQL.Row) throws(SQL.Error) -> From.QueryOutput in
                     var decoder = SQL.RowDecoder(row: row)
                     do {
                         return try From(decoder: &decoder).queryOutput
@@ -108,7 +112,8 @@
         ) async throws(SQL.Error) -> From.QueryOutput? {
             let query = try SQL.Query(self)
             return try await database.write { connection throws(SQL.Error) in
-                try await connection.fetchOne(query) { (row: any SQL.Row) throws(SQL.Error) -> From.QueryOutput in
+                try await connection.fetchOne(query) {
+                    (row: any SQL.Row) throws(SQL.Error) -> From.QueryOutput in
                     var decoder = SQL.RowDecoder(row: row)
                     do {
                         return try From(decoder: &decoder).queryOutput
@@ -134,10 +139,14 @@
         public func fetchAll<each C: QueryRepresentable>(
             _ database: any SQL.Database
         ) async throws(SQL.Error) -> [(repeat (each C).QueryOutput)]
-        where QueryValue == (repeat each C), repeat each C: Sendable, repeat (each C).QueryOutput: Sendable {
+        where
+            QueryValue == (repeat each C), repeat each C: Sendable,
+            repeat (each C).QueryOutput: Sendable
+        {
             let query = try SQL.Query(self)
             return try await database.write { connection throws(SQL.Error) in
-                try await connection.fetchAll(query) { (row: any SQL.Row) throws(SQL.Error) -> (repeat (each C).QueryOutput) in
+                try await connection.fetchAll(query) {
+                    (row: any SQL.Row) throws(SQL.Error) -> (repeat (each C).QueryOutput) in
                     var decoder = SQL.RowDecoder(row: row)
                     do {
                         return try decoder.decodeColumns((repeat each C).self)
@@ -155,10 +164,14 @@
         public func fetchOne<each C: QueryRepresentable>(
             _ database: any SQL.Database
         ) async throws(SQL.Error) -> (repeat (each C).QueryOutput)?
-        where QueryValue == (repeat each C), repeat each C: Sendable, repeat (each C).QueryOutput: Sendable {
+        where
+            QueryValue == (repeat each C), repeat each C: Sendable,
+            repeat (each C).QueryOutput: Sendable
+        {
             let query = try SQL.Query(self)
             return try await database.write { connection throws(SQL.Error) in
-                try await connection.fetchOne(query) { (row: any SQL.Row) throws(SQL.Error) -> (repeat (each C).QueryOutput) in
+                try await connection.fetchOne(query) {
+                    (row: any SQL.Row) throws(SQL.Error) -> (repeat (each C).QueryOutput) in
                     var decoder = SQL.RowDecoder(row: row)
                     do {
                         return try decoder.decodeColumns((repeat each C).self)
