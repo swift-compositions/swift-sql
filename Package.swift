@@ -1,11 +1,11 @@
-// swift-tools-version: 6.3.3
+// swift-tools-version: 6.4
 
 import PackageDescription
 
 let package = Package(
     name: "swift-sql",
     platforms: [
-        .macOS("27")
+        .macOS(.v27)
     ],
     products: [
         .library(name: "SQL", targets: ["SQL"]),
