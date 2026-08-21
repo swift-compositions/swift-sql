@@ -1,22 +1,9 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-sql open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-sql project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 public import RFC_4122
 public import SQL
 public import Time_Primitive
 
 extension SQL {
-    /// A concrete ``SQL/Row`` over an in-memory `[String: SQL.Value]` column map plus an ordered
-    /// column list (keys, sorted, for stable by-index access). Accessors convert from the stored
-    /// ``SQL/Value`` case, raising ``SQL/Error/decoding(_:)`` on a mismatch or missing column.
+
     public struct TestRow: SQL.Row {
         public let columns: [String: SQL.Value]
         public let order: [String]
@@ -42,8 +29,6 @@ extension SQL.TestRow {
         }
         return columns[order[index]] ?? .null
     }
-
-    // MARK: By column name
 
     public func string(_ column: String) throws(SQL.Error) -> String {
         try Self.asString(value(column))
@@ -91,8 +76,6 @@ extension SQL.TestRow {
         try Self.ifPresent(value(column), Self.asBytes)
     }
 
-    // MARK: By column index
-
     public func string(at index: Int) throws(SQL.Error) -> String {
         try Self.asString(value(at: index))
     }
@@ -113,12 +96,6 @@ extension SQL.TestRow {
     public func bytes(at index: Int) throws(SQL.Error) -> [UInt8] {
         try Self.asBytes(value(at: index))
     }
-
-    // MARK: By column index (optional)
-    //
-    // An out-of-range index throws ``SQL/Error/decoding(_:)`` (matching the by-name "no such
-    // column" behaviour — an absent column is an error, not a silent `nil`); an in-range
-    // ``SQL/Value/null`` decodes to `nil`.
 
     public func stringIfPresent(at index: Int) throws(SQL.Error) -> String? {
         try Self.ifPresent(value(at: index), Self.asString)

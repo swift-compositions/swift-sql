@@ -1,24 +1,7 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-sql open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-sql project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 internal import SQL
 
-// `any SQL.Connection` / `any SQL.Row` / `any SQL.Database` existentials are the
-// deliberate engine-free membrane design: conformers are engine-specific and
-// heterogeneous; generics would leak the engine type into consumer signatures.
-// swiftlint:disable no_any_protocol_existential
 extension SQL {
-    /// The scripted ``SQL/Connection`` a ``SQL/TestDatabase`` hands to a scope body. Every verb
-    /// records its statement on the owning database; `fetchAll` / `fetchOne` decode the database's
-    /// next scripted result set through ``SQL/TestRow``.
+
     struct TestConnection: SQL.Connection {
         let database: SQL.TestDatabase
     }
@@ -54,4 +37,3 @@ extension SQL.TestConnection {
         return try decode(SQL.TestRow(first))
     }
 }
-// swiftlint:enable no_any_protocol_existential

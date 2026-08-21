@@ -1,14 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-sql open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-sql project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 #if PostgreSQLStandardIntegration
 
     internal import Byte_Primitives
@@ -18,25 +7,7 @@
     internal import Time_Primitive
 
     extension SQL {
-        // Signatures forced by external protocol Structured_Queries_Primitives.QueryDecoder
-        // (untyped throws); `any SQL.Row` is the deliberate engine-free row abstraction.
-        // swiftlint:disable no_any_protocol_existential
-        /// A positional `Structured Queries Primitives` `QueryDecoder` driven over an `any SQL.Row`.
-        ///
-        /// The DSL decodes a result row column-by-column through a mutating cursor: each `decode`
-        /// reads the current column, then advances `index`. `nil` signals a `NULL` column (the DSL's
-        /// `Optional` machinery turns a required-column `nil` into `missingRequiredColumn`); a type
-        /// mismatch surfaces as ``SQL/Error/decoding(_:)`` from the underlying by-index `…IfPresent`
-        /// accessor. Every requirement is now stated in institute vocabulary — `Instant` for a
-        /// timestamp column, `QueryBinding.UUID` for an identifier, `[Byte]` for `blob`/`jsonb` — so a
-        /// timestamp is handed straight through and an identifier only changes byte container.
-        /// `UInt64` is the bit-pattern of the signed 64-bit column.
-        ///
-        /// The type is deliberately `internal`: it is an implementation detail of the fetch sugar, so
-        /// the witness signatures the external `QueryDecoder` protocol forces never leak onto this
-        /// target's public surface. The conformance methods are untyped-`throws` because the external
-        /// `QueryDecoder` protocol requirements are untyped `throws` — the constraint is imposed by the
-        /// DSL, not chosen here; every error actually thrown is a ``SQL/Error``.
+
         struct RowDecoder: QueryDecoder {
             let row: any SQL.Row
             var index: Int = 0
@@ -45,10 +16,9 @@
                 self.row = row
             }
         }
-        // swiftlint:enable no_any_protocol_existential
+
     }
 
-    // swiftlint:disable typed_throws_required
     extension SQL.RowDecoder {
         mutating func decode(_ columnType: [Byte].Type) throws -> [Byte]? {
             defer { index += 1 }
@@ -96,6 +66,5 @@
             return QueryBinding.UUID(bytes: uuid.byteArray.map { Byte($0) })
         }
     }
-// swiftlint:enable typed_throws_required
 
-#endif  // PostgreSQLStandardIntegration
+#endif

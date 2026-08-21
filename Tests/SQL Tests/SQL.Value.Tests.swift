@@ -1,14 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-sql open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-sql project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import RFC_4122
 import SQL
 import Testing

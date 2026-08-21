@@ -1,14 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-sql open source project
-//
-// Copyright (c) 2026 Coen ten Thije Boonkkamp and the swift-sql project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 #if PostgreSQLStandardIntegration
 
     import Byte_Primitives
@@ -55,8 +44,7 @@
         )
         let fragment: QueryFragment = "SELECT \(QueryBinding.date(instant))"
         let query = try SQL.Query(SQLQueryExpression<()>(fragment))
-        // The binding already carries an `Instant`, so the bridge hands it through unchanged — no
-        // epoch arithmetic, and no sub-second precision lost on the way across.
+
         #expect(query.bindings == [.timestamp(instant)])
     }
 
@@ -73,8 +61,7 @@
     }
 
     @Test func `bridge carries a decimal as its exact digit string`() throws {
-        // Deliberately wider than any fixed-width decimal type accepts: `numeric` admits it, so
-        // the seam must carry the digits verbatim rather than parse and narrow them.
+
         let digits = "123456789012345678901234567890123456789.000000000000000000001"
         let fragment: QueryFragment = "SELECT \(QueryBinding.decimal(digits))"
         let query = try SQL.Query(SQLQueryExpression<()>(fragment))
@@ -108,8 +95,7 @@
     }
 
     @Test func `bridge maps a generic array elementwise rather than degrading it to null`() throws {
-        // The postgres-nio path binds NULL here, discarding caller data. The recursive case gives
-        // this binding the same fidelity as the typed arrays.
+
         let fragment: QueryFragment =
             "SELECT \(QueryBinding.genericArray([.int(1), .text("a"), .null]))"
         let query = try SQL.Query(SQLQueryExpression<()>(fragment))
@@ -142,4 +128,4 @@
         #expect(executed[0].bindings == [.int64(5)])
     }
 
-#endif  // PostgreSQLStandardIntegration
+#endif
