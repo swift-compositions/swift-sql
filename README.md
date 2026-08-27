@@ -11,7 +11,7 @@ Add the package to your `Package.swift` dependencies:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/swift-foundations/swift-sql.git", branch: "main")
+    .package(url: "https://github.com/swift-compositions/swift-sql.git", branch: "main")
 ]
 ```
 

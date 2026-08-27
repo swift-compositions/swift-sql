@@ -2,7 +2,7 @@
 # Triaged by AI-assisted bulk pass (2026-04-29).
 description: "Database-agnostic SQL query and statement types with connection, row, and value protocols for Swift."
 topics:
-  - foundations
+  - compositions
   - sql
 homepage: "https://swift-institute.org"
 readme:

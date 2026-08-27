@@ -31,12 +31,12 @@ let package = Package(
 
         .package(url: "https://github.com/swift-ietf/swift-rfc-4122.git", branch: "main"),
         .package(
-            url: "https://github.com/swift-primitives/swift-time-primitives.git",
+            url: "https://github.com/swift-molecules/swift-time.git",
             branch: "main"
         ),
 
         .package(
-            url: "https://github.com/swift-primitives/swift-byte-primitives.git",
+            url: "https://github.com/swift-molecules/swift-byte.git",
             branch: "main"
         ),
         .package(
@@ -50,7 +50,7 @@ let package = Package(
             name: "SQL",
             dependencies: [
                 .product(name: "RFC 4122", package: "swift-rfc-4122"),
-                .product(name: "Time Primitive", package: "swift-time-primitives"),
+                .product(name: "Time Primitive", package: "swift-time"),
             ],
             path: "Sources/SQL"
         ),
@@ -68,8 +68,8 @@ let package = Package(
             dependencies: [
                 "SQL",
                 .product(
-                    name: "Byte Primitives",
-                    package: "swift-byte-primitives",
+                    name: "Byte",
+                    package: "swift-byte",
                     condition: .when(traits: ["PostgreSQLStandardIntegration"])
                 ),
                 .product(
@@ -88,8 +88,8 @@ let package = Package(
                 "SQL Test Support",
                 "SQL PostgreSQL Standard Integration",
                 .product(
-                    name: "Byte Primitives",
-                    package: "swift-byte-primitives",
+                    name: "Byte",
+                    package: "swift-byte",
                     condition: .when(traits: ["PostgreSQLStandardIntegration"])
                 ),
                 .product(

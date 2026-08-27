@@ -1,6 +1,6 @@
 #if PostgreSQLStandardIntegration
 
-    internal import Byte_Primitives
+    internal import Byte
     public import PostgreSQL_Standard
     internal import RFC_4122
     public import SQL

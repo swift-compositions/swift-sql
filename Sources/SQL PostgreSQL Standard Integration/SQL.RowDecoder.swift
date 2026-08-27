@@ -1,9 +1,9 @@
 #if PostgreSQLStandardIntegration
 
-    internal import Byte_Primitives
+    internal import Byte
     internal import RFC_4122
     internal import SQL
-    internal import Structured_Queries_Primitives
+    internal import Structured_Queries
     internal import Time_Primitive
 
     extension SQL {
