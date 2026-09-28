@@ -1,11 +1,14 @@
 public import ISO_9075_Call_Level_Interface
+internal import Synchronization
 
-public actor TestDatabase: ISO_9075.Database {
-    public private(set) var executed: [ISO_9075.Rendering] = []
-    public private(set) var scopes: [Scope] = []
-    private var results: [[Row]] = []
+public final class TestDatabase: ISO_9075.Database {
+    private let state = Mutex(State())
 
     public init() {}
+
+    public var executed: [ISO_9075.Rendering] { state.withLock { $0.executed } }
+
+    public var scopes: [Scope] { state.withLock { $0.scopes } }
 }
 
 extension TestDatabase {
@@ -15,11 +18,17 @@ extension TestDatabase {
         case rollback
     }
 
+    struct State {
+        var executed: [ISO_9075.Rendering] = []
+        var scopes: [Scope] = []
+        var results: [[Row]] = []
+    }
+
     public struct Dialect: ISO_9075.Dialect {
         public func placeholder(_ offset: Int) -> String { "$\(offset)" }
     }
 
-    public struct Row: ISO_9075.Row {
+    public struct Row: ISO_9075.Row, Sendable {
         public let columns: [String]
         public let values: [ISO_9075.Value]
 
@@ -35,33 +44,40 @@ extension TestDatabase {
     }
 
     public func script(_ rows: [Row]) {
-        results.append(rows)
+        state.withLock { $0.results.append(rows) }
     }
 
     public func read<Value: Sendable>(
-        _ body: @Sendable (Connection) async throws(ISO_9075.Error) -> Value
+        _ body: @Sendable (Connection) throws(ISO_9075.Error) -> Value
     ) async throws(ISO_9075.Error) -> Value {
-        scopes.append(.read)
-        return try await body(Connection(database: self))
+        try scope(.read, body)
     }
 
     public func write<Value: Sendable>(
-        _ body: @Sendable (Connection) async throws(ISO_9075.Error) -> Value
+        _ body: @Sendable (Connection) throws(ISO_9075.Error) -> Value
     ) async throws(ISO_9075.Error) -> Value {
-        scopes.append(.write)
-        return try await body(Connection(database: self))
+        try scope(.write, body)
     }
 
     public func withRollback<Value: Sendable>(
-        _ body: @Sendable (Connection) async throws(ISO_9075.Error) -> Value
+        _ body: @Sendable (Connection) throws(ISO_9075.Error) -> Value
     ) async throws(ISO_9075.Error) -> Value {
-        scopes.append(.rollback)
-        return try await body(Connection(database: self))
+        try scope(.rollback, body)
+    }
+
+    private func scope<Value>(
+        _ scope: Scope,
+        _ body: (Connection) throws(ISO_9075.Error) -> Value
+    ) throws(ISO_9075.Error) -> Value {
+        state.withLock { $0.scopes.append(scope) }
+        return try body(Connection(database: self))
     }
 
     fileprivate func record(_ statement: ISO_9075.Rendering) -> [Row] {
-        executed.append(statement)
-        return results.isEmpty ? [] : results.removeFirst()
+        state.withLock { state in
+            state.executed.append(statement)
+            return state.results.isEmpty ? [] : state.results.removeFirst()
+        }
     }
 }
 
@@ -70,15 +86,15 @@ extension TestDatabase {
         let database: TestDatabase
         public var dialect: Dialect { Dialect() }
 
-        public func execute(_ statement: ISO_9075.Rendering) async throws(ISO_9075.Error) -> Int {
-            await database.record(statement).count
+        public func execute(_ statement: ISO_9075.Rendering) throws(ISO_9075.Error) -> Int {
+            database.record(statement).count
         }
 
-        public func fetchAll<Value: Sendable>(
+        public func fetchAll<Value>(
             _ statement: ISO_9075.Rendering,
             decode: (Row) throws(ISO_9075.Error) -> Value
-        ) async throws(ISO_9075.Error) -> [Value] {
-            try await database.record(statement).map { row throws(ISO_9075.Error) in try decode(row) }
+        ) throws(ISO_9075.Error) -> [Value] {
+            try database.record(statement).map { row throws(ISO_9075.Error) in try decode(row) }
         }
     }
 }

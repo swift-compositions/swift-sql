@@ -22,7 +22,7 @@ extension Migrator {
 
     public mutating func register(
         _ name: String,
-        up: @escaping @Sendable (Database.Connection) async throws(ISO_9075.Error) -> Void
+        up: @escaping @Sendable (Database.Connection) throws(ISO_9075.Error) -> Void
     ) {
         migrations.append(Migration(name: name, up: up))
     }
@@ -48,7 +48,7 @@ extension Migrator {
             )
             applied = Set(
                 try await database.read { (connection: Database.Connection) throws(ISO_9075.Error) -> [String] in
-                    try await connection.fetchAll("SELECT \(quote: "name") FROM \(Self.appliedTable)") {
+                    try connection.fetchAll("SELECT \(quote: "name") FROM \(Self.appliedTable)") {
                         row throws(ISO_9075.Error) in
                         switch try row.value(named: "name") {
                         case .text(let name): name
@@ -68,8 +68,8 @@ extension Migrator {
     private func apply(_ migration: Migration<Database.Connection>, to database: Database) async throws(Error) {
         do {
             try await database.write { (connection: Database.Connection) throws(ISO_9075.Error) in
-                try await migration.up(connection)
-                _ = try await connection.execute(
+                try migration.up(connection)
+                _ = try connection.execute(
                     "INSERT INTO \(Self.appliedTable) (\(quote: "name")) VALUES (\(.text(migration.name)))"
                 )
             }
