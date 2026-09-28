@@ -39,21 +39,21 @@ extension TestDatabase {
     }
 
     public func read<Value: Sendable>(
-        _ body: @Sendable (any ISO_9075.Connection) async throws(ISO_9075.Error) -> Value
+        _ body: @Sendable (Connection) async throws(ISO_9075.Error) -> Value
     ) async throws(ISO_9075.Error) -> Value {
         scopes.append(.read)
         return try await body(Connection(database: self))
     }
 
     public func write<Value: Sendable>(
-        _ body: @Sendable (any ISO_9075.Connection) async throws(ISO_9075.Error) -> Value
+        _ body: @Sendable (Connection) async throws(ISO_9075.Error) -> Value
     ) async throws(ISO_9075.Error) -> Value {
         scopes.append(.write)
         return try await body(Connection(database: self))
     }
 
     public func withRollback<Value: Sendable>(
-        _ body: @Sendable (any ISO_9075.Connection) async throws(ISO_9075.Error) -> Value
+        _ body: @Sendable (Connection) async throws(ISO_9075.Error) -> Value
     ) async throws(ISO_9075.Error) -> Value {
         scopes.append(.rollback)
         return try await body(Connection(database: self))
@@ -66,17 +66,17 @@ extension TestDatabase {
 }
 
 extension TestDatabase {
-    fileprivate struct Connection: ISO_9075.Connection {
+    public struct Connection: ISO_9075.Connection {
         let database: TestDatabase
-        var dialect: any ISO_9075.Dialect { Dialect() }
+        public var dialect: Dialect { Dialect() }
 
-        func execute(_ statement: ISO_9075.Rendering) async throws(ISO_9075.Error) -> Int {
+        public func execute(_ statement: ISO_9075.Rendering) async throws(ISO_9075.Error) -> Int {
             await database.record(statement).count
         }
 
-        func fetchAll<Value: Sendable>(
+        public func fetchAll<Value: Sendable>(
             _ statement: ISO_9075.Rendering,
-            decode: (any ISO_9075.Row) throws(ISO_9075.Error) -> Value
+            decode: (Row) throws(ISO_9075.Error) -> Value
         ) async throws(ISO_9075.Error) -> [Value] {
             try await database.record(statement).map { row throws(ISO_9075.Error) in try decode(row) }
         }
