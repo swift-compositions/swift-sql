@@ -88,3 +88,16 @@ struct Positional: ISO_9075.Dialect {
         #expect(String._queryFragment(jsonEncoding: "\(quote: "title")").debugDescription == #""title""#)
     }
 }
+
+@Suite struct `Ordering terms` {
+    @Test func `a direction and null ordering render after the expression`() {
+        let sql = Numbered().render(Reminder.order { $0.title.ordered(.descending, nulls: .last) }.query).sql
+        #expect(sql.contains(#"ORDER BY "reminder"."title" DESC NULLS LAST"#))
+    }
+
+    @Test func `asc without null ordering renders only the direction`() {
+        let sql = Numbered().render(Reminder.order { $0.title.asc() }.query).sql
+        #expect(sql.contains(#"ORDER BY "reminder"."title" ASC"#))
+        #expect(!sql.contains("NULLS"))
+    }
+}
