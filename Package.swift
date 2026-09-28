@@ -24,6 +24,7 @@ let package = Package(
         .trait(name: "CasePaths", description: "Enum tables through CasePaths"),
     ],
     dependencies: [
+        .package(url: "https://github.com/swift-atoms/swift-ascii.git", branch: "main", traits: ["Parser"]),
         .package(url: "https://github.com/swift-atoms/swift-byte.git", branch: "main"),
         .package(url: "https://github.com/swift-atoms/swift-order.git", branch: "main"),
         .package(url: "https://github.com/pointfreeco/swift-case-paths.git", from: "1.7.2"),

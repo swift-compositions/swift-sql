@@ -458,7 +458,7 @@ public struct Insert<Into: Table, Returning> {
     var updateFilter: [ISO_9075.Fragment]
     var returning: [ISO_9075.Fragment]
 
-    package func _returning<R>(_ returning: [ISO_9075.Fragment]) -> Insert<Into, R> {
+    public func _returning<R>(_ returning: [ISO_9075.Fragment]) -> Insert<Into, R> {
         Insert<Into, R>(
             conflictResolution: conflictResolution,
             columnNames: columnNames,

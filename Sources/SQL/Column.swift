@@ -45,7 +45,7 @@ public struct Column<Root: Table> {
         return _isSelecting ? decoding(column) : column
     }
 
-    package var returningFragment: ISO_9075.Fragment {
+    public var returningFragment: ISO_9075.Fragment {
         decoding("\(quote: name)")
     }
 

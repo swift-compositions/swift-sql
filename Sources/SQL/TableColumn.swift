@@ -20,7 +20,7 @@ where Value: QueryBindable {
 extension TableColumnExpression {
     public var _names: [String] { [name] }
 
-    package var returningFragment: ISO_9075.Fragment {
+    public var returningFragment: ISO_9075.Fragment {
         Value.queryFragment(decoding: "\(quote: name)")
     }
 }

@@ -34,10 +34,10 @@ extension UUID: QueryBindable {
 }
 
 extension Data: QueryBindable {
-    public var queryBinding: ISO_9075.Value { .blob(map(Byte.init)) }
+    public var queryBinding: ISO_9075.Value { .blob(map(Byte.init(bitPattern:))) }
 
     public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
-        self.init(try [Byte](decoder: &decoder).map(\.underlying))
+        self.init(try [Byte](decoder: &decoder).map(\.bitPattern))
     }
 }
 

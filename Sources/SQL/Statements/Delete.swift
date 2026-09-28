@@ -20,7 +20,7 @@ public struct Delete<From: Table, Returning> {
     var `where`: [ISO_9075.Fragment] = []
     var returning: [ISO_9075.Fragment] = []
 
-    package func _returning<R>(_ returning: [ISO_9075.Fragment]) -> Delete<From, R> {
+    public func _returning<R>(_ returning: [ISO_9075.Fragment]) -> Delete<From, R> {
         Delete<From, R>(isEmpty: isEmpty, where: `where`, returning: returning)
     }
 
