@@ -1,164 +1,116 @@
-// swift-tools-version: 6.3.3
+// swift-tools-version: 6.4
 
 import CompilerPluginSupport
 import PackageDescription
 
-#if canImport(FoundationEssentials)
-    import FoundationEssentials
-#else
-    import Foundation
-#endif
-
 let package = Package(
-    name: "swift-structured-queries-postgres",
+    name: "swift-sql",
     platforms: [
-        .iOS(.v26),
-        .macOS(.v26),
-        //        .tvOS(.v26),
-        //        .watchOS(.v26)
+        .macOS(.v27),
+        .iOS(.v27),
+        .tvOS(.v27),
+        .watchOS(.v27),
+        .visionOS(.v27),
     ],
     products: [
-        .library(
-            name: "StructuredQueriesCore",
-            targets: ["StructuredQueriesCore"]
-        ),
-        .library(
-            name: "StructuredQueriesPostgres",
-            targets: ["StructuredQueriesPostgres"]
-        ),
-        .library(
-            name: "StructuredQueriesPostgresTestSupport",
-            targets: ["StructuredQueriesPostgresTestSupport"]
-        ),
-        .library(
-            name: "StructuredQueriesPostgresSupport",
-            targets: ["StructuredQueriesPostgresSupport"]
-        ),
+        .library(name: "SQL", targets: ["SQL"]),
+        .library(name: "SQL Macros", targets: ["SQL Macros"]),
+        .library(name: "SQL Foundation Integration", targets: ["SQL Foundation Integration"]),
+        .library(name: "SQL Test Support", targets: ["SQL Test Support"]),
     ],
     traits: [
-        .trait(
-            name: "StructuredQueriesPostgresCasePaths",
-            description: "Introduce enum table support to StructuredQueries."
-        ),
-        .trait(
-            name: "StructuredQueriesPostgresTagged",
-            description: "Introduce StructuredQueries conformances to the swift-tagged package."
-        ),
-        .trait(
-            name: "StructuredQueriesPostgresSQLValidation",
-            description:
-                "Enable SQL syntax validation against PostgreSQL using postgres-nio. Heavy dependency - only enable for validation testing."
-        ),
-        .default(
-            enabledTraits: [
-                "StructuredQueriesPostgresCasePaths",
-                "StructuredQueriesPostgresTagged",
-                //                "StructuredQueriesPostgresSQLValidation",
-            ]
-        ),
+        .trait(name: "Tagged", description: "SQL conformances for swift-atoms Tagged"),
+        .trait(name: "CasePaths", description: "Enum tables through CasePaths"),
     ],
     dependencies: [
+        .package(url: "https://github.com/swift-iso/swift-iso-9075.git", branch: "main"),
+        .package(url: "https://github.com/swift-atoms/swift-byte.git", branch: "main"),
+        .package(url: "https://github.com/swift-atoms/swift-time.git", branch: "main"),
+        .package(url: "https://github.com/swift-ietf/swift-rfc-4122.git", branch: "main"),
+        .package(url: "https://github.com/swift-atoms/swift-tagged.git", branch: "main"),
         .package(url: "https://github.com/pointfreeco/swift-case-paths.git", from: "1.7.2"),
         .package(url: "https://github.com/pointfreeco/swift-custom-dump.git", from: "1.3.3"),
-        .package(
-            url: "https://github.com/swift-compositions/swift-dependencies.git", branch: "main"),
-        .package(url: "https://github.com/pointfreeco/swift-macro-testing.git", from: "0.6.3"),
         .package(url: "https://github.com/pointfreeco/swift-snapshot-testing.git", from: "1.18.4"),
-        .package(url: "https://github.com/pointfreeco/swift-tagged.git", from: "0.10.0"),
-        .package(url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git", exact: "1.6.1"),
-        .package(url: "https://github.com/swiftlang/swift-syntax.git", "600.0.0"..<"603.0.0"),
-        // new snapshot contains fix for swift build and swift test linker issue.
-        //        .package(url: "https://github.com/swiftlang/swift-syntax.git", branch: "swift-6.2-DEVELOPMENT-SNAPSHOT-2025-10-09-a"),
-        .package(url: "https://github.com/vapor/postgres-nio.git", from: "1.22.0"),
+        .package(url: "https://github.com/pointfreeco/swift-macro-testing.git", from: "0.6.3"),
+        .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "603.0.0"),
     ],
     targets: [
+        .target(name: "SQL Inflection"),
         .target(
-            name: "StructuredQueriesCore",
+            name: "SQL",
             dependencies: [
-                "StructuredQueriesPostgresSupport",
-                .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
-                .product(
-                    name: "CasePaths",
-                    package: "swift-case-paths",
-                    condition: .when(traits: ["StructuredQueriesPostgresCasePaths"])
-                ),
-                .product(
-                    name: "Tagged",
-                    package: "swift-tagged",
-                    condition: .when(traits: ["StructuredQueriesPostgresTagged"])
-                ),
-            ],
-            exclude: ["Symbolic Links/README.md"]
-        ),
-        .target(
-            name: "StructuredQueriesPostgres",
-            dependencies: [
-                "StructuredQueriesCore",
-                "StructuredQueriesPostgresMacros",
+                "SQL Inflection",
+                .product(name: "ISO 9075 Foundation", package: "swift-iso-9075"),
+                .product(name: "Byte", package: "swift-byte"),
+                .product(name: "Time", package: "swift-time"),
+                .product(name: "RFC 4122", package: "swift-rfc-4122"),
+                .product(name: "Tagged", package: "swift-tagged", condition: .when(traits: ["Tagged"])),
+                .product(name: "CasePaths", package: "swift-case-paths", condition: .when(traits: ["CasePaths"])),
             ]
         ),
         .macro(
-            name: "StructuredQueriesPostgresMacros",
+            name: "SQL Macros Implementation",
             dependencies: [
+                "SQL Inflection",
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-            ],
-            exclude: ["Symbolic Links/README.md"]
-        ),
-        .target(
-            name: "StructuredQueriesPostgresTestSupport",
-            dependencies: [
-                "StructuredQueriesCore",
-                .product(name: "CustomDump", package: "swift-custom-dump"),
-                .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
-                .product(name: "Dependencies Test Support", package: "swift-dependencies"),
-                .product(
-                    name: "PostgresNIO",
-                    package: "postgres-nio",
-                    condition: .when(traits: ["StructuredQueriesPostgresSQLValidation"])
-                ),
             ]
         ),
         .target(
-            name: "StructuredQueriesPostgresSupport",
-            dependencies: []
+            name: "SQL Macros",
+            dependencies: [
+                "SQL",
+                .product(name: "ISO 9075 Foundation", package: "swift-iso-9075"),
+                "SQL Macros Implementation",
+                .product(name: "CasePaths", package: "swift-case-paths", condition: .when(traits: ["CasePaths"])),
+            ]
+        ),
+        .target(
+            name: "SQL Foundation Integration",
+            dependencies: [
+                "SQL",
+                .product(name: "ISO 9075 Foundation", package: "swift-iso-9075"),
+                .product(name: "Byte", package: "swift-byte"),
+                .product(name: "Time", package: "swift-time"),
+                .product(name: "RFC 4122", package: "swift-rfc-4122"),
+            ]
+        ),
+        .target(
+            name: "SQL Test Support",
+            dependencies: [
+                "SQL",
+                .product(name: "ISO 9075 Foundation", package: "swift-iso-9075"),
+                .product(name: "CustomDump", package: "swift-custom-dump"),
+                .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
+                .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
+            ]
         ),
         .testTarget(
-            name: "StructuredQueriesPostgresMacrosTests",
+            name: "SQL Tests",
+            dependencies: ["SQL", "SQL Macros", "SQL Test Support"]
+        ),
+        .testTarget(
+            name: "SQL Macros Tests",
             dependencies: [
-                "StructuredQueriesPostgres",
-                "StructuredQueriesPostgresMacros",
-                .product(name: "IssueReporting", package: "xctest-dynamic-overlay"),
+                "SQL Macros",
+                "SQL Macros Implementation",
                 .product(name: "MacroTesting", package: "swift-macro-testing"),
-                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-            ]
-        ),
-        .testTarget(
-            name: "StructuredQueriesPostgresTests",
-            dependencies: [
-                "StructuredQueriesPostgres",
-                "StructuredQueriesPostgresTestSupport",
-                .product(name: "CustomDump", package: "swift-custom-dump"),
-                .product(name: "Dependencies", package: "swift-dependencies"),
-                .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
-            ]
-        ),
-        .testTarget(
-            name: "READMEExamplesTests",
-            dependencies: [
-                "StructuredQueriesPostgres",
-                "StructuredQueriesPostgresTestSupport",
-                .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
+                .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
             ]
         ),
     ],
     swiftLanguageModes: [.v6]
 )
 
-let swiftSettings: [SwiftSetting] = [
-    .enableUpcomingFeature("MemberImportVisibility")
-]
+for target in package.targets where ![.system, .binary, .plugin].contains(target.type) {
+    let ecosystem: [SwiftSetting] = [
+        .strictMemorySafety(),
+        .enableUpcomingFeature("ExistentialAny"),
+        .enableUpcomingFeature("InternalImportsByDefault"),
+        .enableUpcomingFeature("MemberImportVisibility"),
+        .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+        .enableUpcomingFeature("InferIsolatedConformances"),
+    ]
 
-for index in package.targets.indices {
-    package.targets[index].swiftSettings = swiftSettings
+    target.swiftSettings = (target.swiftSettings ?? []) + ecosystem
 }
