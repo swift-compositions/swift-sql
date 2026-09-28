@@ -93,7 +93,7 @@ extension Update: Statement {
 
         var query: ISO_9075.Fragment = "UPDATE "
         if let conflictResolution {
-            query.append("OR \(conflictResolution) ")
+            query.append("\(conflictResolution) ")
         }
         if let schemaName = From.schemaName {
             query.append("\(quote: schemaName).")
@@ -111,5 +111,13 @@ extension Update: Statement {
             query.append("\(.newlineOrSpace)RETURNING \(returning.joined(separator: ", "))")
         }
         return query
+    }
+}
+
+extension Update {
+    public func _modifying(_ clause: ISO_9075.Fragment) -> Self {
+        var update = self
+        update.conflictResolution = clause
+        return update
     }
 }

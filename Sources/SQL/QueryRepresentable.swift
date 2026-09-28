@@ -12,6 +12,10 @@ public protocol QueryRepresentable<QueryOutput>: QueryDecodable {
 
     static func queryFragment(decoding queryFragment: ISO_9075.Fragment) -> ISO_9075.Fragment
 
+    static func _queryFragment(jsonEncoding queryFragment: ISO_9075.Fragment) -> ISO_9075.Fragment
+
+    static func _queryFragment(jsonDecoding queryFragment: ISO_9075.Fragment) -> ISO_9075.Fragment
+
     static var _valuesColumns: [ValuesElement.Column] { get }
 
     static var _valuesFieldOffsets: [Int] { get }
@@ -22,6 +26,14 @@ public protocol QueryRepresentable<QueryOutput>: QueryDecodable {
 }
 
 extension QueryRepresentable {
+    public static func _queryFragment(jsonEncoding queryFragment: ISO_9075.Fragment) -> ISO_9075.Fragment {
+        queryFragment
+    }
+
+    public static func _queryFragment(jsonDecoding queryFragment: ISO_9075.Fragment) -> ISO_9075.Fragment {
+        queryFragment
+    }
+
     @inlinable
     @inline(__always)
     public static func queryFragment(decoding queryFragment: ISO_9075.Fragment) -> ISO_9075.Fragment {
@@ -47,7 +59,11 @@ extension QueryRepresentable where Self: QueryDecodable, Self == QueryOutput {
 
 extension [Byte]: QueryRepresentable {}
 
-extension Bool: QueryRepresentable {}
+extension Bool: QueryRepresentable {
+    public static func _queryFragment(jsonEncoding queryFragment: ISO_9075.Fragment) -> ISO_9075.Fragment {
+        "\(ISO_9075.Keyword.jsonBooleanOpen)\(queryFragment)\(ISO_9075.Keyword.jsonBooleanClose)"
+    }
+}
 
 extension Double: QueryRepresentable {}
 

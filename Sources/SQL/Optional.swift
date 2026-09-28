@@ -81,6 +81,14 @@ extension Optional: QueryRepresentable where Wrapped: QueryRepresentable {
         Wrapped.queryFragment(decoding: queryFragment)
     }
 
+    public static func _queryFragment(jsonEncoding queryFragment: ISO_9075.Fragment) -> ISO_9075.Fragment {
+        Wrapped._queryFragment(jsonEncoding: queryFragment)
+    }
+
+    public static func _queryFragment(jsonDecoding queryFragment: ISO_9075.Fragment) -> ISO_9075.Fragment {
+        Wrapped._queryFragment(jsonDecoding: queryFragment)
+    }
+
 
 }
 

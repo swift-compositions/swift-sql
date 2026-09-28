@@ -64,3 +64,27 @@ struct Positional: ISO_9075.Dialect {
     }
 }
 
+
+@Suite struct `Statement modifiers` {
+    @Test func `an insert places its modifier after the verb`() {
+        let insert = Reminder.insert { Reminder.Draft(title: "Groceries") }._modifying("OR REPLACE")
+        #expect(Numbered().render(insert.query).sql.hasPrefix(#"INSERT OR REPLACE INTO "reminder""#))
+    }
+
+    @Test func `an update places its modifier after the verb`() {
+        let update = Reminder.update { $0.title = #bind("Taxes") }._modifying("OR IGNORE")
+        #expect(Numbered().render(update.query).sql.hasPrefix(#"UPDATE OR IGNORE "reminder""#))
+    }
+}
+
+@Suite struct `JSON encoding` {
+    @Test func `a boolean enters JSON through the dialect`() {
+        let fragment = Bool._queryFragment(jsonEncoding: "\(quote: "isCompleted")")
+        #expect(fragment.debugDescription == #""isCompleted""#)
+        #expect(Positional().render(fragment).sql == #""isCompleted""#)
+    }
+
+    @Test func `other values enter JSON unchanged`() {
+        #expect(String._queryFragment(jsonEncoding: "\(quote: "title")").debugDescription == #""title""#)
+    }
+}

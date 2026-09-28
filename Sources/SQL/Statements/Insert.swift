@@ -500,7 +500,7 @@ extension Insert: Statement {
     public var query: ISO_9075.Fragment {
         var query: ISO_9075.Fragment = "INSERT"
         if let conflictResolution {
-            query.append(" OR \(conflictResolution)")
+            query.append(" \(conflictResolution)")
         }
         query.append(" INTO ")
         if let schemaName = Into.schemaName {
@@ -776,5 +776,13 @@ extension Table {
             updateFilter: [],
             returning: []
         )
+    }
+}
+
+extension Insert {
+    public func _modifying(_ clause: ISO_9075.Fragment) -> Self {
+        var insert = self
+        insert.conflictResolution = clause
+        return insert
     }
 }

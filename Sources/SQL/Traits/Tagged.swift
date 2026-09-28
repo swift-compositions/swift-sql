@@ -39,6 +39,14 @@ where Tag: ~Copyable & ~Escapable, Underlying: QueryRepresentable {
         Underlying.queryFragment(decoding: queryFragment)
     }
 
+    public static func _queryFragment(jsonEncoding queryFragment: ISO_9075.Fragment) -> ISO_9075.Fragment {
+        Underlying._queryFragment(jsonEncoding: queryFragment)
+    }
+
+    public static func _queryFragment(jsonDecoding queryFragment: ISO_9075.Fragment) -> ISO_9075.Fragment {
+        Underlying._queryFragment(jsonDecoding: queryFragment)
+    }
+
 
 }
 #endif
