@@ -22,9 +22,9 @@ where Values.QueryOutput: Table {
 
     public var queryFragment: ISO_9075.Fragment { base.queryFragment }
 
-    public var _allColumns: [any TableColumnExpression] { base._allColumns }
+    public var _columns: [Column<Root>] { base._columns }
 
-    public var _writableColumns: [any WritableTableColumnExpression] { base._writableColumns }
+    public var _writableColumns: [Column<Root>] { base._writableColumns }
 
     public subscript<Member>(
         dynamicMember keyPath: KeyPath<

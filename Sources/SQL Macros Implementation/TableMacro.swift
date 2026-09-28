@@ -1396,7 +1396,7 @@ extension TableMacro: MemberMacro {
 
         let allColumnsAssignment =
             allColumnNames
-            .map { "allColumns.append(contentsOf: QueryValue.columns.\($0)._allColumns)\n" }
+            .map { "allColumns.append(contentsOf: QueryValue.columns.\($0)._columns)\n" }
             .joined()
         let writableColumnsAssignment =
             writableColumns
@@ -1438,13 +1438,12 @@ extension TableMacro: MemberMacro {
                 public \(nonisolated)struct TableColumns: \(schemaConformances, separator: ", ") {
                 public typealias QueryValue = \(type.trimmed)\(primaryKeyTypealias)
                 \(columnsProperties, separator: "\n")
-                \(raw: optimizeNoneWorkaround)public static var allColumns: \
-                [any \(moduleName)::TableColumnExpression] {
-                var allColumns: [any \(moduleName)::TableColumnExpression] = []
+                \(raw: optimizeNoneWorkaround)public static var allColumns: [\(moduleName)::Column<QueryValue>] {
+                var allColumns: [\(moduleName)::Column<QueryValue>] = []
                 \(raw: allColumnsAssignment)return allColumns
                 }
-                \(raw: optimizeNoneWorkaround)public static var writableColumns: [any \(moduleName)::WritableTableColumnExpression] {
-                var writableColumns: [any \(moduleName)::WritableTableColumnExpression] = []
+                \(raw: optimizeNoneWorkaround)public static var writableColumns: [\(moduleName)::Column<QueryValue>] {
+                var writableColumns: [\(moduleName)::Column<QueryValue>] = []
                 \(raw: writableColumnsAssignment)return writableColumns
                 }
                 public var queryFragment: ISO_9075_Foundation::ISO_9075.Fragment {

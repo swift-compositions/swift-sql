@@ -21,23 +21,9 @@ public import ISO_9075_Foundation
 
         public var queryFragment: ISO_9075.Fragment { base.queryFragment }
 
-        public var _allColumns: [any TableColumnExpression] { [self] }
+        public var _columns: [Column<Root>] { base._columns }
 
-        public var _writableColumns: [any WritableTableColumnExpression] { [self] }
-
-        public func _aliased<Name: AliasName>(
-            _ alias: Name.Type
-        ) -> any WritableTableColumnExpression<TableAlias<Root, Name>, Payload?> {
-            base._aliased(alias)
-        }
-    }
-
-    package protocol _CaseColumnExpression {
-        var _base: any WritableTableColumnExpression { get }
-    }
-
-    extension CaseColumn: _CaseColumnExpression {
-        package var _base: any WritableTableColumnExpression { base }
+        public var _writableColumns: [Column<Root>] { base._writableColumns }
     }
 
     @dynamicMemberLookup
@@ -62,9 +48,9 @@ public import ISO_9075_Foundation
 
         public var queryFragment: ISO_9075.Fragment { base.queryFragment }
 
-        public var _allColumns: [any TableColumnExpression] { base._allColumns }
+        public var _columns: [Column<Root>] { base._columns }
 
-        public var _writableColumns: [any WritableTableColumnExpression] { base._writableColumns }
+        public var _writableColumns: [Column<Root>] { base._writableColumns }
 
         public subscript<Member>(
             dynamicMember keyPath: KeyPath<
@@ -225,7 +211,7 @@ public import ISO_9075_Foundation
             set {
                 let group = Base.columns[keyPath: keyPath]
                 let writableNames = Set(group._writableColumns.map(\.name))
-                for (column, value) in zip(group._allColumns, newValue._allFragments)
+                for (column, value) in zip(group._columns, newValue._allFragments)
                 where writableNames.contains(column.name) {
                     updates.append((column.name, value))
                 }
@@ -326,7 +312,7 @@ public import ISO_9075_Foundation
             set {
                 let caseGroup = group[dynamicMember: keyPath]
                 let writableNames = Set(caseGroup._writableColumns.map(\.name))
-                for (column, value) in zip(caseGroup._allColumns, newValue._allFragments)
+                for (column, value) in zip(caseGroup._columns, newValue._allFragments)
                 where writableNames.contains(column.name) {
                     updates.append((column.name, value))
                 }

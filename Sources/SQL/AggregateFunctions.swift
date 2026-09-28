@@ -61,7 +61,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
 
 extension QueryExpression where Self == AggregateFunctionExpression<Int> {
     public static func count(
-        filter: (any QueryExpression<Bool>)? = nil
+        filter: (some QueryExpression<Bool>)? = Bool?.none
     ) -> Self {
         AggregateFunctionExpression("count", ["*"], filter: filter?.queryFragment)
     }

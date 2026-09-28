@@ -2,9 +2,9 @@ public import ISO_9075_Foundation
 
 @dynamicMemberLookup
 public protocol TableDefinition<QueryValue>: QueryExpression where QueryValue: Table {
-    static var allColumns: [any TableColumnExpression] { get }
+    static var allColumns: [Column<QueryValue>] { get }
 
-    static var writableColumns: [any WritableTableColumnExpression] { get }
+    static var writableColumns: [Column<QueryValue>] { get }
 }
 
 extension TableDefinition {

@@ -13,7 +13,7 @@ public struct Updates<Base: Table> {
     }
 
     mutating func set(
-        _ column: some TableColumnExpression,
+        _ column: Column<Base>,
         _ value: ISO_9075.Fragment
     ) {
         updates.append((column.name, value))
@@ -76,20 +76,9 @@ public struct Updates<Base: Table> {
         )
         get { fatalError() }
         set {
-            func open<R, V>(
-                _ column: some WritableTableColumnExpression<R, V>
-            ) -> ISO_9075.Fragment {
-                V(
-                    queryOutput: Value?(queryOutput: newValue)[
-                        keyPath: column.keyPath as! KeyPath<Value?, V.QueryOutput>
-                    ]
-                )
-                .queryFragment
-            }
+            let row = Value?(queryOutput: newValue)
             updates.append(
-                contentsOf: Optional<Value>.TableColumns.writableColumns.map { column in
-                    (column.name, open(column))
-                }
+                contentsOf: Optional<Value>.TableColumns.writableColumns.map { ($0.name, $0.render(row)) }
             )
         }
     }
@@ -107,20 +96,9 @@ public struct Updates<Base: Table> {
         )
         get { fatalError() }
         set {
-            func open<Root, V>(
-                _ column: some WritableTableColumnExpression<Root, V>
-            ) -> ISO_9075.Fragment {
-                V(
-                    queryOutput: Value(queryOutput: newValue)[
-                        keyPath: column.keyPath as! KeyPath<Value, V.QueryOutput>
-                    ]
-                )
-                .queryFragment
-            }
+            let row = Value(queryOutput: newValue)
             updates.append(
-                contentsOf: Value.TableColumns.writableColumns.map { column in
-                    (column.name, open(column))
-                }
+                contentsOf: Value.TableColumns.writableColumns.map { ($0.name, $0.render(row)) }
             )
         }
     }
@@ -202,20 +180,9 @@ public struct UpdatesGroup<Base: Table, Values: Table> where Values.QueryOutput:
         )
         get { fatalError() }
         set {
-            func open<R, V>(
-                _ column: some WritableTableColumnExpression<R, V>
-            ) -> ISO_9075.Fragment {
-                V(
-                    queryOutput: Member(queryOutput: newValue)[
-                        keyPath: column.keyPath as! KeyPath<Member, V.QueryOutput>
-                    ]
-                )
-                .queryFragment
-            }
+            let row = Member(queryOutput: newValue)
             updates.append(
-                contentsOf: Member.TableColumns.writableColumns.map { column in
-                    (column.name, open(column))
-                }
+                contentsOf: Member.TableColumns.writableColumns.map { ($0.name, $0.render(row)) }
             )
         }
     }

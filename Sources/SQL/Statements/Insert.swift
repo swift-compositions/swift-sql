@@ -431,7 +431,7 @@ extension PrimaryKeyedTable {
                     Excluded.writableColumns
                 )
                 where !columns.primaryKey._names.contains(column.name) {
-                    updates.set(column, excluded.queryFragment)
+                    updates.updates.append((column.name, excluded.queryFragment))
                 }
             }
         )
@@ -441,7 +441,11 @@ extension PrimaryKeyedTable {
 private enum InsertValues {
     case `default`
     case values([[ISO_9075.Fragment]])
-    case select(any PartialSelectStatement)
+    case selection(ISO_9075.Fragment, hasUpsertParsingAmbiguity: Bool)
+
+    static func select(_ statement: some PartialSelectStatement) -> Self {
+        .selection(statement.query, hasUpsertParsingAmbiguity: statement._hasUpsertParsingAmbiguity)
+    }
 }
 
 public struct Insert<Into: Table, Returning> {
@@ -515,14 +519,11 @@ extension Insert: Statement {
         case .default:
             query.append("\(.newlineOrSpace)DEFAULT VALUES")
 
-        case .select(let statement):
-            let select = statement.query
+        case .selection(let select, let hasUpsertParsingAmbiguity):
             guard !select.isEmpty else { return "" }
             query.append("\(.newlineOrSpace)\(select)")
-            if updates != nil,
-                (statement as? any HasUpsertParsingAmbiguity)?.hasUpsertParsingAmbiguity == true
-            {
-                query.append("\(.newlineOrSpace)WHERE 1")
+            if updates != nil, hasUpsertParsingAmbiguity {
+                query.append("\(.newlineOrSpace)WHERE TRUE")
             }
 
         case .values(let values):
@@ -743,18 +744,24 @@ public enum InsertValuesBuilder<Value> {
 }
 
 private func _writableRows<T: Table>(_ values: [T]) -> [[ISO_9075.Fragment]] {
-    values.map { value in
-        T.TableColumns.writableColumns.map { column in
-            func open<Root, Member>(
-                _ column: some WritableTableColumnExpression<Root, Member>
-            ) -> ISO_9075.Fragment {
-                Member(queryOutput: (value as! Root)[keyPath: column.keyPath]).queryFragment
-            }
-            return open(column)
-        }
-    }
+    values.map { value in T.TableColumns.writableColumns.map { $0.render(value) } }
 }
 
 public struct _ExcludedName: AliasName {
     public static var aliasName: String { "excluded" }
+}
+
+extension Table {
+    package static func _insert(columnNames: [String], rows: [[ISO_9075.Fragment]]) -> InsertOf<Self> {
+        Insert(
+            conflictResolution: nil,
+            columnNames: columnNames,
+            conflictTargetColumnNames: [],
+            conflictTargetFilter: [],
+            values: .values(rows),
+            updates: nil,
+            updateFilter: [],
+            returning: []
+        )
+    }
 }

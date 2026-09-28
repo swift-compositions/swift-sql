@@ -15,13 +15,7 @@ extension PrimaryKeyedTable {
         update { updates in
             for column in TableColumns.writableColumns
             where !columns.primaryKey._names.contains(column.name) {
-                func open<Root, Value>(_ column: some WritableTableColumnExpression<Root, Value>) {
-                    updates.set(
-                        column,
-                        Value(queryOutput: (row as! Root)[keyPath: column.keyPath]).queryFragment
-                    )
-                }
-                open(column)
+                updates.set(column, column.render(row))
             }
         }
         .where {

@@ -36,22 +36,17 @@ extension SelectStatement {
     }
 }
 
-protocol HasUpsertParsingAmbiguity {
-    var hasUpsertParsingAmbiguity: Bool { get }
-}
-
-extension HasUpsertParsingAmbiguity where Self: SelectStatement {
-    var hasUpsertParsingAmbiguity: Bool {
+extension SelectStatement {
+    public var _hasUpsertParsingAmbiguity: Bool {
         _selectClauses.hasUpsertParsingAmbiguity
     }
 }
 
-extension Select: HasUpsertParsingAmbiguity {
-    var hasUpsertParsingAmbiguity: Bool {
+extension Select {
+    public var _hasUpsertParsingAmbiguity: Bool {
         _rendersFromClause && clauses.hasUpsertParsingAmbiguity
     }
 }
-extension Where: HasUpsertParsingAmbiguity {}
 
 extension _SelectClauses {
     var hasUpsertParsingAmbiguity: Bool {

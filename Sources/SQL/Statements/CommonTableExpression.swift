@@ -16,8 +16,7 @@ public struct With<Base: Statement>: Statement, Sendable {
         self.ctes = ctes()
         let statement = statement()
         self.statement = statement.query
-        hasUpsertParsingAmbiguity =
-            (statement as? any HasUpsertParsingAmbiguity)?.hasUpsertParsingAmbiguity ?? false
+        hasUpsertParsingAmbiguity = statement._hasUpsertParsingAmbiguity
     }
 
     public init<S: SelectStatement, each J: Table>(
@@ -32,8 +31,7 @@ public struct With<Base: Statement>: Statement, Sendable {
         self.ctes = ctes()
         let statement = statement()
         self.statement = statement.query
-        hasUpsertParsingAmbiguity =
-            (statement as? any HasUpsertParsingAmbiguity)?.hasUpsertParsingAmbiguity ?? false
+        hasUpsertParsingAmbiguity = statement._hasUpsertParsingAmbiguity
     }
 
     @_disfavoredOverload
@@ -49,9 +47,10 @@ public struct With<Base: Statement>: Statement, Sendable {
         self.ctes = ctes()
         let statement = statement()
         self.statement = statement.query
-        hasUpsertParsingAmbiguity =
-            (statement as? any HasUpsertParsingAmbiguity)?.hasUpsertParsingAmbiguity ?? false
+        hasUpsertParsingAmbiguity = statement._hasUpsertParsingAmbiguity
     }
+
+    public var _hasUpsertParsingAmbiguity: Bool { hasUpsertParsingAmbiguity }
 
     public var query: ISO_9075.Fragment {
         guard !statement.isEmpty else { return "" }
@@ -67,7 +66,6 @@ public struct With<Base: Statement>: Statement, Sendable {
 
 extension With: PartialSelectStatement where Base: PartialSelectStatement {}
 
-extension With: HasUpsertParsingAmbiguity {}
 
 extension ISO_9075.Fragment {
     fileprivate var presence: Self? { isEmpty ? nil : self }

@@ -42,9 +42,8 @@ private struct CompoundSelect<QueryValue>: PartialSelectStatement {
         self.lhs = lhs.query
         self.operator = `operator`.queryFragment
         self.rhs = rhs.query
-        let tail: any PartialSelectStatement = self.rhs.isEmpty ? lhs : rhs
         hasUpsertParsingAmbiguity =
-            (tail as? any HasUpsertParsingAmbiguity)?.hasUpsertParsingAmbiguity ?? false
+            self.rhs.isEmpty ? lhs._hasUpsertParsingAmbiguity : rhs._hasUpsertParsingAmbiguity
     }
 
     var query: ISO_9075.Fragment {
@@ -54,4 +53,6 @@ private struct CompoundSelect<QueryValue>: PartialSelectStatement {
     }
 }
 
-extension CompoundSelect: HasUpsertParsingAmbiguity {}
+extension CompoundSelect {
+    var _hasUpsertParsingAmbiguity: Bool { hasUpsertParsingAmbiguity }
+}

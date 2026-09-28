@@ -1,12 +1,14 @@
 public import ISO_9075_Foundation
 
 extension Never: Table {
+    public typealias QueryValue = Never
+
     public struct TableColumns: TableDefinition {
         public typealias QueryValue = Never
 
-        public static var allColumns: [any TableColumnExpression] { [] }
+        public static var allColumns: [Column<Never>] { [] }
 
-        public static var writableColumns: [any WritableTableColumnExpression] { [] }
+        public static var writableColumns: [Column<Never>] { [] }
     }
 
     public struct Selection: TableExpression {

@@ -20,9 +20,6 @@ public struct ValuesElement: Sendable {
             self.decoding = decoding
         }
 
-        fileprivate init<R, V>(_ column: some TableColumnExpression<R, V>) {
-            self.init(name: column.name, decoding: { V.queryFragment(decoding: $0) })
-        }
     }
 
     package static func elements<each V: QueryRepresentable>(for types: repeat (each V).Type) -> [ValuesElement] {
@@ -72,23 +69,15 @@ extension [ValuesElement] {
 
 extension Table {
     public static var _valuesColumns: [ValuesElement.Column] {
-        TableColumns.allColumns.map { ValuesElement.Column($0) }
+        TableColumns.allColumns.map { ValuesElement.Column(name: $0.name, decoding: $0.decoding) }
     }
 
     public static var _valuesFieldOffsets: [Int] {
-        TableColumns.allColumns.map { column in
-            func offset<C: TableColumnExpression>(_ column: C) -> Int {
-                MemoryLayout<C.Root>.offset(of: column.keyPath) ?? 0
-            }
-            return offset(column)
-        }
+        TableColumns.allColumns.map { $0.fieldOffset ?? 0 }
     }
 
     public static func _valuesColumnIndex(of keyPath: AnyKeyPath) -> Int? {
-        TableColumns.allColumns.firstIndex { column in
-            func open<R, V>(_ column: some TableColumnExpression<R, V>) -> AnyKeyPath { column.keyPath }
-            return open(column) == keyPath
-        }
+        TableColumns.allColumns.firstIndex { $0.keyPath == keyPath }
     }
 
     package static var valuesElement: ValuesElement {
@@ -96,6 +85,9 @@ extension Table {
     }
 
     package static var writableValuesElement: ValuesElement {
-        ValuesElement(offset: 0, columns: TableColumns.writableColumns.map { ValuesElement.Column($0) })
+        ValuesElement(
+            offset: 0,
+            columns: TableColumns.writableColumns.map { ValuesElement.Column(name: $0.name, decoding: $0.decoding) }
+        )
     }
 }

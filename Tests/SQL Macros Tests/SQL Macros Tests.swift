@@ -25,14 +25,14 @@ struct `Table macro` {
                 @SQL_Macros::_ColumnDefinition public var id = SQL::_TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
                 @SQL_Macros::_PrimaryKeyDefault public var primaryKey = SQL::_TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
                 @_optimize(none)
-                public static var allColumns: [any SQL::TableColumnExpression] {
-                  var allColumns: [any SQL::TableColumnExpression] = []
-                  allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
+                public static var allColumns: [SQL::Column<QueryValue>] {
+                  var allColumns: [SQL::Column<QueryValue>] = []
+                  allColumns.append(contentsOf: QueryValue.columns.id._columns)
                   return allColumns
                 }
                 @_optimize(none)
-                public static var writableColumns: [any SQL::WritableTableColumnExpression] {
-                  var writableColumns: [any SQL::WritableTableColumnExpression] = []
+                public static var writableColumns: [SQL::Column<QueryValue>] {
+                  var writableColumns: [SQL::Column<QueryValue>] = []
                   writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
                   return writableColumns
                 }

@@ -1,6 +1,6 @@
 public import ISO_9075_Foundation
 
-public struct Values<QueryValue>: PartialSelectStatement {
+public struct Values<QueryValue>: PartialSelectStatement, _SelectSource {
   public typealias From = Never
 
   private let rows: [[ISO_9075.Fragment]]

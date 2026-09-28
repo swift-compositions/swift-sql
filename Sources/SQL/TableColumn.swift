@@ -15,9 +15,6 @@ public protocol TableColumnExpression<Root, Value>: _TableColumnExpression
 where Value: QueryBindable {
     var name: String { get }
 
-    func _aliased<Name: AliasName>(
-        _ alias: Name.Type
-    ) -> any TableColumnExpression<TableAlias<Root, Name>, Value>
 }
 
 extension TableColumnExpression {
@@ -28,19 +25,7 @@ extension TableColumnExpression {
     }
 }
 
-public protocol WritableTableColumnExpression<Root, Value>: TableColumnExpression {
-    func _aliased<Name: AliasName>(
-        _ alias: Name.Type
-    ) -> any WritableTableColumnExpression<TableAlias<Root, Name>, Value>
-}
-
-extension WritableTableColumnExpression {
-    public func _aliased<Name: AliasName>(
-        _ alias: Name.Type
-    ) -> any TableColumnExpression<TableAlias<Root, Name>, Value> {
-        _aliased(alias)
-    }
-}
+public protocol WritableTableColumnExpression<Root, Value>: TableColumnExpression {}
 
 public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
     WritableTableColumnExpression
@@ -86,18 +71,11 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
         return _isSelecting ? Value.queryFragment(decoding: column) : column
     }
 
-    public func _aliased<Name>(
-        _ alias: Name.Type
-    ) -> any WritableTableColumnExpression<TableAlias<Root, Name>, Value> {
-        TableColumn<TableAlias<Root, Name>, Value>(
-            name,
-            keyPath: \.[member: \Value.self, column: keyPath]
-        )
+    public var _columns: [Column<Root>] {
+        [Column(name: name, isWritable: true, keyPath: keyPath, as: Value.self)]
     }
 
-    public var _allColumns: [any TableColumnExpression] { [self] }
-
-    public var _writableColumns: [any WritableTableColumnExpression] { [self] }
+    public var _writableColumns: [Column<Root>] { _columns }
 }
 
 public enum _TableColumn<Root: Table, Value: QueryRepresentable> {
@@ -199,14 +177,7 @@ public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBind
         return _isSelecting ? Value.queryFragment(decoding: column) : column
     }
 
-    public func _aliased<Name>(
-        _ alias: Name.Type
-    ) -> any TableColumnExpression<TableAlias<Root, Name>, Value> {
-        TableColumn<TableAlias<Root, Name>, Value>(
-            name,
-            keyPath: \.[member: \Value.self, column: keyPath]
-        )
+    public var _columns: [Column<Root>] {
+        [Column(name: name, isWritable: false, keyPath: keyPath, as: Value.self)]
     }
-
-    public var _allColumns: [any TableColumnExpression] { [self] }
 }

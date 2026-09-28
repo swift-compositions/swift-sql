@@ -1,83 +1,99 @@
-public struct Seeds: Sequence {
-    let seeds: [any Table]
+public import ISO_9075_Foundation
 
-    public init(@SeedsBuilder _ build: () -> [any Table]) {
+public struct Seeds: Sequence {
+    let seeds: [Seed]
+
+    public init(@SeedsBuilder _ build: () -> [Seed]) {
         self.seeds = build()
     }
 
     public func makeIterator() -> Iterator {
-        Iterator(seeds: seeds)
+        Iterator(seeds: seeds[...])
     }
 
     public struct Iterator: IteratorProtocol {
-        var seeds: [any Table]
+        var seeds: ArraySlice<Seed>
 
         public mutating func next() -> SQLQueryExpression<Void>? {
             guard let first = seeds.first else { return nil }
+            let batch = seeds.prefix { $0.table == first.table }
+            seeds.removeFirst(batch.count)
+            return first.insert(batch.map(\.row))
+        }
+    }
+}
 
-            let firstType = type(of: first)
+public struct Seed {
+    let table: ObjectIdentifier
+    let row: [ISO_9075.Fragment]
+    let insert: ([[ISO_9075.Fragment]]) -> SQLQueryExpression<Void>
 
-            if let firstType = firstType as? any TableDraft.Type {
-                func insertBatch<T: TableDraft>(_: T.Type) -> SQLQueryExpression<Void> {
-                    let batch = Array(seeds.lazy.prefix { $0 is T }.compactMap { $0 as? T })
-                    defer { seeds.removeFirst(batch.count) }
-                    return SQLQueryExpression(T.SourceTable.insert { batch })
-                }
+    init<T: Table>(_ row: T) {
+        self.table = ObjectIdentifier(T.self)
+        self.row = T.TableColumns.writableColumns.map { $0.render(row) }
+        self.insert = { rows in
+            SQLQueryExpression(T._insert(columnNames: T.TableColumns.writableColumns.map(\.name), rows: rows))
+        }
+    }
 
-                return insertBatch(firstType)
-            } else {
-                func insertBatch<T: Table>(_: T.Type) -> SQLQueryExpression<Void> {
-                    let batch = Array(seeds.lazy.prefix { $0 is T }.compactMap { $0 as? T })
-                    defer { seeds.removeFirst(batch.count) }
-                    return SQLQueryExpression(T.insert { batch })
-                }
-
-                return insertBatch(firstType)
-            }
+    init<T: TableDraft>(draft row: T) {
+        self.table = ObjectIdentifier(T.self)
+        self.row = T.TableColumns.writableColumns.map { $0.render(row) }
+        self.insert = { rows in
+            SQLQueryExpression(
+                T.SourceTable._insert(columnNames: T.TableColumns.writableColumns.map(\.name), rows: rows)
+            )
         }
     }
 }
 
 @resultBuilder
 public enum SeedsBuilder {
-    public static func buildArray(_ components: [[any Table]]) -> [any Table] {
+    public static func buildArray(_ components: [[Seed]]) -> [Seed] {
         components.flatMap(\.self)
     }
 
-    public static func buildBlock(_ components: [any Table]) -> [any Table] {
+    public static func buildBlock(_ components: [Seed]) -> [Seed] {
         components
     }
 
-    public static func buildEither(first component: [any Table]) -> [any Table] {
+    public static func buildEither(first component: [Seed]) -> [Seed] {
         component
     }
 
-    public static func buildEither(second component: [any Table]) -> [any Table] {
+    public static func buildEither(second component: [Seed]) -> [Seed] {
         component
     }
 
-    public static func buildExpression(_ expression: some Table) -> [any Table] {
-        [expression]
+    public static func buildExpression<T: Table>(_ expression: T) -> [Seed] {
+        [Seed(expression)]
     }
 
-    public static func buildExpression(_ expression: [any Table]) -> [any Table] {
-        expression
+    public static func buildExpression<T: TableDraft>(_ expression: T) -> [Seed] {
+        [Seed(draft: expression)]
     }
 
-    public static func buildLimitedAvailability(_ component: [any Table]) -> [any Table] {
+    public static func buildExpression<T: Table>(_ expression: [T]) -> [Seed] {
+        expression.map(Seed.init)
+    }
+
+    public static func buildExpression<T: TableDraft>(_ expression: [T]) -> [Seed] {
+        expression.map(Seed.init(draft:))
+    }
+
+    public static func buildLimitedAvailability(_ component: [Seed]) -> [Seed] {
         component
     }
 
-    public static func buildOptional(_ component: [any Table]?) -> [any Table] {
+    public static func buildOptional(_ component: [Seed]?) -> [Seed] {
         component ?? []
     }
 
-    public static func buildPartialBlock(first: [any Table]) -> [any Table] {
+    public static func buildPartialBlock(first: [Seed]) -> [Seed] {
         first
     }
 
-    public static func buildPartialBlock(accumulated: [any Table], next: [any Table]) -> [any Table]
-    {
+    public static func buildPartialBlock(accumulated: [Seed], next: [Seed]) -> [Seed] {
         accumulated + next
     }
 }

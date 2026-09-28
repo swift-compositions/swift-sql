@@ -169,7 +169,7 @@ extension Table {
         Where().order(by: ordering)
     }
 
-    public static func limit(_ maxLength: (any QueryExpression<Int>)?) -> SelectOf<Self> {
+    public static func limit(_ maxLength: (some QueryExpression<Int>)?) -> SelectOf<Self> {
         Where().limit(maxLength)
     }
 
@@ -180,7 +180,7 @@ extension Table {
         Where().limit(maxLength)
     }
 
-    public static func offset(_ offset: (any QueryExpression<Int>)?) -> SelectOf<Self> {
+    public static func offset(_ offset: (some QueryExpression<Int>)?) -> SelectOf<Self> {
         Where().offset(offset)
     }
 
@@ -191,8 +191,12 @@ extension Table {
         Where().offset(offset)
     }
 
-    public static func count(
-        filter: ((TableColumns) -> any QueryExpression<Bool>)? = nil
+    public static func count() -> Select<Int, Self, ()> {
+        Where().count()
+    }
+
+    public static func count<Filter: QueryExpression<Bool>>(
+        filter: (TableColumns) -> Filter
     ) -> Select<Int, Self, ()> {
         Where().count(filter: filter)
     }
@@ -213,7 +217,7 @@ public struct _SelectClauses: Sendable {
 }
 
     @dynamicMemberLookup
-public struct Select<Columns, From, Joins>: Sendable {
+public struct Select<Columns, From: _SelectSource, Joins>: Sendable {
     @CopyOnWrite var clauses = _SelectClauses()
 
     fileprivate var isEmpty: Bool {
@@ -302,7 +306,7 @@ public struct Select<Columns, From, Joins>: Sendable {
 }
 
 @dynamicMemberLookup
-public struct ValuesColumns<Value>: QueryExpression, Sendable {
+public struct ValuesColumns<Value>: QueryExpression, _SelectSource, Sendable {
     public typealias QueryValue = Value
 
     let columns: [ISO_9075.Fragment]
@@ -452,12 +456,12 @@ extension Select {
         return select
     }
 
-    public func limit<each J: Table>(_ maxLength: (any QueryExpression<Int>)?) -> Self
+    public func limit<each J: Table>(_ maxLength: (some QueryExpression<Int>)?) -> Self
     where Joins == (repeat each J) {
         _limit(maxLength?.queryFragment)
     }
 
-    public func offset<each J: Table>(_ offset: (any QueryExpression<Int>)?) -> Self
+    public func offset<each J: Table>(_ offset: (some QueryExpression<Int>)?) -> Self
     where Joins == (repeat each J) {
         _offset(offset?.queryFragment)
     }
@@ -607,7 +611,7 @@ extension Select where From: Table {
 
     @_documentation(visibility: private)
     public func join<each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table>(
-        _ other: any SelectStatement<(repeat each C2), F, ()>,
+        _ other: some SelectStatement<(repeat each C2), F, ()>,
         on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
     ) -> Select<(repeat each C1, repeat each C2), From, F>
     where Columns == (repeat each C1), Joins == () {
@@ -639,7 +643,7 @@ extension Select where From: Table {
         each J1: Table,
         each J2: Table
     >(
-        _ other: any SelectStatement<(repeat each C2), F, (repeat each J2)>,
+        _ other: some SelectStatement<(repeat each C2), F, (repeat each J2)>,
         on constraint: (
             (
                 From.TableColumns, repeat (each J1).TableColumns, F.TableColumns,
@@ -671,6 +675,33 @@ extension Select where From: Table {
         )
     }
 
+    package func _join<each C: QueryRepresentable, F: Table, each J: Table>(
+        _ other: Select<(repeat each C), F, (repeat each J)>,
+        constraint: SQLQueryExpression<Bool>
+    ) -> Select<(repeat each C), From, (F, repeat each J)>
+    where Columns == (), Joins == () {
+        Select<(repeat each C), From, (F, repeat each J)>(
+            isEmpty: isEmpty || other.isEmpty,
+            distinct: distinct || other.distinct,
+            columns: columns + other.columns,
+            from: from,
+            joins: joins
+                + [
+                    _JoinClause(
+                        operator: nil,
+                        tableReference: other._tableReference,
+                        table: F.self,
+                        constraint: constraint
+                    )
+                ] + other.joins,
+            where: `where` + other.where,
+            group: group + other.group,
+            having: having + other.having,
+            order: order + other.order,
+            limit: other.limit ?? limit
+        )
+    }
+
     @_documentation(visibility: private)
     @_disfavoredOverload
     public func join<
@@ -679,7 +710,7 @@ extension Select where From: Table {
         F: Table,
         each J: Table
     >(
-        _ other: any SelectStatement<(repeat each C2), F, ()>,
+        _ other: some SelectStatement<(repeat each C2), F, ()>,
         on constraint: (
             (From.TableColumns, repeat (each J).TableColumns, F.TableColumns)
         ) -> some QueryExpression<Bool>
@@ -711,7 +742,7 @@ extension Select where From: Table {
     @_disfavoredOverload
     @_documentation(visibility: private)
     public func join<F: Table, each J: Table>(
-        _ other: any SelectStatement<(), F, (repeat each J)>,
+        _ other: some SelectStatement<(), F, (repeat each J)>,
         on constraint: (
             (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
         ) -> some QueryExpression<Bool>
@@ -742,7 +773,7 @@ extension Select where From: Table {
     @_disfavoredOverload
     @_documentation(visibility: private)
     public func join<F: Table>(
-        _ other: any SelectStatementOf<F>,
+        _ other: some SelectStatementOf<F>,
         on constraint: (
             (From.TableColumns, Joins.TableColumns, F.TableColumns)
         ) -> some QueryExpression<Bool>
@@ -772,7 +803,7 @@ extension Select where From: Table {
 
     @_documentation(visibility: private)
     public func leftJoin<each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table>(
-        _ other: any SelectStatement<(repeat each C2), F, ()>,
+        _ other: some SelectStatement<(repeat each C2), F, ()>,
         on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
     ) -> Select<(repeat each C1, repeat (each C2)._Optionalized), From, F._Optionalized>
     where Columns == (repeat each C1), Joins == () {
@@ -804,7 +835,7 @@ extension Select where From: Table {
         each J1: Table,
         each J2: Table
     >(
-        _ other: any SelectStatement<(repeat each C2), F, (repeat each J2)>,
+        _ other: some SelectStatement<(repeat each C2), F, (repeat each J2)>,
         on constraint: (
             (
                 From.TableColumns, repeat (each J1).TableColumns, F.TableColumns,
@@ -852,7 +883,7 @@ extension Select where From: Table {
         F: Table,
         each J: Table
     >(
-        _ other: any SelectStatement<(repeat each C2), F, ()>,
+        _ other: some SelectStatement<(repeat each C2), F, ()>,
         on constraint: (
             (From.TableColumns, repeat (each J).TableColumns, F.TableColumns)
         ) -> some QueryExpression<Bool>
@@ -892,7 +923,7 @@ extension Select where From: Table {
     @_disfavoredOverload
     @_documentation(visibility: private)
     public func leftJoin<F: Table, each J: Table>(
-        _ other: any SelectStatement<(), F, (repeat each J)>,
+        _ other: some SelectStatement<(), F, (repeat each J)>,
         on constraint: (
             (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
         ) -> some QueryExpression<Bool>
@@ -924,7 +955,7 @@ extension Select where From: Table {
     @_disfavoredOverload
     @_documentation(visibility: private)
     public func leftJoin<F: Table>(
-        _ other: any SelectStatementOf<F>,
+        _ other: some SelectStatementOf<F>,
         on constraint: (
             (From.TableColumns, Joins.TableColumns, F.TableColumns)
         ) -> some QueryExpression<Bool>
@@ -955,7 +986,7 @@ extension Select where From: Table {
 
     @_documentation(visibility: private)
     public func rightJoin<each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table>(
-        _ other: any SelectStatement<(repeat each C2), F, ()>,
+        _ other: some SelectStatement<(repeat each C2), F, ()>,
         on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
     ) -> Select<(repeat each C1, repeat each C2), From._Optionalized, F>
     where Columns == (repeat each C1), Joins == () {
@@ -987,7 +1018,7 @@ extension Select where From: Table {
         each J1: Table,
         each J2: Table
     >(
-        _ other: any SelectStatement<(repeat each C2), F, (repeat each J2)>,
+        _ other: some SelectStatement<(repeat each C2), F, (repeat each J2)>,
         on constraint: (
             (
                 From.TableColumns, repeat (each J1).TableColumns, F.TableColumns,
@@ -1035,7 +1066,7 @@ extension Select where From: Table {
         F: Table,
         each J: Table
     >(
-        _ other: any SelectStatement<(repeat each C2), F, ()>,
+        _ other: some SelectStatement<(repeat each C2), F, ()>,
         on constraint: (
             (From.TableColumns, repeat (each J).TableColumns, F.TableColumns)
         ) -> some QueryExpression<Bool>
@@ -1075,7 +1106,7 @@ extension Select where From: Table {
     @_disfavoredOverload
     @_documentation(visibility: private)
     public func rightJoin<F: Table, each J: Table>(
-        _ other: any SelectStatement<(), F, (repeat each J)>,
+        _ other: some SelectStatement<(), F, (repeat each J)>,
         on constraint: (
             (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
         ) -> some QueryExpression<Bool>
@@ -1107,7 +1138,7 @@ extension Select where From: Table {
     @_disfavoredOverload
     @_documentation(visibility: private)
     public func rightJoin<F: Table>(
-        _ other: any SelectStatementOf<F>,
+        _ other: some SelectStatementOf<F>,
         on constraint: (
             (From.TableColumns, Joins.TableColumns, F.TableColumns)
         ) -> some QueryExpression<Bool>
@@ -1138,7 +1169,7 @@ extension Select where From: Table {
 
     @_documentation(visibility: private)
     public func fullJoin<each C1: QueryRepresentable, each C2: QueryRepresentable, F: Table>(
-        _ other: any SelectStatement<(repeat each C2), F, ()>,
+        _ other: some SelectStatement<(repeat each C2), F, ()>,
         on constraint: ((From.TableColumns, F.TableColumns)) -> some QueryExpression<Bool>
     ) -> Select<
         (repeat (each C1)._Optionalized, repeat (each C2)._Optionalized), From._Optionalized,
@@ -1176,7 +1207,7 @@ extension Select where From: Table {
         each J1: Table,
         each J2: Table
     >(
-        _ other: any SelectStatement<(repeat each C2), F, (repeat each J2)>,
+        _ other: some SelectStatement<(repeat each C2), F, (repeat each J2)>,
         on constraint: (
             (
                 From.TableColumns, repeat (each J1).TableColumns, F.TableColumns,
@@ -1224,7 +1255,7 @@ extension Select where From: Table {
         F: Table,
         each J: Table
     >(
-        _ other: any SelectStatement<(repeat each C2), F, ()>,
+        _ other: some SelectStatement<(repeat each C2), F, ()>,
         on constraint: (
             (From.TableColumns, repeat (each J).TableColumns, F.TableColumns)
         ) -> some QueryExpression<Bool>
@@ -1264,7 +1295,7 @@ extension Select where From: Table {
     @_disfavoredOverload
     @_documentation(visibility: private)
     public func fullJoin<F: Table, each J: Table>(
-        _ other: any SelectStatement<(), F, (repeat each J)>,
+        _ other: some SelectStatement<(), F, (repeat each J)>,
         on constraint: (
             (From.TableColumns, F.TableColumns, repeat (each J).TableColumns)
         ) -> some QueryExpression<Bool>
@@ -1298,7 +1329,7 @@ extension Select where From: Table {
     @_disfavoredOverload
     @_documentation(visibility: private)
     public func fullJoin<F: Table>(
-        _ other: any SelectStatementOf<F>,
+        _ other: some SelectStatementOf<F>,
         on constraint: (
             (From.TableColumns, Joins.TableColumns, F.TableColumns)
         ) -> some QueryExpression<Bool>
@@ -1565,41 +1596,63 @@ extension Select where From: Table {
         _offset(offset(From.columns, Joins.columns).last)
     }
 
-    public func count<each J: Table>(
-        filter: ((From.TableColumns, repeat (each J).TableColumns) -> any QueryExpression<Bool>)? =
-            nil
+    public func count<each J: Table>() -> Select<Int, From, Joins>
+    where Columns == (), Joins == (repeat each J) {
+        select { _ in .count() }
+    }
+
+    public func count<each J: Table, Filter: QueryExpression<Bool>>(
+        filter: (From.TableColumns, repeat (each J).TableColumns) -> Filter
     ) -> Select<Int, From, Joins>
     where Columns == (), Joins == (repeat each J) {
-        let filter = filter?(From.columns, repeat (each J).columns)
+        let filter = filter(From.columns, repeat (each J).columns)
         return select { _ in .count(filter: filter) }
     }
 
-    public func count<each C: QueryRepresentable, each J: Table>(
-        filter: ((From.TableColumns, repeat (each J).TableColumns) -> any QueryExpression<Bool>)? =
-            nil
+    public func count<each C: QueryRepresentable, each J: Table>() -> Select<
+        (repeat each C, Int), From, (repeat each J)
+    >
+    where Columns == (repeat each C), Joins == (repeat each J) {
+        select { _ in .count() }
+    }
+
+    public func count<each C: QueryRepresentable, each J: Table, Filter: QueryExpression<Bool>>(
+        filter: (From.TableColumns, repeat (each J).TableColumns) -> Filter
     ) -> Select<
         (repeat each C, Int), From, (repeat each J)
     >
     where Columns == (repeat each C), Joins == (repeat each J) {
-        let filter = filter?(From.columns, repeat (each J).columns)
+        let filter = filter(From.columns, repeat (each J).columns)
         return select { _ in .count(filter: filter) }
     }
 
-    public func count(
-        filter: ((From.TableColumns, Joins.TableColumns) -> any QueryExpression<Bool>)? = nil
+    public func count() -> Select<Int, From, Joins>
+    where Columns == (), Joins: Table {
+        select { _, _ in .count() }
+    }
+
+    public func count<Filter: QueryExpression<Bool>>(
+        filter: (From.TableColumns, Joins.TableColumns) -> Filter
     ) -> Select<Int, From, Joins>
     where Columns == (), Joins: Table {
-        let filter = filter?(From.columns, Joins.columns)
+        let filter = filter(From.columns, Joins.columns)
         return select { _, _ in .count(filter: filter) }
     }
 
-    public func count<each C: QueryRepresentable>(
-        filter: ((From.TableColumns, Joins.TableColumns) -> any QueryExpression<Bool>)? = nil
+    public func count<each C: QueryRepresentable>() -> Select<
+        (repeat each C, Int), From, Joins
+    >
+    where Columns == (repeat each C), Joins: Table {
+        select { _, _ in .count() }
+    }
+
+    public func count<each C: QueryRepresentable, Filter: QueryExpression<Bool>>(
+        filter: (From.TableColumns, Joins.TableColumns) -> Filter
     ) -> Select<
         (repeat each C, Int), From, Joins
     >
     where Columns == (repeat each C), Joins: Table {
-        let filter = filter?(From.columns, Joins.columns)
+        let filter = filter(From.columns, Joins.columns)
         return select { _, _ in .count(filter: filter) }
     }
 
@@ -1650,8 +1703,8 @@ public func + <
     each J1: Table,
     each J2: Table
 >(
-    lhs: any SelectStatement<(repeat each C1), From, (repeat each J1)>,
-    rhs: any SelectStatement<(repeat each C2), From, (repeat each J2)>
+    lhs: some SelectStatement<(repeat each C1), From, (repeat each J1)>,
+    rhs: some SelectStatement<(repeat each C2), From, (repeat each J2)>
 ) -> Select<
     (repeat each C1, repeat each C2), From, (repeat each J1, repeat each J2)
 > {
@@ -1711,16 +1764,16 @@ extension Select: PartialSelectStatement {
     public typealias QueryValue = Columns
 
     var _rendersFromClause: Bool {
-        clauses.from != nil || From.self is any Table.Type
+        clauses.from != nil || From._fromTable != nil
     }
 
     public var query: ISO_9075.Fragment {
         guard !isEmpty else { return "" }
         var query: ISO_9075.Fragment = "SELECT"
-        let fromTable = From.self as? any Table.Type
+        let fromTable = From._fromTable
         let columns =
             columns.isEmpty
-            ? $_isSelecting.withValue(true) { fromTable.map { [$0._allColumnsFragment] } ?? [] }
+            ? $_isSelecting.withValue(true) { fromTable.map { [$0.columns] } ?? [] }
                 + joins.map { $0.tableColumns }
             : columns
         if distinct {
@@ -1732,13 +1785,10 @@ extension Select: PartialSelectStatement {
             if let tableReference = clauses.from {
                 query.append(tableReference)
             } else if let fromTable {
-                if let schemaName = fromTable.schemaName {
-                    query.append("\(quote: schemaName).")
-                }
-                query.append(fromTable.tableFragment)
+                query.append(fromTable.reference)
             }
         }
-        if let tableAlias = fromTable?.tableAlias {
+        if let tableAlias = fromTable?.alias {
             query.append(" AS \(quote: tableAlias)")
         }
         for join in joins {
@@ -1785,10 +1835,10 @@ public struct _JoinClause: QueryExpression, Sendable {
     let tableColumns: ISO_9075.Fragment
     let tableReference: ISO_9075.Fragment
 
-    init(
+    init<T: Table>(
         operator: Operator?,
         tableReference: ISO_9075.Fragment? = nil,
-        table: any Table.Type,
+        table: T.Type,
         constraint: some QueryExpression<Bool>
     ) {
         self.constraint = constraint.queryFragment

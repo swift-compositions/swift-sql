@@ -61,7 +61,7 @@ extension QueryFragmentBuilder<()> {
     }
 }
 
-extension QueryFragmentBuilder<any Statement> {
+extension QueryFragmentBuilder<_StatementClause> {
     public static func buildExpression(
         _ expression: some Statement
     ) -> [ISO_9075.Fragment] {
@@ -75,3 +75,5 @@ extension QueryFragmentBuilder<any Statement> {
         first + rest.flatMap(\.self)
     }
 }
+
+public enum _StatementClause {}

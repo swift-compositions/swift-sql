@@ -1,7 +1,7 @@
 public import ISO_9075_Foundation
 
 @dynamicMemberLookup
-public protocol Table: QueryRepresentable, PartialSelectStatement {
+public protocol Table: QueryRepresentable, PartialSelectStatement, _SelectSource {
     associatedtype QueryValue = Self
 
     associatedtype From = Never
@@ -62,27 +62,15 @@ extension Table {
     }
 
     public var query: ISO_9075.Fragment {
-        func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> ISO_9075.Fragment {
-            let value = Value(queryOutput: (self as! Root)[keyPath: column.keyPath])
-            return "\(value) AS \(quote: column.name)"
-        }
-        return "SELECT \(TableColumns.allColumns.map { open($0) }.joined(separator: ", "))"
+        "SELECT \(TableColumns.allColumns.map { "\($0.render(self)) AS \(quote: $0.name)" }.joined(separator: ", "))"
     }
 
     public var queryFragment: ISO_9075.Fragment {
-        func open<Root, Value>(_ column: some TableColumnExpression<Root, Value>) -> ISO_9075.Fragment {
-            Value(queryOutput: (self as! Root)[keyPath: column.keyPath]).queryFragment
-        }
-        return TableColumns.allColumns.map { open($0) }.joined(separator: ", ")
+        _allFragments.joined(separator: ", ")
     }
 
     public var _allFragments: [ISO_9075.Fragment] {
-        func open<Root, Value>(
-            _ column: some TableColumnExpression<Root, Value>
-        ) -> ISO_9075.Fragment {
-            Value(queryOutput: (self as! Root)[keyPath: column.keyPath]).queryFragment
-        }
-        return TableColumns.allColumns.map { open($0) }
+        TableColumns.allColumns.map { $0.render(self) }
     }
 }
 

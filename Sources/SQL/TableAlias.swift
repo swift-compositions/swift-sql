@@ -55,12 +55,12 @@ extension TableAlias: Table, PartialSelectStatement, Statement where Base: Table
     public struct TableColumns: Sendable, TableDefinition {
         public typealias QueryValue = TableAlias
 
-        public static var allColumns: [any TableColumnExpression] {
-                return Base.TableColumns.allColumns.map { $0._aliased(Name.self) }
+        public static var allColumns: [Column<TableAlias>] {
+            Base.TableColumns.allColumns.map { $0.aliased(Name.self) }
         }
 
-        public static var writableColumns: [any WritableTableColumnExpression] {
-                return Base.TableColumns.writableColumns.map { $0._aliased(Name.self) }
+        public static var writableColumns: [Column<TableAlias>] {
+            Base.TableColumns.writableColumns.map { $0.aliased(Name.self) }
         }
 
         public subscript<Member>(
@@ -171,21 +171,10 @@ where Base.TableColumns.PrimaryColumn: TableColumnExpression {
         Base.columns.primaryKey.name
     }
 
-    public func _aliased<N: AliasName>(
-        _ alias: N.Type
-    ) -> any TableColumnExpression<TableAlias<TableAlias, N>, Base.PrimaryKey> {
-        GeneratedColumn(name, keyPath: \.[member: \Value.self, column: keyPath])
-    }
 }
 
 extension TableAlias.TableColumns.PrimaryColumn: WritableTableColumnExpression
-where Base.TableColumns.PrimaryColumn: WritableTableColumnExpression {
-    public func _aliased<N: AliasName>(
-        _ alias: N.Type
-    ) -> any WritableTableColumnExpression<TableAlias<TableAlias, N>, Base.PrimaryKey> {
-        TableColumn(name, keyPath: \.[member: \Value.self, column: keyPath])
-    }
-}
+where Base.TableColumns.PrimaryColumn: WritableTableColumnExpression {}
 
 extension TableAlias: QueryExpression where Base: QueryExpression {
     public typealias QueryValue = Self

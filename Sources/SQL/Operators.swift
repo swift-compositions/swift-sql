@@ -282,22 +282,16 @@ extension QueryExpression where QueryValue: Numeric {
 
 @_documentation(visibility: private)
 public prefix func - <QueryValue: Numeric>(
-    expression: any QueryExpression<QueryValue>
+    expression: some QueryExpression<QueryValue>
 ) -> some QueryExpression<QueryValue> {
-    func open(_ expression: some QueryExpression<QueryValue>) -> SQLQueryExpression<QueryValue> {
-        SQLQueryExpression(UnaryOperator(operator: "-", base: expression, separator: ""))
-    }
-    return open(expression)
+    SQLQueryExpression<QueryValue>(UnaryOperator(operator: "-", base: expression, separator: ""))
 }
 
 @_documentation(visibility: private)
 public prefix func + <QueryValue: Numeric>(
-    expression: any QueryExpression<QueryValue>
+    expression: some QueryExpression<QueryValue>
 ) -> some QueryExpression<QueryValue> {
-    func open(_ expression: some QueryExpression<QueryValue>) -> SQLQueryExpression<QueryValue> {
-        SQLQueryExpression(UnaryOperator(operator: "+", base: expression, separator: ""))
-    }
-    return open(expression)
+    SQLQueryExpression<QueryValue>(UnaryOperator(operator: "+", base: expression, separator: ""))
 }
 
 extension SQLQueryExpression where QueryValue: Numeric {
@@ -365,12 +359,9 @@ extension QueryExpression where QueryValue: BinaryInteger {
 
 @_documentation(visibility: private)
 public prefix func ~ <QueryValue: BinaryInteger>(
-    expression: any QueryExpression<QueryValue>
+    expression: some QueryExpression<QueryValue>
 ) -> some QueryExpression<QueryValue> {
-    func open(_ expression: some QueryExpression<QueryValue>) -> SQLQueryExpression<QueryValue> {
-        SQLQueryExpression(UnaryOperator(operator: "~", base: expression, separator: ""))
-    }
-    return open(expression)
+    SQLQueryExpression<QueryValue>(UnaryOperator(operator: "~", base: expression, separator: ""))
 }
 
 extension SQLQueryExpression where QueryValue: BinaryInteger {

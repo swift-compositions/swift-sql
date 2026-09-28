@@ -110,50 +110,12 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
     public struct TableColumns: TableDefinition {
         public typealias QueryValue = Optional
 
-        public static var allColumns: [any TableColumnExpression] {
-            func open<Root, Value>(
-                _ column: some TableColumnExpression<Root, Value>
-            ) -> any TableColumnExpression {
-                #if CasePaths
-                    if let caseColumn = column as? any _CaseColumnExpression {
-                        return open(caseColumn._base)
-                    }
-                #endif
-                guard let column = column as? TableColumn<Wrapped, Value>
-                else {
-                    let column = column as! GeneratedColumn<Wrapped, Value>
-                    return GeneratedColumn<Optional, Value?>(
-                        column.name,
-                        keyPath: \.[member: \Value.self, column: column.keyPath],
-                        default: column.defaultValue
-                    )
-                }
-                return TableColumn<Optional, Value?>(
-                    column.name,
-                    keyPath: \.[member: \Value.self, column: column.keyPath],
-                    default: column.defaultValue
-                )
-            }
-            return Wrapped.TableColumns.allColumns.map { open($0) }
+        public static var allColumns: [Column<Optional>] {
+            Wrapped.TableColumns.allColumns.map(\.optional)
         }
 
-        public static var writableColumns: [any WritableTableColumnExpression] {
-            func open<Root, Value>(
-                _ column: some WritableTableColumnExpression<Root, Value>
-            ) -> any WritableTableColumnExpression {
-                #if CasePaths
-                    if let caseColumn = column as? any _CaseColumnExpression {
-                        return open(caseColumn._base)
-                    }
-                #endif
-                let column = column as! TableColumn<Wrapped, Value>
-                return TableColumn<Optional, Value?>(
-                    column.name,
-                    keyPath: \.[member: \Value.self, column: column.keyPath],
-                    default: column.defaultValue
-                )
-            }
-            return Wrapped.TableColumns.writableColumns.map { open($0) }
+        public static var writableColumns: [Column<Optional>] {
+            Wrapped.TableColumns.writableColumns.map(\.optional)
         }
 
         public subscript<Member>(
@@ -291,21 +253,10 @@ where Wrapped.TableColumns.PrimaryColumn: TableColumnExpression {
         Wrapped.columns.primaryKey.name
     }
 
-    public func _aliased<Name: AliasName>(
-        _ alias: Name.Type
-    ) -> any TableColumnExpression<TableAlias<Optional, Name>, Wrapped.PrimaryKey?> {
-        GeneratedColumn(name, keyPath: \.[member: \Value.self, column: keyPath])
-    }
 }
 
 extension Optional.TableColumns.PrimaryColumn: WritableTableColumnExpression
-where Wrapped.TableColumns.PrimaryColumn: WritableTableColumnExpression {
-    public func _aliased<Name: AliasName>(
-        _ alias: Name.Type
-    ) -> any WritableTableColumnExpression<TableAlias<Optional, Name>, Wrapped.PrimaryKey?> {
-        TableColumn(name, keyPath: \.[member: \Value.self, column: keyPath])
-    }
-}
+where Wrapped.TableColumns.PrimaryColumn: WritableTableColumnExpression {}
 
 extension Optional: TableExpression where Wrapped: TableExpression {
     public var allColumns: [ISO_9075.Fragment] {
