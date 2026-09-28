@@ -25,6 +25,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/swift-atoms/swift-byte.git", branch: "main"),
+        .package(url: "https://github.com/swift-atoms/swift-comparison.git", branch: "main"),
         .package(url: "https://github.com/pointfreeco/swift-case-paths.git", from: "1.7.2"),
         .package(url: "https://github.com/pointfreeco/swift-custom-dump.git", from: "1.3.3"),
         .package(url: "https://github.com/swift-iso/swift-iso-9075.git", branch: "main"),
@@ -43,6 +44,7 @@ let package = Package(
                 .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
                 .product(name: "ISO 9075 Foundation", package: "swift-iso-9075"),
                 .product(name: "Byte", package: "swift-byte"),
+                .product(name: "Comparison", package: "swift-comparison"),
                 .product(name: "Time", package: "swift-time"),
                 .product(name: "RFC 4122", package: "swift-rfc-4122"),
                 .product(name: "Tagged", package: "swift-tagged", condition: .when(traits: ["Tagged"])),

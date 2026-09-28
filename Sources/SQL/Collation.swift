@@ -27,15 +27,3 @@ extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
         SQLQueryExpression("\(self) COLLATE \(collation)")
     }
 }
-
-public enum CollationOrder: Hashable, Sendable {
-    case ascending
-
-    case same
-
-    case descending
-
-    public init<T: Comparable>(_ lhs: T, _ rhs: T) {
-        self = lhs < rhs ? .ascending : rhs < lhs ? .descending : .same
-    }
-}
