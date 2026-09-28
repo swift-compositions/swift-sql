@@ -13,14 +13,14 @@ extension QueryExpression where QueryValue: QueryRepresentable {
         _ other: some QueryExpression<Other>
     ) -> some QueryExpression<Bool>
     where QueryValue._Optionalized.Wrapped == Other._Optionalized.Wrapped {
-        BinaryOperator(lhs: self, operator: "IS", rhs: other)
+        BinaryOperator(lhs: self, operator: "IS NOT DISTINCT FROM", rhs: other)
     }
 
     public func isNot<Other: QueryRepresentable>(
         _ other: some QueryExpression<QueryValue._Optionalized>
     ) -> some QueryExpression<Bool>
     where QueryValue._Optionalized.Wrapped == Other._Optionalized.Wrapped {
-        BinaryOperator(lhs: self, operator: "IS NOT", rhs: other)
+        BinaryOperator(lhs: self, operator: "IS DISTINCT FROM", rhs: other)
     }
 
     @available(*, unavailable, message: "Use 'eq' (or 'is') instead.")
@@ -90,14 +90,14 @@ extension QueryExpression where QueryValue: QueryRepresentable & QueryExpression
     public func `is`(
         _ other: _Null<QueryValue>
     ) -> some QueryExpression<Bool> {
-        BinaryOperator(lhs: self, operator: "IS", rhs: other)
+        BinaryOperator(lhs: self, operator: "IS NOT DISTINCT FROM", rhs: other)
     }
 
     @_documentation(visibility: private)
     public func isNot(
         _ other: _Null<QueryValue>
     ) -> some QueryExpression<Bool> {
-        BinaryOperator(lhs: self, operator: "IS NOT", rhs: other)
+        BinaryOperator(lhs: self, operator: "IS DISTINCT FROM", rhs: other)
     }
 }
 
@@ -139,14 +139,14 @@ extension QueryExpression where QueryValue: QueryRepresentable & _OptionalProtoc
     public func `is`(
         _ other: some QueryExpression<QueryValue>
     ) -> some QueryExpression<Bool> {
-        BinaryOperator(lhs: self, operator: "IS", rhs: other)
+        BinaryOperator(lhs: self, operator: "IS NOT DISTINCT FROM", rhs: other)
     }
 
     @_documentation(visibility: private)
     public func isNot(
         _ other: some QueryExpression<QueryValue>
     ) -> some QueryExpression<Bool> {
-        BinaryOperator(lhs: self, operator: "IS NOT", rhs: other)
+        BinaryOperator(lhs: self, operator: "IS DISTINCT FROM", rhs: other)
     }
 }
 
@@ -399,10 +399,6 @@ extension QueryExpression where QueryValue == String {
         BinaryOperator(lhs: lhs, operator: "||", rhs: rhs)
     }
 
-    public func glob(_ pattern: some StringProtocol) -> some QueryExpression<Bool> {
-        BinaryOperator(lhs: self, operator: "GLOB", rhs: "\(pattern)")
-    }
-
     public func like(
         _ pattern: some StringProtocol,
         escape: Character? = nil
@@ -461,9 +457,6 @@ extension QueryExpression where QueryValue: QueryExpression {
     ) -> some QueryExpression<Bool> {
         SQLQueryExpression("\(self) BETWEEN \(lowerBound) AND \(upperBound)")
     }
-}
-
-extension Statement where QueryValue: QueryBindable {
 }
 
 extension PartialSelectStatement {

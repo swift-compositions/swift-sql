@@ -12,6 +12,12 @@ public protocol QueryRepresentable<QueryOutput>: QueryDecodable {
 
     static func queryFragment(decoding queryFragment: ISO_9075.Fragment) -> ISO_9075.Fragment
 
+    static var _valuesColumns: [ValuesElement.Column] { get }
+
+    static var _valuesFieldOffsets: [Int] { get }
+
+    static func _valuesColumnIndex(of keyPath: AnyKeyPath) -> Int?
+
 
 }
 

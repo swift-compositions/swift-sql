@@ -3,25 +3,23 @@ public import SwiftSyntax
 import SwiftSyntaxBuilder
 public import SwiftSyntaxMacros
 
-public enum SQLMacro: ExpressionMacro {
+public enum SQLMacro: ExpressionMacro {}
+
+extension SQLMacro {
     public static func expansion<N: FreestandingMacroExpansionSyntax, C: MacroExpansionContext>(
         of node: N,
         in context: C
     ) -> ExprSyntax {
-        guard let argument = node.arguments.first?.expression else { fatalError() }
-        let binds = [
-            UInt8(ascii: "?"), UInt8(ascii: ":"), UInt8(ascii: "@"), UInt8(ascii: "$"),
-        ]
+        guard let argument = node.arguments.first?.expression else {
+            fatalError("#sql requires at least one argument")
+        }
         let delimiters: [UInt8: UInt8] = [
             UInt8(ascii: #"""#): UInt8(ascii: #"""#),
             UInt8(ascii: "'"): UInt8(ascii: "'"),
-            UInt8(ascii: "`"): UInt8(ascii: "`"),
-            UInt8(ascii: "["): UInt8(ascii: "]"),
             UInt8(ascii: "("): UInt8(ascii: ")"),
         ]
         var parenStack: [(delimiter: UInt8, segment: StringSegmentSyntax, offset: Int)] = []
         var currentDelimiter: (delimiter: UInt8, segment: StringSegmentSyntax, offset: Int)?
-        var unexpectedBind: (segment: StringSegmentSyntax, offset: Int)?
         var unexpectedClose: (delimiter: UInt8, segment: StringSegmentSyntax, offset: Int)?
         var invalidBind = false
         var isInComment = false
@@ -111,8 +109,6 @@ public enum SQLMacro: ExpressionMacro {
                             }
                         } else if delimiters.values.contains(byte) {
                             unexpectedClose = (byte, segment, offset)
-                        } else if binds.contains(byte) {
-                            unexpectedBind = (segment, offset)
                         } else if byte == UInt8(ascii: "-"),
                             segment.content.syntaxTextBytes.indices.contains(offset + 1),
                             segment.content.syntaxTextBytes[offset + 1] == byte
@@ -161,29 +157,10 @@ public enum SQLMacro: ExpressionMacro {
                     )
                 )
             }
-            if let unexpectedBind {
-                context.diagnose(
-                    Diagnostic(
-                        node: string,
-                        position: unexpectedBind.segment.position.advanced(
-                            by: unexpectedBind.offset
-                        ),
-                        message: MacroExpansionErrorMessage(
-                            """
-                            Invalid bind parameter in literal; use interpolation to bind values into SQL
-                            """
-                        )
-                    )
-                )
-            }
             if let unexpectedClose {
-                let delimiters: [UInt8: UInt8] = [
-                    UInt8(ascii: "]"): UInt8(ascii: "["),
-                    UInt8(ascii: ")"): UInt8(ascii: "("),
-                ]
                 let closingDelimiter = UnicodeScalar(unexpectedClose.delimiter)
                 let openingDelimiter = UnicodeScalar(
-                    delimiters[unexpectedClose.delimiter] ?? unexpectedClose.delimiter
+                    unexpectedClose.delimiter == UInt8(ascii: ")") ? UInt8(ascii: "(") : unexpectedClose.delimiter
                 )
                 let q = openingDelimiter == "'" ? #"""# : "'"
 

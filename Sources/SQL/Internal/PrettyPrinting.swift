@@ -11,7 +11,7 @@ extension ISO_9075.Fragment {
                 + segments.map { segment in
                     switch segment {
                     case .sql(let sql): .sql(sql.replacing("\n", with: "\n  "))
-                    case .value, .identifier: segment
+                    case .value, .identifier, .keyword: segment
                     }
                 }
         )

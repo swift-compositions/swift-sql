@@ -264,7 +264,7 @@ public macro ColumnCheck<T>(_ type: T.Type) =
 @_documentation(visibility: private)
 @attached(peer)
 public macro ColumnCheck<T: Codable>(_ type: T.Type) =
-    #externalMacro(module: "SQL_Macros_Implementation", type: "ColumnCheckFailJSONMacro")
+    #externalMacro(module: "SQL_Macros_Implementation", type: "ColumnCheckFailMacro")
 
 @_documentation(visibility: private)
 @attached(peer)

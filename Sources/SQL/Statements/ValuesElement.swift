@@ -1,26 +1,21 @@
 public import ISO_9075_Foundation
 
-package struct ValuesElement: Sendable {
+public struct ValuesElement: Sendable {
     package let offset: Int
-    package let decodableType: (any QueryDecodable.Type)?
     package let columns: [Column]
+    package let fieldOffsets: [Int]
 
-    package init(
-        offset: Int,
-        decodableType: (any QueryDecodable.Type)?,
-        columns: [Column]
-    ) {
+    package init(offset: Int, columns: [Column], fieldOffsets: [Int] = []) {
         self.offset = offset
-        self.decodableType = decodableType
         self.columns = columns
+        self.fieldOffsets = fieldOffsets
     }
 
-    package struct Column: Sendable {
+    public struct Column: Sendable {
         package let name: String?
         package let decoding: @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment
 
-        package init(name: String?, decoding: @escaping @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment)
-        {
+        package init(name: String?, decoding: @escaping @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment) {
             self.name = name
             self.decoding = decoding
         }
@@ -30,114 +25,77 @@ package struct ValuesElement: Sendable {
         }
     }
 
-    package static func elements<each V>(
-        for types: repeat (each V).Type
-    ) -> [ValuesElement] {
+    package static func elements<each V: QueryRepresentable>(for types: repeat (each V).Type) -> [ValuesElement] {
         var elements: [ValuesElement] = []
         var offset = 0
         for type in repeat each types {
-            func append<T>(_: T.Type) {
+            func append<T: QueryRepresentable>(_: T.Type) {
                 let alignment = MemoryLayout<T>.alignment
                 offset = (offset + alignment - 1) / alignment * alignment
-                let columns: [Column]
-                if let table = T.self as? any Table.Type {
-                    columns = table.allValuesElementColumns
-                } else {
-                    columns = [Column(name: nil, decoding: decoding(T.self))]
-                }
-                elements.append(
-                    ValuesElement(
-                        offset: offset,
-                        decodableType: T.self as? any QueryDecodable.Type,
-                        columns: columns
-                    )
-                )
+                elements.append(ValuesElement(offset: offset, columns: T._valuesColumns, fieldOffsets: T._valuesFieldOffsets))
                 offset += MemoryLayout<T>.size
             }
             append(type)
         }
         return elements
     }
+}
 
-    private static func decoding(_ type: Any.Type) -> @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment {
-        guard let representable = type as? any QueryRepresentable.Type else { return { $0 } }
-        func open<U: QueryRepresentable>(_: U.Type) -> @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment {
-            { U.queryFragment(decoding: $0) }
-        }
-        return open(representable)
+extension QueryRepresentable {
+    public static var _valuesColumns: [ValuesElement.Column] {
+        [ValuesElement.Column(name: nil, decoding: { Self.queryFragment(decoding: $0) })]
     }
+
+    public static var _valuesFieldOffsets: [Int] { [] }
+
+    public static func _valuesColumnIndex(of keyPath: AnyKeyPath) -> Int? { nil }
 }
 
 extension [ValuesElement] {
     package func columnIndex<Value>(of keyPath: PartialKeyPath<Value>) -> Int? {
-        if let table = Value.self as? any Table.Type,
-            let index = table.columnIndex(of: keyPath)
-        {
-            return index
-        }
         guard let target = MemoryLayout<Value>.offset(of: keyPath) else { return nil }
         var position = 0
         for element in self {
             if element.columns.count == 1 {
-                if element.offset == target {
-                    return position
-                }
-                position += 1
-            } else {
-                if let table = element.decodableType as? any Table.Type,
-                    target >= element.offset,
-                    let field = table.columnFieldOffsets.firstIndex(of: target - element.offset),
-                    field < element.columns.count
-                {
-                    return position + field
-                }
-                position += element.columns.count
+                if element.offset == target { return position }
+            } else if target >= element.offset,
+                let field = element.fieldOffsets.firstIndex(of: target - element.offset),
+                field < element.columns.count
+            {
+                return position + field
             }
+            position += element.columns.count
         }
         return nil
     }
 }
 
 extension Table {
-    package static var valuesElement: ValuesElement {
-        ValuesElement(
-            offset: 0,
-            decodableType: Self.self,
-            columns: allValuesElementColumns
-        )
-    }
-
-    package static var writableValuesElement: ValuesElement {
-        ValuesElement(
-            offset: 0,
-            decodableType: Self.self,
-            columns: writableValuesElementColumns
-        )
-    }
-
-    fileprivate static var allValuesElementColumns: [ValuesElement.Column] {
+    public static var _valuesColumns: [ValuesElement.Column] {
         TableColumns.allColumns.map { ValuesElement.Column($0) }
     }
 
-    fileprivate static var writableValuesElementColumns: [ValuesElement.Column] {
-        TableColumns.writableColumns.map { ValuesElement.Column($0) }
-    }
-
-    fileprivate static func columnIndex(of keyPath: AnyKeyPath) -> Int? {
-        TableColumns.allColumns.firstIndex { column in
-            func open<R, V>(_ column: some TableColumnExpression<R, V>) -> AnyKeyPath {
-                column.keyPath
-            }
-            return open(column) == keyPath
-        }
-    }
-
-    fileprivate static var columnFieldOffsets: [Int] {
+    public static var _valuesFieldOffsets: [Int] {
         TableColumns.allColumns.map { column in
             func offset<C: TableColumnExpression>(_ column: C) -> Int {
                 MemoryLayout<C.Root>.offset(of: column.keyPath) ?? 0
             }
             return offset(column)
         }
+    }
+
+    public static func _valuesColumnIndex(of keyPath: AnyKeyPath) -> Int? {
+        TableColumns.allColumns.firstIndex { column in
+            func open<R, V>(_ column: some TableColumnExpression<R, V>) -> AnyKeyPath { column.keyPath }
+            return open(column) == keyPath
+        }
+    }
+
+    package static var valuesElement: ValuesElement {
+        ValuesElement(offset: 0, columns: _valuesColumns, fieldOffsets: _valuesFieldOffsets)
+    }
+
+    package static var writableValuesElement: ValuesElement {
+        ValuesElement(offset: 0, columns: TableColumns.writableColumns.map { ValuesElement.Column($0) })
     }
 }

@@ -21,9 +21,7 @@ extension Table {
     }
 }
 
-#if compiler(>=6.1)
     @dynamicMemberLookup
-#endif
 public struct Where<From: Table>: Sendable {
     public static func + (lhs: Self, rhs: Self) -> Self {
         Where(predicates: (lhs.predicates + rhs.predicates).removingDuplicates())
@@ -37,7 +35,6 @@ public struct Where<From: Table>: Sendable {
         self.scope = scope
     }
 
-    #if compiler(>=6.1)
         public static subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
             From.self[keyPath: keyPath]
         }
@@ -60,7 +57,6 @@ public struct Where<From: Table>: Sendable {
         where From: TableDraft {
             self + unsafeBitCast(From.SourceTable.self[keyPath: keyPath], to: Self.self)
         }
-    #endif
 }
 
 extension Where: SelectStatement {

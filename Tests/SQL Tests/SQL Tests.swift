@@ -19,9 +19,9 @@ struct Numbered: ISO_9075.Dialect {
         let rendering = Numbered().render(Reminder.where { $0.isCompleted.eq(true) }.select(\.title).query)
         #expect(rendering == ISO_9075.Rendering(
             sql: """
-                SELECT "reminders"."title"
-                FROM "reminders"
-                WHERE (("reminders"."isCompleted") = ($1))
+                SELECT "reminder"."title"
+                FROM "reminder"
+                WHERE (("reminder"."isCompleted") = ($1))
                 """,
             values: [.bool(true)]
         ))
@@ -30,6 +30,14 @@ struct Numbered: ISO_9075.Dialect {
     @Test func `an insert binds each given column of its draft and leaves out an absent primary key`() {
         let rendering = Numbered().render(Reminder.insert { Reminder.Draft(title: "Groceries") }.query)
         #expect(rendering.values == [.text("Groceries"), .bool(false)])
-        #expect(rendering.sql.hasPrefix(#"INSERT INTO "reminders""#))
+        #expect(rendering.sql.hasPrefix(#"INSERT INTO "reminder""#))
     }
+}
+
+@Suite struct `Dialect keywords in statements` {
+    @Test func `is renders through the dialect`() {
+        let fragment = Reminder.where { $0.title.is(Optional("Taxes")) }.query
+        #expect(Numbered().render(fragment).sql.contains(#""reminder"."title") IS NOT DISTINCT FROM ($1)"#))
+    }
+
 }

@@ -12,7 +12,7 @@ extension Tagged: QueryBindable where Tag: ~Copyable & ~Escapable, Underlying: Q
 }
 
 extension Tagged: QueryDecodable where Tag: ~Copyable & ~Escapable, Underlying: QueryDecodable {
-    public init(decoder: inout some QueryDecoder) throws {
+    public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
         self.init(_unchecked: try Underlying(decoder: &decoder))
     }
 }

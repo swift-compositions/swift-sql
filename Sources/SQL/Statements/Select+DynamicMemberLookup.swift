@@ -1,4 +1,3 @@
-#if compiler(>=6.1)
     extension Select where From: Table {
         public subscript<
             each C: QueryRepresentable,
@@ -450,4 +449,3 @@
                 )
         }
     }
-#endif

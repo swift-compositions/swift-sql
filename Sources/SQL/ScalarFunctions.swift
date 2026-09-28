@@ -40,18 +40,6 @@ extension QueryExpression where QueryValue: _OptionalPromotable {
 }
 
 extension QueryExpression where QueryValue: _OptionalProtocol {
-    public func ifnull<W>(
-        _ other: some QueryExpression<W>
-    ) -> some QueryExpression<W> where W == QueryValue.Wrapped {
-        QueryFunction("ifnull", self, other)
-    }
-
-    public func ifnull(
-        _ other: some QueryExpression<QueryValue>
-    ) -> some QueryExpression<QueryValue> {
-        QueryFunction("ifnull", self, other)
-    }
-
     public static func ?? (
         lhs: Self,
         rhs: some QueryExpression<QueryValue.Wrapped>
@@ -64,12 +52,6 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
         rhs: some QueryExpression<QueryValue>
     ) -> CoalesceFunction<QueryValue> {
         CoalesceFunction([lhs.queryFragment, rhs.queryFragment])
-    }
-}
-
-extension QueryExpression where QueryValue == String {
-    public func instr(_ occurrence: some QueryExpression<QueryValue>) -> some QueryExpression<Int> {
-        QueryFunction("instr", self, occurrence)
     }
 }
 
@@ -90,17 +72,8 @@ extension QueryExpression where QueryValue == String {
         }
     }
 
-    #if !SuppressPlatformSQLiteAvailability
-        @available(iOS 17, macOS 14, tvOS 17, watchOS 10, *)
-    #endif
     public func octetLength() -> some QueryExpression<Int> {
         QueryFunction("octet_length", self)
-    }
-}
-
-extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
-    public func quote() -> some QueryExpression<QueryValue> {
-        QueryFunction("quote", self)
     }
 }
 
@@ -148,12 +121,6 @@ extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
 
     public func upper() -> some QueryExpression<QueryValue> {
         QueryFunction("upper", self)
-    }
-}
-
-extension QueryExpression where QueryValue == [Byte] {
-    public func hex() -> some QueryExpression<String> {
-        QueryFunction("hex", self)
     }
 }
 

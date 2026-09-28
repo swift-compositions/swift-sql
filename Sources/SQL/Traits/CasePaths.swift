@@ -1,9 +1,5 @@
 #if CasePaths
-    #if EXCLUDE_EXPORTS
         public import CasePaths
-    #else
-        @_exported import CasePaths
-    #endif
 
     extension ColumnGroup where QueryValue: CasePathable & Table {
         public func `is`<V>(

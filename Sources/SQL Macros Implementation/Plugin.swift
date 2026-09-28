@@ -6,7 +6,6 @@ struct SQLPlugin: CompilerPlugin {
     let providingMacros: [any Macro.Type] =
         [
             BindMacro.self,
-            ColumnCheckFailJSONMacro.self,
             ColumnCheckFailMacro.self,
             ColumnCheckFailRawRepresentableMacro.self,
             ColumnCheckGroupMacro.self,

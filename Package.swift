@@ -16,6 +16,7 @@ let package = Package(
         .library(name: "SQL", targets: ["SQL"]),
         .library(name: "SQL Macros", targets: ["SQL Macros"]),
         .library(name: "SQL Foundation Integration", targets: ["SQL Foundation Integration"]),
+        .library(name: "SQL Migrations", targets: ["SQL Migrations"]),
         .library(name: "SQL Test Support", targets: ["SQL Test Support"]),
     ],
     traits: [
@@ -24,6 +25,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/swift-iso/swift-iso-9075.git", branch: "main"),
+        .package(url: "https://github.com/swift-atoms/swift-standard-library-extensions.git", branch: "main"),
         .package(url: "https://github.com/swift-atoms/swift-byte.git", branch: "main"),
         .package(url: "https://github.com/swift-atoms/swift-time.git", branch: "main"),
         .package(url: "https://github.com/swift-ietf/swift-rfc-4122.git", branch: "main"),
@@ -35,11 +37,10 @@ let package = Package(
         .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "603.0.0"),
     ],
     targets: [
-        .target(name: "SQL Inflection"),
         .target(
             name: "SQL",
             dependencies: [
-                "SQL Inflection",
+                .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
                 .product(name: "ISO 9075 Foundation", package: "swift-iso-9075"),
                 .product(name: "Byte", package: "swift-byte"),
                 .product(name: "Time", package: "swift-time"),
@@ -51,7 +52,7 @@ let package = Package(
         .macro(
             name: "SQL Macros Implementation",
             dependencies: [
-                "SQL Inflection",
+                .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
             ]
@@ -76,10 +77,17 @@ let package = Package(
             ]
         ),
         .target(
+            name: "SQL Migrations",
+            dependencies: [
+                .product(name: "ISO 9075 Call-Level Interface", package: "swift-iso-9075"),
+            ]
+        ),
+        .target(
             name: "SQL Test Support",
             dependencies: [
                 "SQL",
                 .product(name: "ISO 9075 Foundation", package: "swift-iso-9075"),
+                .product(name: "ISO 9075 Call-Level Interface", package: "swift-iso-9075"),
                 .product(name: "CustomDump", package: "swift-custom-dump"),
                 .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
                 .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
@@ -87,7 +95,21 @@ let package = Package(
         ),
         .testTarget(
             name: "SQL Tests",
-            dependencies: ["SQL", "SQL Macros", "SQL Test Support"]
+            dependencies: [
+                "SQL",
+                "SQL Macros",
+                "SQL Test Support",
+                .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
+                .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
+            ]
+        ),
+        .testTarget(
+            name: "SQL Migrations Tests",
+            dependencies: [
+                "SQL Migrations",
+                "SQL Test Support",
+                .product(name: "ISO 9075 Call-Level Interface", package: "swift-iso-9075"),
+            ]
         ),
         .testTarget(
             name: "SQL Macros Tests",

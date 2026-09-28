@@ -1,5 +1,5 @@
 public import ISO_9075_Foundation
-import SQL_Inflection
+import Standard_Library_Extensions
 
 public protocol AliasName {
     static var aliasName: String { get }
@@ -7,7 +7,7 @@ public protocol AliasName {
 
 extension AliasName {
     public static var aliasName: String {
-        _typeName(Self.self, qualified: false).lowerCamelCased().pluralized()
+        _typeName(Self.self, qualified: false).lowercasingLeadingUppercase
     }
 }
 
@@ -56,27 +56,11 @@ extension TableAlias: Table, PartialSelectStatement, Statement where Base: Table
         public typealias QueryValue = TableAlias
 
         public static var allColumns: [any TableColumnExpression] {
-            #if compiler(>=6.1)
                 return Base.TableColumns.allColumns.map { $0._aliased(Name.self) }
-            #else
-                func open(_ column: some TableColumnExpression) -> any TableColumnExpression {
-                    column._aliased(Name.self)
-                }
-                return Base.TableColumns.allColumns.map { open($0) }
-            #endif
         }
 
         public static var writableColumns: [any WritableTableColumnExpression] {
-            #if compiler(>=6.1)
                 return Base.TableColumns.writableColumns.map { $0._aliased(Name.self) }
-            #else
-                func open(
-                    _ column: some WritableTableColumnExpression
-                ) -> any WritableTableColumnExpression {
-                    column._aliased(Name.self)
-                }
-                return Base.TableColumns.writableColumns.map { open($0) }
-            #endif
         }
 
         public subscript<Member>(
@@ -226,7 +210,7 @@ extension TableAlias: QueryBindable where Base: QueryBindable {
 }
 
 extension TableAlias: QueryDecodable where Base: QueryDecodable {
-    public init(decoder: inout some QueryDecoder) throws {
+    public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
         try self.init(base: Base(decoder: &decoder))
     }
 }

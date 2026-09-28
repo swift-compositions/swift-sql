@@ -24,17 +24,13 @@ struct `Table macro` {
                 public typealias PrimaryKey = Int
                 @SQL_Macros::_ColumnDefinition public var id = SQL::_TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
                 @SQL_Macros::_PrimaryKeyDefault public var primaryKey = SQL::_TableColumn<QueryValue, Int>.for("id", keyPath: \QueryValue.id)
-                #if compiler(>=6.4)
                 @_optimize(none)
-                #endif
                 public static var allColumns: [any SQL::TableColumnExpression] {
                   var allColumns: [any SQL::TableColumnExpression] = []
                   allColumns.append(contentsOf: QueryValue.columns.id._allColumns)
                   return allColumns
                 }
-                #if compiler(>=6.4)
                 @_optimize(none)
-                #endif
                 public static var writableColumns: [any SQL::WritableTableColumnExpression] {
                   var writableColumns: [any SQL::WritableTableColumnExpression] = []
                   writableColumns.append(contentsOf: QueryValue.columns.id._writableColumns)
@@ -78,12 +74,12 @@ struct `Table macro` {
               }
 
               public nonisolated static var tableName: Swift.String {
-                "reminders"
+                "reminder"
               }
             }
 
             nonisolated extension Reminder: SQL::Table, SQL::PrimaryKeyedTable, SQL::PartialSelectStatement {
-              public nonisolated init(decoder: inout some SQL::QueryDecoder) throws {
+              public nonisolated init(decoder: inout some SQL::QueryDecoder) throws(SQL::QueryDecodingError) {
                 let id = try decoder.decode(Self.columns.id)
                 guard let id else {
                   throw SQL::QueryDecodingError.missingRequiredColumn

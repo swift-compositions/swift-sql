@@ -30,10 +30,10 @@ extension _RawRepresentableRawRepresentation: QueryBindable {
 }
 
 extension _RawRepresentableRawRepresentation: QueryDecodable {
-    public init(decoder: inout some QueryDecoder) throws {
+    public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
         let rawValue = try QueryOutput.RawValue(decoder: &decoder)
         guard let queryOutput = QueryOutput(rawValue: rawValue)
-        else { throw DataCorruptedError() }
+        else { throw .dataCorrupted("\(rawValue) as \(QueryOutput.self)") }
         self.init(queryOutput: queryOutput)
     }
 }

@@ -212,9 +212,7 @@ public struct _SelectClauses: Sendable {
     var valuesElements: [ValuesElement] = []
 }
 
-#if compiler(>=6.1)
     @dynamicMemberLookup
-#endif
 public struct Select<Columns, From, Joins>: Sendable {
     @CopyOnWrite var clauses = _SelectClauses()
 
@@ -322,25 +320,36 @@ public struct ValuesColumns<Value>: QueryExpression, Sendable {
     public subscript<Member>(
         dynamicMember keyPath: KeyPath<Value, Member>
     ) -> SQLQueryExpression<Member> {
-        guard
-            let index = (elements ?? ValuesElement.elements(for: Value.self)).columnIndex(
-                of: keyPath
-            ),
-            columns.indices.contains(index)
-        else {
+        column(at: (elements ?? []).columnIndex(of: keyPath), as: Member.self)
+    }
+
+    private func column<Member>(at index: Int?, as _: Member.Type) -> SQLQueryExpression<Member> {
+        guard let index, columns.indices.contains(index) else {
             preconditionFailure("Could not determine the column for the given key path")
         }
         return SQLQueryExpression(columns[index], as: Member.self)
     }
 }
 
+extension ValuesColumns where Value: QueryRepresentable {
+    public subscript<Member>(
+        dynamicMember keyPath: KeyPath<Value, Member>
+    ) -> SQLQueryExpression<Member> {
+        column(
+            at: Value._valuesColumnIndex(of: keyPath)
+                ?? (elements ?? ValuesElement.elements(for: Value.self)).columnIndex(of: keyPath),
+            as: Member.self
+        )
+    }
+}
+
 extension Select where Joins == () {
     @_disfavoredOverload
     public init(_ value: Columns)
-    where Columns: QueryExpression, From == ValuesColumns<Columns> {
+    where Columns: QueryExpression, Columns.QueryValue: QueryRepresentable, From == ValuesColumns<Columns> {
         self.init(clauses: _SelectClauses())
         columns = $_isSelecting.withValue(true) { [value.queryFragment] }
-        clauses.valuesElements = ValuesElement.elements(for: Columns.self)
+        clauses.valuesElements = ValuesElement.elements(for: Columns.QueryValue.self)
     }
 
     @_disfavoredOverload
@@ -349,6 +358,7 @@ extension Select where Joins == () {
     )
     where
         Columns == (repeat (each Value).QueryValue),
+        repeat (each Value).QueryValue: QueryRepresentable,
         From == ValuesColumns<(repeat (each Value).QueryValue)>
     {
         self.init(clauses: _SelectClauses())
@@ -473,28 +483,6 @@ extension Select where From: Table {
         self.where = `where`
     }
 
-    #if DEBUG && compiler(>=6.1)
-        @available(
-            *,
-            unavailable,
-            message: """
-                No overload is available for this many columns/joins. To request more overloads, please file a GitHub issue that describes your use case: https://github.com/pointfreeco/swift-structured-queries
-                """
-        )
-        public subscript<
-            each C1: QueryRepresentable,
-            each C2: QueryRepresentable,
-            each J1: Table,
-            each J2: Table
-        >(
-            dynamicMember keyPath: KeyPath<
-                From.Type, Select<(repeat each C2), From, (repeat each J2)>
-            >
-        ) -> Select<(repeat each C1, repeat each C2), From, (repeat each J1, repeat each J2)>
-        where Columns == (repeat each C1), Joins == (repeat each J1) {
-            self + From.self[keyPath: keyPath]
-        }
-    #endif
 
     public func select<each C1: QueryRepresentable, C2: QueryExpression>(
         _ selection: KeyPath<From.TableColumns, C2>

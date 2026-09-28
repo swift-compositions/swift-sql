@@ -17,7 +17,7 @@ extension Date: QueryBindable {
         )
     }
 
-    public init(decoder: inout some QueryDecoder) throws {
+    public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
         let instant = try Instant(decoder: &decoder)
         self.init(
             timeIntervalSince1970: Double(instant.secondsSinceUnixEpoch) + Double(instant.nanosecondFraction) / 1_000_000_000
@@ -28,7 +28,7 @@ extension Date: QueryBindable {
 extension UUID: QueryBindable {
     public var queryBinding: ISO_9075.Value { .uuid(RFC_4122.UUID(bytes: uuid)) }
 
-    public init(decoder: inout some QueryDecoder) throws {
+    public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
         self.init(uuid: try RFC_4122.UUID(decoder: &decoder).bytes)
     }
 }
@@ -36,7 +36,7 @@ extension UUID: QueryBindable {
 extension Data: QueryBindable {
     public var queryBinding: ISO_9075.Value { .blob(map(Byte.init)) }
 
-    public init(decoder: inout some QueryDecoder) throws {
+    public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
         self.init(try [Byte](decoder: &decoder).map(\.underlying))
     }
 }
@@ -44,10 +44,9 @@ extension Data: QueryBindable {
 extension URL: QueryBindable {
     public var queryBinding: ISO_9075.Value { .text(absoluteString) }
 
-    public init(decoder: inout some QueryDecoder) throws {
-        guard let url = Self(string: try String(decoder: &decoder)) else { throw Invalid() }
+    public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
+        let string = try String(decoder: &decoder)
+        guard let url = Self(string: string) else { throw .dataCorrupted("\(string) as URL") }
         self = url
     }
-
-    private struct Invalid: Error {}
 }

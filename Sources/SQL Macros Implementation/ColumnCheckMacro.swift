@@ -24,17 +24,6 @@ package enum ColumnCheckFailMacro: PeerMacro {
     }
 }
 
-package enum ColumnCheckFailJSONMacro: PeerMacro {
-    package static func expansion(
-        of node: AttributeSyntax,
-        providingPeersOf declaration: some DeclSyntaxProtocol,
-        in context: some MacroExpansionContext
-    ) throws -> [DeclSyntax] {
-        diagnoseUnrepresentableColumn(of: node, on: declaration, suggesting: .json, in: context)
-        return []
-    }
-}
-
 package enum ColumnCheckFailRawRepresentableMacro: PeerMacro {
     package static func expansion(
         of node: AttributeSyntax,
@@ -155,7 +144,6 @@ package enum ColumnCheckGroupMacro: PeerMacro {
 
 private enum UnrepresentableSuggestion {
     case none
-    case json
     case rawRepresentation
 }
 
@@ -219,31 +207,6 @@ private func diagnoseUnrepresentableColumn(
     switch suggestion {
     case .none:
         message = "'\(type)' is not representable as a column"
-    case .json:
-        message = "'\(type)' is not representable as a column"
-        fixIts.insert(
-            contentsOf: [
-                .replace(
-                    message: MacroExpansionFixItMessage(
-                        "Apply '@Column(as: \(type).JSONRepresentation.self)' to store as JSON"
-                    ),
-                    oldNode: declaration,
-                    newNode: declaration.applyingColumnFixIt(
-                        "@Column(as: \(raw: type).JSONRepresentation.self)"
-                    )
-                ),
-                .replace(
-                    message: MacroExpansionFixItMessage(
-                        "Apply '@Column(as: \(type).JSONBRepresentation.self)' to store as JSONB"
-                    ),
-                    oldNode: declaration,
-                    newNode: declaration.applyingColumnFixIt(
-                        "@Column(as: \(raw: type).JSONBRepresentation.self)"
-                    )
-                ),
-            ],
-            at: 0
-        )
     case .rawRepresentation:
         message = """
             '\(type)' is not representable as a column; conform it to 'QueryBindable' to store it as its \
