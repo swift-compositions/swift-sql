@@ -49,10 +49,10 @@ extension Bool: QueryDecodable {
     }
 }
 
-extension Instant: QueryDecodable {
+extension Time.Instant: QueryDecodable {
     @inlinable
     public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
-        guard let result = try decoder.decode(Instant.self)
+        guard let result = try decoder.decode(Time.Instant.self)
         else { throw .missingRequiredColumn }
         self = result
     }

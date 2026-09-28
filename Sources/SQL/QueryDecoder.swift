@@ -17,7 +17,7 @@ public protocol QueryDecoder {
 
     mutating func decode(_ columnType: Int.Type) throws(QueryDecodingError) -> Int?
 
-    mutating func decode(_ columnType: Instant.Type) throws(QueryDecodingError) -> Instant?
+    mutating func decode(_ columnType: Time.Instant.Type) throws(QueryDecodingError) -> Time.Instant?
 
     mutating func decode(_ columnType: RFC_4122.UUID.Type) throws(QueryDecodingError) -> RFC_4122.UUID?
 

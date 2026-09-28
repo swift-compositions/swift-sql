@@ -71,7 +71,7 @@ extension UInt64: QueryBindable {
     }
 }
 
-extension Instant: QueryBindable {
+extension Time.Instant: QueryBindable {
     public var queryBinding: ISO_9075.Value { .timestamp(self) }
 }
 

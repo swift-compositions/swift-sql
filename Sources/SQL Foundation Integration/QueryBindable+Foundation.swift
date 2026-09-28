@@ -9,7 +9,7 @@ extension Date: QueryBindable {
     public var queryBinding: ISO_9075.Value {
         let seconds = timeIntervalSince1970.rounded(.down)
         return .timestamp(
-            Instant(
+            Time.Instant(
                 _unchecked: (),
                 secondsSinceUnixEpoch: Int64(seconds),
                 nanosecondFraction: Int32(((timeIntervalSince1970 - seconds) * 1_000_000_000).rounded(.down))
@@ -18,7 +18,7 @@ extension Date: QueryBindable {
     }
 
     public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
-        let instant = try Instant(decoder: &decoder)
+        let instant = try Time.Instant(decoder: &decoder)
         self.init(
             timeIntervalSince1970: Double(instant.secondsSinceUnixEpoch) + Double(instant.nanosecondFraction) / 1_000_000_000
         )

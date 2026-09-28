@@ -89,6 +89,6 @@ extension UInt32: QueryRepresentable {}
 
 extension UInt64: QueryRepresentable {}
 
-extension Instant: QueryRepresentable {}
+extension Time.Instant: QueryRepresentable {}
 
 extension RFC_4122.UUID: QueryRepresentable {}
