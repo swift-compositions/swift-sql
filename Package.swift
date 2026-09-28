@@ -101,6 +101,7 @@ let package = Package(
                 "SQL",
                 "SQL Macros",
                 "SQL Test Support",
+                .product(name: "Order", package: "swift-order"),
                 .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
                 .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
             ]
