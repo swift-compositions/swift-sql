@@ -683,7 +683,7 @@ public enum InsertValuesBuilder<Value> {
     ) -> ValuesRows<Value>
     where Value: Table {
         ValuesRows(
-            rows: [expression.allColumns.map(\.queryFragment)],
+            rows: [expression.allColumns],
             elements: [Value.valuesElement]
         )
     }
@@ -693,7 +693,7 @@ public enum InsertValuesBuilder<Value> {
     ) -> ValuesRows<Value>
     where Value: Table {
         ValuesRows(
-            rows: [expression.allColumns.map(\.queryFragment)],
+            rows: [expression.allColumns],
             elements: [Value.valuesElement]
         )
     }

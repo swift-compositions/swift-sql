@@ -1,7 +1,7 @@
 public import ISO_9075_Foundation
 
 public protocol TableExpression<QueryValue>: QueryExpression where QueryValue: Table {
-    var allColumns: [any QueryExpression] { get }
+    var allColumns: [ISO_9075.Fragment] { get }
 }
 
 extension TableExpression {
@@ -11,7 +11,7 @@ extension TableExpression {
                 .map { "\($0) AS \(quote: $1.name)" }
                 .joined(separator: ", ")
         } else {
-            return allColumns.map(\.queryFragment).joined(separator: ", ")
+            return allColumns.joined(separator: ", ")
         }
     }
 
@@ -19,7 +19,7 @@ extension TableExpression {
         QueryValue._columnWidth
     }
 
-    public var _allColumns: [any QueryExpression] {
+    public var _allFragments: [ISO_9075.Fragment] {
         allColumns
     }
 }

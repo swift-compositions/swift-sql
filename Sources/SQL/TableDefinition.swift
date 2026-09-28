@@ -23,7 +23,7 @@ extension TableDefinition {
         QueryValue._columnWidth
     }
 
-    public var _allColumns: [any QueryExpression] {
-        Self.allColumns
+    public var _allFragments: [ISO_9075.Fragment] {
+        Self.allColumns.map(\.queryFragment)
     }
 }

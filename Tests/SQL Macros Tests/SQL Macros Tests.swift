@@ -43,12 +43,12 @@ struct `Table macro` {
 
               public nonisolated struct Selection: SQL::TableExpression {
                 public typealias QueryValue = Reminder
-                public let allColumns: [any SQL::QueryExpression]
+                public let allColumns: [ISO_9075_Foundation::ISO_9075.Fragment]
                 public init(
                   id: some SQL::QueryExpression<Int>
                 ) {
-                  var allColumns: [any SQL::QueryExpression] = []
-                  allColumns.append(contentsOf: id._allColumns)
+                  var allColumns: [ISO_9075_Foundation::ISO_9075.Fragment] = []
+                  allColumns.append(contentsOf: id._allFragments)
                   self.allColumns = allColumns
                 }
               }

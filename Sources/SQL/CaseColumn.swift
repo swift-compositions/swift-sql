@@ -225,9 +225,9 @@ public import ISO_9075_Foundation
             set {
                 let group = Base.columns[keyPath: keyPath]
                 let writableNames = Set(group._writableColumns.map(\.name))
-                for (column, value) in zip(group._allColumns, newValue._allColumns)
+                for (column, value) in zip(group._allColumns, newValue._allFragments)
                 where writableNames.contains(column.name) {
-                    updates.append((column.name, value.queryFragment))
+                    updates.append((column.name, value))
                 }
                 for other in Base.TableColumns.allColumns where !group._names.contains(other.name) {
                     updates.append((other.name, "NULL"))
@@ -326,9 +326,9 @@ public import ISO_9075_Foundation
             set {
                 let caseGroup = group[dynamicMember: keyPath]
                 let writableNames = Set(caseGroup._writableColumns.map(\.name))
-                for (column, value) in zip(caseGroup._allColumns, newValue._allColumns)
+                for (column, value) in zip(caseGroup._allColumns, newValue._allFragments)
                 where writableNames.contains(column.name) {
-                    updates.append((column.name, value.queryFragment))
+                    updates.append((column.name, value))
                 }
                 for other in Values.QueryOutput.TableColumns.allColumns
                 where !caseGroup._names.contains(other.name) {

@@ -7,7 +7,7 @@ public protocol QueryExpression<QueryValue> {
 
     static var _columnWidth: Int { get }
 
-    var _allColumns: [any QueryExpression] { get }
+    var _allFragments: [ISO_9075.Fragment] { get }
 }
 
 extension QueryExpression {
@@ -15,8 +15,8 @@ extension QueryExpression {
         1
     }
 
-    public var _allColumns: [any QueryExpression] {
-        [self]
+    public var _allFragments: [ISO_9075.Fragment] {
+        [queryFragment]
     }
 }
 

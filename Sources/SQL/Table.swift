@@ -76,11 +76,11 @@ extension Table {
         return TableColumns.allColumns.map { open($0) }.joined(separator: ", ")
     }
 
-    public var _allColumns: [any QueryExpression] {
+    public var _allFragments: [ISO_9075.Fragment] {
         func open<Root, Value>(
             _ column: some TableColumnExpression<Root, Value>
-        ) -> any QueryExpression {
-            Value(queryOutput: (self as! Root)[keyPath: column.keyPath])
+        ) -> ISO_9075.Fragment {
+            Value(queryOutput: (self as! Root)[keyPath: column.keyPath]).queryFragment
         }
         return TableColumns.allColumns.map { open($0) }
     }

@@ -47,19 +47,15 @@ extension Optional: QueryExpression where Wrapped: QueryExpression {
     public typealias QueryValue = Wrapped.QueryValue?
 
     public var queryFragment: ISO_9075.Fragment {
-        self._allColumns.map(\.queryFragment).joined(separator: ", ")
+        _allFragments.joined(separator: ", ")
     }
 
     public static var _columnWidth: Int {
         Wrapped._columnWidth
     }
 
-    public var _allColumns: [any QueryExpression] {
-        self?._allColumns
-            ?? Array(
-                repeating: SQLQueryExpression("NULL") as any QueryExpression,
-                count: Self._columnWidth
-            )
+    public var _allFragments: [ISO_9075.Fragment] {
+        self?._allFragments ?? Array(repeating: "NULL", count: Self._columnWidth)
     }
 }
 
@@ -312,11 +308,9 @@ where Wrapped.TableColumns.PrimaryColumn: WritableTableColumnExpression {
 }
 
 extension Optional: TableExpression where Wrapped: TableExpression {
-    public var allColumns: [any QueryExpression] {
+    public var allColumns: [ISO_9075.Fragment] {
         self?.allColumns
-            ?? Wrapped.QueryValue.TableColumns.allColumns.map {
-                SQLQueryExpression("NULL AS \(quote: $0.name)")
-            }
+            ?? Wrapped.QueryValue.TableColumns.allColumns.map { "NULL AS \(quote: $0.name)" }
     }
 }
 

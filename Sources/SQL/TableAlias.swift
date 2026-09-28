@@ -115,7 +115,7 @@ extension TableAlias: Table, PartialSelectStatement, Statement where Base: Table
             self.base = base
         }
 
-        public var allColumns: [any QueryExpression] {
+        public var allColumns: [ISO_9075.Fragment] {
             base.allColumns
         }
     }
@@ -198,8 +198,8 @@ extension TableAlias: QueryExpression where Base: QueryExpression {
         Base._columnWidth
     }
 
-    public var _allColumns: [any QueryExpression] {
-        base._allColumns
+    public var _allFragments: [ISO_9075.Fragment] {
+        base._allFragments
     }
 }
 

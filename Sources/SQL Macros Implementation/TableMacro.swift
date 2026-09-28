@@ -1156,7 +1156,7 @@ extension TableMacro: MemberMacro {
 
             let selectionAssignment =
                 selectedColumns
-                .map { c, _ in "allColumns.append(contentsOf: \(c)._allColumns)\n" }
+                .map { c, _ in "allColumns.append(contentsOf: \(c)._allFragments)\n" }
                 .joined()
 
             selectionInitializers.append(
@@ -1164,7 +1164,7 @@ extension TableMacro: MemberMacro {
                 public init(
                 \(raw: selectionInitArguments)
                 ) {
-                var allColumns: [any SQL::QueryExpression] = []
+                var allColumns: [ISO_9075_Foundation::ISO_9075.Fragment] = []
                 \(raw: selectionAssignment)self.allColumns = allColumns
                 }
                 """
@@ -1299,7 +1299,7 @@ extension TableMacro: MemberMacro {
                 }
                 let staticInitialization =
                     staticColumns
-                    .map { "allColumns.append(contentsOf: \($0)._allColumns)\n" }
+                    .map { "allColumns.append(contentsOf: \($0)._allFragments)\n" }
                     .joined()
 
                 selectionInitializers.append(
@@ -1307,7 +1307,7 @@ extension TableMacro: MemberMacro {
                     public static func \(identifier)(
                     \(firstName) \(identifier): some \(moduleName)::QueryExpression<\(valueType)>
                     ) -> Self {
-                    var allColumns: [any SQL::QueryExpression] = []
+                    var allColumns: [ISO_9075_Foundation::ISO_9075.Fragment] = []
                     \(raw: staticInitialization)return Self(allColumns: allColumns)
                     }
                     """
@@ -1455,7 +1455,7 @@ extension TableMacro: MemberMacro {
                 """
                 public \(nonisolated)struct Selection: \(moduleName)::TableExpression {
                 public typealias QueryValue = \(type.trimmed)
-                public let allColumns: [any \(moduleName)::QueryExpression]
+                public let allColumns: [ISO_9075_Foundation::ISO_9075.Fragment]
                 \(selectionInitializers, separator: "\n")
                 }
                 """,
