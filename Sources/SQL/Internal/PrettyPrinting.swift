@@ -1,11 +1,11 @@
 public import ISO_9075_Foundation
 
 extension ISO_9075.Fragment {
-    package static var newlineOrSpace: Self { "\n" }
+    public static var newlineOrSpace: Self { "\n" }
 
     package static var newline: Self { "\n" }
 
-    package func indented() -> Self {
+    public func indented() -> Self {
         Self(
             segments: [.sql("  ")]
                 + segments.map { segment in

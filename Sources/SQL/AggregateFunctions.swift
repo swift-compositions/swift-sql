@@ -7,7 +7,7 @@ extension QueryExpression where QueryValue: QueryBindable {
     ) -> some QueryExpression<Int> {
         AggregateFunctionExpression(
             "count",
-            isDistinct: isDistinct,
+            distinct: isDistinct,
             [queryFragment],
             filter: filter?.queryFragment
         )
@@ -36,7 +36,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
     ) -> some QueryExpression<Double?> {
         AggregateFunctionExpression(
             "avg",
-            isDistinct: isDistinct,
+            distinct: isDistinct,
             [queryFragment],
             filter: filter?.queryFragment
         )
@@ -49,7 +49,7 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
         SQLQueryExpression(
             AggregateFunctionExpression<QueryValue._Optionalized>(
                 "sum",
-                isDistinct: isDistinct,
+                distinct: isDistinct,
                 [queryFragment],
                 filter: filter?.queryFragment
             )
@@ -83,16 +83,16 @@ public struct AggregateFunctionExpression<QueryValue>: QueryExpression, Sendable
     ) {
         self.init(
             ISO_9075.Fragment(quote: name),
-            isDistinct: isDistinct,
+            distinct: isDistinct,
             Array(repeat each arguments),
             order: order?.queryFragment,
             filter: filter?.queryFragment
         )
     }
 
-    package init(
+    public init(
         _ name: ISO_9075.Fragment,
-        isDistinct: Bool = false,
+        distinct isDistinct: Bool = false,
         _ arguments: [ISO_9075.Fragment] = [],
         order: ISO_9075.Fragment? = nil,
         filter: ISO_9075.Fragment? = nil

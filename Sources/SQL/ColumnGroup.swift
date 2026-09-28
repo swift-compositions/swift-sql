@@ -9,7 +9,7 @@ where Values.QueryOutput: Table {
 
     public typealias QueryValue = Values
 
-    package let name: String
+    public let groupName: String
 
     private let _defaultValue: () -> Values.QueryOutput?
 
@@ -24,7 +24,7 @@ where Values.QueryOutput: Table {
         keyPath: @autoclosure @escaping () -> KeyPath<Root, Values.QueryOutput>,
         default defaultValue: @autoclosure @escaping () -> Values.QueryOutput? = nil
     ) {
-        self.name = name
+        self.groupName = name
         self._defaultValue = defaultValue
         self._keyPath = keyPath
     }
@@ -62,7 +62,7 @@ where Values.QueryOutput: Table {
     ) -> ColumnGroup<Root, Member> {
         let column = Values.columns[keyPath: keyPath]
         return ColumnGroup<Root, Member>(
-            column.name,
+            column.groupName,
             keyPath: self.keyPath.appending(path: column.keyPath),
             default: column.defaultValue
         )
@@ -76,7 +76,7 @@ where Values.QueryOutput: Table {
         let column = Values.columns[keyPath: keyPath]
         return OptionalColumnGroup(
             base: ColumnGroup<Root, Member?>(
-                column.name,
+                column.groupName,
                 keyPath: self.keyPath.appending(path: column.keyPath)
             )
         )

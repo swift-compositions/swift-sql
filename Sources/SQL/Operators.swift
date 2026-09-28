@@ -478,12 +478,12 @@ private struct UnaryOperator<QueryValue>: QueryExpression {
     }
 }
 
-struct BinaryOperator<QueryValue>: QueryExpression {
+public struct BinaryOperator<QueryValue>: QueryExpression {
     let lhs: ISO_9075.Fragment
     let `operator`: ISO_9075.Fragment
     let rhs: ISO_9075.Fragment
 
-    init(
+    public init(
         lhs: some QueryExpression,
         operator: ISO_9075.Fragment,
         rhs: some QueryExpression
@@ -493,7 +493,7 @@ struct BinaryOperator<QueryValue>: QueryExpression {
         self.rhs = rhs.queryFragment
     }
 
-    var queryFragment: ISO_9075.Fragment {
+    public var queryFragment: ISO_9075.Fragment {
         "(\(lhs)) \(`operator`) (\(rhs))"
     }
 }

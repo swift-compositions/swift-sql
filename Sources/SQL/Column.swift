@@ -6,7 +6,8 @@ public struct Column<Root: Table> {
     package let render: (Root) -> ISO_9075.Fragment
     package let isNull: (Root) -> Bool
     package let decoding: @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment
-    package let keyPath: PartialKeyPath<Root>?
+    public let jsonEncoding: @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment
+    public let keyPath: PartialKeyPath<Root>?
 
     package init(
         name: String,
@@ -14,6 +15,7 @@ public struct Column<Root: Table> {
         render: @escaping (Root) -> ISO_9075.Fragment,
         isNull: @escaping (Root) -> Bool,
         decoding: @escaping @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment,
+        jsonEncoding: @escaping @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment,
         keyPath: PartialKeyPath<Root>?
     ) {
         self.name = name
@@ -21,6 +23,7 @@ public struct Column<Root: Table> {
         self.render = render
         self.isNull = isNull
         self.decoding = decoding
+        self.jsonEncoding = jsonEncoding
         self.keyPath = keyPath
     }
 
@@ -36,6 +39,7 @@ public struct Column<Root: Table> {
             render: { Value(queryOutput: $0[keyPath: keyPath]).queryFragment },
             isNull: { Value(queryOutput: $0[keyPath: keyPath]).queryBinding == .null },
             decoding: { Value.queryFragment(decoding: $0) },
+            jsonEncoding: { Value._queryFragment(jsonEncoding: $0) },
             keyPath: keyPath
         )
     }
@@ -60,6 +64,7 @@ public struct Column<Root: Table> {
             render: { [render] alias in render(alias.base) },
             isNull: { [isNull] alias in isNull(alias.base) },
             decoding: decoding,
+            jsonEncoding: jsonEncoding,
             keyPath: keyPath.flatMap { (\TableAlias<Root, Name>.base as PartialKeyPath).appending(path: $0) }
         )
     }
@@ -71,6 +76,7 @@ public struct Column<Root: Table> {
             render: { [render] root in root.map(render) ?? "NULL" },
             isNull: { [isNull] root in root.map(isNull) ?? true },
             decoding: decoding,
+            jsonEncoding: jsonEncoding,
             keyPath: nil
         )
     }
@@ -82,6 +88,7 @@ public struct Column<Root: Table> {
             render: { [render] outer in render(outer[keyPath: path]) },
             isNull: { [isNull] outer in isNull(outer[keyPath: path]) },
             decoding: decoding,
+            jsonEncoding: jsonEncoding,
             keyPath: keyPath.flatMap { (path as PartialKeyPath).appending(path: $0) }
         )
     }

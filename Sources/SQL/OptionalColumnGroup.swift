@@ -12,7 +12,7 @@ where Values.QueryOutput: Table {
         self.base = base
     }
 
-    package var name: String { base.name }
+    public var groupName: String { base.groupName }
 
     public var _names: [String] { base._names }
 
@@ -46,7 +46,7 @@ where Values.QueryOutput: Table {
         let column = Values.QueryOutput.columns[keyPath: keyPath]
         return OptionalColumnGroup<Root, Member>(
             base: ColumnGroup<Root, Member?>(
-                column.name,
+                column.groupName,
                 keyPath: base.keyPath.appending(
                     path: \.[member: \Member.self, column: column.keyPath]
                 )
@@ -62,7 +62,7 @@ where Values.QueryOutput: Table {
         let column = Values.QueryOutput.columns[keyPath: keyPath]
         return OptionalColumnGroup<Root, Member>(
             base: ColumnGroup<Root, Member?>(
-                column.name,
+                column.groupName,
                 keyPath: base.keyPath.appending(
                     path: \.[flattenedMember: \Member.self, column: column.keyPath]
                 )

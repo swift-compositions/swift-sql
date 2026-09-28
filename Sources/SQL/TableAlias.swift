@@ -88,7 +88,7 @@ extension TableAlias: Table, PartialSelectStatement, Statement where Base: Table
         ) -> ColumnGroup<TableAlias, Member> {
             let column = Base.columns[keyPath: keyPath]
             return ColumnGroup<TableAlias, Member>(
-                column.name,
+                column.groupName,
                 keyPath: \.[member: \Member.self, column: column.keyPath]
             )
         }
@@ -99,7 +99,7 @@ extension TableAlias: Table, PartialSelectStatement, Statement where Base: Table
             let column = Base.columns[keyPath: keyPath]
             return OptionalColumnGroup(
                 base: ColumnGroup<TableAlias, Member?>(
-                    column.name,
+                    column.groupName,
                     keyPath: \.[member: \Member?.self, column: column.keyPath]
                 )
             )

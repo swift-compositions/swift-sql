@@ -38,7 +38,7 @@ public import ISO_9075_Foundation
             self.base = base
         }
 
-        package var name: String { base.name }
+        public var groupName: String { base.groupName }
 
         public var _names: [String] { base._names }
 

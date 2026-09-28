@@ -1,7 +1,7 @@
 public import ISO_9075_Foundation
 
 extension RangeReplaceableCollection {
-    package init<each Q: QueryExpression>(_ elements: repeat each Q)
+    public init<each Q: QueryExpression>(_ elements: repeat each Q)
     where Element == ISO_9075.Fragment {
         self.init()
         for element in repeat each elements {

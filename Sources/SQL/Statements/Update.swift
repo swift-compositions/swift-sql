@@ -31,13 +31,13 @@ public struct Update<From: Table, Returning> {
     var `where`: [ISO_9075.Fragment]
     var returning: [ISO_9075.Fragment]
 
-    public func _returning<R>(_ returning: [ISO_9075.Fragment]) -> Update<From, R> {
+    public func returning<R>(fragments: [ISO_9075.Fragment]) -> Update<From, R> {
         Update<From, R>(
             isEmpty: isEmpty,
             conflictResolution: conflictResolution,
             updates: updates,
             where: `where`,
-            returning: returning
+            returning: fragments
         )
     }
 

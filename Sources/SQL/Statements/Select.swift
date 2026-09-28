@@ -299,7 +299,7 @@ public struct Select<Columns, From: _SelectSource, Joins>: Sendable {
         self.clauses = clauses
     }
 
-    package var _tableReference: ISO_9075.Fragment? {
+    public var tableReference: ISO_9075.Fragment? {
         get { clauses.from }
         set { clauses.from = newValue }
     }
@@ -618,7 +618,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: nil,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint((From.columns, F.columns))
         )
@@ -655,7 +655,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: nil,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint(
                 (From.columns, repeat (each J1).columns, F.columns, repeat (each J2).columns)
@@ -689,7 +689,7 @@ extension Select where From: Table {
                 + [
                     _JoinClause(
                         operator: nil,
-                        tableReference: other._tableReference,
+                        tableReference: other.tableReference,
                         table: F.self,
                         constraint: constraint
                     )
@@ -719,7 +719,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: nil,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint(
                 (From.columns, repeat (each J).columns, F.columns)
@@ -750,7 +750,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: nil,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint(
                 (From.columns, F.columns, repeat (each J).columns)
@@ -781,7 +781,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: nil,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint(
                 (From.columns, Joins.columns, F.columns)
@@ -810,7 +810,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: .left,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint((From.columns, F.columns))
         )
@@ -851,7 +851,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: .left,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint(
                 (From.columns, repeat (each J1).columns, F.columns, repeat (each J2).columns)
@@ -896,7 +896,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: .left,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint(
                 (From.columns, repeat (each J).columns, F.columns)
@@ -932,7 +932,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: .left,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint(
                 (From.columns, F.columns, repeat (each J).columns)
@@ -964,7 +964,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: .left,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint(
                 (From.columns, Joins.columns, F.columns)
@@ -993,7 +993,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: .right,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint((From.columns, F.columns))
         )
@@ -1034,7 +1034,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: .right,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint(
                 (From.columns, repeat (each J1).columns, F.columns, repeat (each J2).columns)
@@ -1079,7 +1079,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: .right,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint(
                 (From.columns, repeat (each J).columns, F.columns)
@@ -1115,7 +1115,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: .right,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint(
                 (From.columns, F.columns, repeat (each J).columns)
@@ -1147,7 +1147,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: .right,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint(
                 (From.columns, Joins.columns, F.columns)
@@ -1179,7 +1179,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: .full,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint((From.columns, F.columns))
         )
@@ -1223,7 +1223,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: .full,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint(
                 (From.columns, repeat (each J1).columns, F.columns, repeat (each J2).columns)
@@ -1268,7 +1268,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: .full,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint(
                 (From.columns, repeat (each J).columns, F.columns)
@@ -1304,7 +1304,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: .full,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint(
                 (From.columns, F.columns, repeat (each J).columns)
@@ -1338,7 +1338,7 @@ extension Select where From: Table {
         let other = other.asSelect()
         let join = _JoinClause(
             operator: .full,
-            tableReference: other._tableReference,
+            tableReference: other.tableReference,
             table: F.self,
             constraint: constraint(
                 (From.columns, Joins.columns, F.columns)

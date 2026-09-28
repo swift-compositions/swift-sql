@@ -20,8 +20,8 @@ public struct Delete<From: Table, Returning> {
     var `where`: [ISO_9075.Fragment] = []
     var returning: [ISO_9075.Fragment] = []
 
-    public func _returning<R>(_ returning: [ISO_9075.Fragment]) -> Delete<From, R> {
-        Delete<From, R>(isEmpty: isEmpty, where: `where`, returning: returning)
+    public func returning<R>(fragments: [ISO_9075.Fragment]) -> Delete<From, R> {
+        Delete<From, R>(isEmpty: isEmpty, where: `where`, returning: fragments)
     }
 
     public func `where`(

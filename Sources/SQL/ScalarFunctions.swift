@@ -124,11 +124,11 @@ extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
     }
 }
 
-package struct QueryFunction<QueryValue>: QueryExpression {
+public struct QueryFunction<QueryValue>: QueryExpression {
     let name: ISO_9075.Fragment
     let arguments: [ISO_9075.Fragment]
 
-    package init<each Argument: QueryExpression>(
+    public init<each Argument: QueryExpression>(
         _ name: ISO_9075.Fragment,
         _ arguments: repeat each Argument
     ) {

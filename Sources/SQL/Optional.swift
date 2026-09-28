@@ -152,7 +152,7 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
             let column = Wrapped.columns[keyPath: keyPath]
             return OptionalColumnGroup(
                 base: ColumnGroup<Optional, Member?>(
-                    column.name,
+                    column.groupName,
                     keyPath: \.[member: \Member.self, column: column.keyPath]
                 )
             )
@@ -166,7 +166,7 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
             let column = Wrapped.columns[keyPath: keyPath]
             return OptionalColumnGroup(
                 base: ColumnGroup<Optional, Member?>(
-                    column.name,
+                    column.groupName,
                     keyPath: \.[flattenedMember: \Member.self, column: column.keyPath]
                 )
             )
