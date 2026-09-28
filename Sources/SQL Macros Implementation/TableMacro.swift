@@ -188,7 +188,7 @@ extension TableMacro: ExtensionMacro {
                     else { continue }
                     isEphemeral = isEphemeral || attributeName == "Ephemeral"
                     isExplicitColumn =
-                        isExplicitColumn || attributeName == "Column" || attributeName == "Columns"
+                        isExplicitColumn || attributeName == "Column"
                     guard
                         isExplicitColumn || isEphemeral,
                         case .argumentList(let arguments) = attribute.arguments
@@ -503,7 +503,7 @@ extension TableMacro: ExtensionMacro {
                         continue
                     }
                     isExplicitColumn =
-                        isExplicitColumn || attributeName == "Column" || attributeName == "Columns"
+                        isExplicitColumn || attributeName == "Column"
                     guard
                         isExplicitColumn,
                         case .argumentList(let arguments) = attribute.arguments
@@ -833,7 +833,7 @@ extension TableMacro: MemberMacro {
                     else { continue }
                     isEphemeral = isEphemeral || attributeName == "Ephemeral"
                     isExplicitColumn =
-                        isExplicitColumn || attributeName == "Column" || attributeName == "Columns"
+                        isExplicitColumn || attributeName == "Column"
                     guard
                         isExplicitColumn || isEphemeral,
                         case .argumentList(let arguments) = attribute.arguments
@@ -981,7 +981,7 @@ extension TableMacro: MemberMacro {
                                     IdentifierTypeSyntax.self
                                 )?.name
                                     .text,
-                                ["Column", "Columns"].contains(attributeName)
+                                attributeName == "Column"
                             else { continue }
                             var hasPrimaryKeyArgument = false
                             var arguments: LabeledExprListSyntax = []
@@ -1067,7 +1067,7 @@ extension TableMacro: MemberMacro {
                                     IdentifierTypeSyntax.self
                                 )?.name
                                     .text,
-                                ["Column", "Columns"].contains(attributeName)
+                                attributeName == "Column"
                             else { continue }
                             if case .argumentList(var arguments) = attribute.arguments {
                                 for argumentIndex in arguments.indices {
@@ -1194,7 +1194,7 @@ extension TableMacro: MemberMacro {
                             .name.text
                     else { continue }
                     isExplicitColumn =
-                        isExplicitColumn || attributeName == "Column" || attributeName == "Columns"
+                        isExplicitColumn || attributeName == "Column"
                     guard
                         isExplicitColumn,
                         case .argumentList(let arguments) = attribute.arguments
@@ -1516,7 +1516,7 @@ extension TableMacro: MemberAttributeMacro {
                         let attribute = attribute.as(AttributeSyntax.self),
                         let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?
                             .name.text,
-                        attributeName == "Column" || attributeName == "Columns",
+                        attributeName == "Column",
                         case .argumentList(let arguments) = attribute.arguments
                     else { continue }
                     for argument in arguments {
@@ -1554,7 +1554,7 @@ extension TableMacro: MemberAttributeMacro {
                 let attribute = attribute.as(AttributeSyntax.self),
                 let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name
                     .text,
-                attributeName == "Column" || attributeName == "Columns"
+                attributeName == "Column"
             else { continue }
             columnAttribute = attribute
             break
@@ -1597,7 +1597,7 @@ extension TableMacro: MemberAttributeMacro {
                         let attribute = attribute.as(AttributeSyntax.self),
                         let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?
                             .name.text,
-                        attributeName == "Column" || attributeName == "Columns",
+                        attributeName == "Column",
                         case .argumentList(let arguments) = attribute.arguments,
                         arguments.contains(
                             where: {

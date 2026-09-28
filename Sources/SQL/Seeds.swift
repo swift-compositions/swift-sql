@@ -36,9 +36,9 @@ public struct Seed {
         }
     }
 
-    init<T: TableDraft>(draft row: T) {
+    init<T: TableDraft>(draft row: T, primaryKeys: Set<String> = []) {
         self.table = ObjectIdentifier(T.self)
-        self.row = T.TableColumns.writableColumns.map { $0.render(row) }
+        self.row = T.TableColumns.writableColumns.map { $0.rendering(row, primaryKeys: primaryKeys) }
         self.insert = { rows in
             SQLQueryExpression(
                 T.SourceTable._insert(columnNames: T.TableColumns.writableColumns.map(\.name), rows: rows)
@@ -78,7 +78,18 @@ public enum SeedsBuilder {
     }
 
     public static func buildExpression<T: TableDraft>(_ expression: [T]) -> [Seed] {
-        expression.map(Seed.init(draft:))
+        expression.map { Seed(draft: $0) }
+    }
+
+    public static func buildExpression<T: TableDraft>(_ expression: T) -> [Seed]
+    where T.SourceTable: PrimaryKeyedTable {
+        [Seed(draft: expression, primaryKeys: Set(T.SourceTable.columns.primaryKey._names))]
+    }
+
+    public static func buildExpression<T: TableDraft>(_ expression: [T]) -> [Seed]
+    where T.SourceTable: PrimaryKeyedTable {
+        let primaryKeys = Set(T.SourceTable.columns.primaryKey._names)
+        return expression.map { Seed(draft: $0, primaryKeys: primaryKeys) }
     }
 
     public static func buildLimitedAvailability(_ component: [Seed]) -> [Seed] {

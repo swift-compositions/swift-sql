@@ -27,7 +27,7 @@ struct Numbered: ISO_9075.Dialect {
         ))
     }
 
-    @Test func `an insert binds each given column of its draft and leaves out an absent primary key`() {
+    @Test func `an insert binds each given column of its draft`() {
         let rendering = Numbered().render(Reminder.insert { Reminder.Draft(title: "Groceries") }.query)
         #expect(rendering.values == [.text("Groceries"), .bool(false)])
         #expect(rendering.sql.hasPrefix(#"INSERT INTO "reminder""#))
@@ -41,3 +41,26 @@ struct Numbered: ISO_9075.Dialect {
     }
 
 }
+
+struct Positional: ISO_9075.Dialect {
+    func placeholder(_ offset: Int) -> String { "?" }
+    var defaultPrimaryKey: String { "NULL" }
+}
+
+@Suite struct `An absent primary key` {
+    let insert = Reminder.insert {
+        Reminder.Draft(id: 1, title: "Groceries")
+        Reminder.Draft(title: "Taxes")
+    }
+
+    @Test func `renders as the standard DEFAULT`() {
+        let rendering = Numbered().render(insert.query)
+        #expect(rendering.sql.hasSuffix("VALUES\n($1, $2, $3), (DEFAULT, $4, $5)"))
+        #expect(rendering.values == [.int(1), .text("Groceries"), .bool(false), .text("Taxes"), .bool(false)])
+    }
+
+    @Test func `renders as the dialect spells it`() {
+        #expect(Positional().render(insert.query).sql.hasSuffix("VALUES\n(?, ?, ?), (NULL, ?, ?)"))
+    }
+}
+

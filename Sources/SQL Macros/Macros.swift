@@ -172,7 +172,6 @@ public import SQL
 @attached(peer)
 public macro Column(
     _ name: String = "",
-    as representableType: (any QueryRepresentable.Type)? = nil,
     generated: GeneratedColumnStorage? = nil,
     primaryKey: Bool = false,
     lazyInitializable: Bool? = nil
@@ -182,16 +181,17 @@ public macro Column(
         type: "ColumnMacro"
     )
 
-@available(*, deprecated, renamed: "Column")
 @attached(peer)
-public macro Columns(
-    as representableType: (any QueryRepresentable.Type)? = nil,
+public macro Column<Representation: QueryRepresentable>(
+    _ name: String = "",
+    as representableType: Representation.Type,
+    generated: GeneratedColumnStorage? = nil,
     primaryKey: Bool = false,
     lazyInitializable: Bool? = nil
 ) =
     #externalMacro(
         module: "SQL_Macros_Implementation",
-        type: "ColumnsMacro"
+        type: "ColumnMacro"
     )
 
 @attached(peer)
@@ -215,12 +215,6 @@ public macro sql<QueryValue>(
 ) -> SQLQueryExpression<QueryValue> =
     #externalMacro(module: "SQL_Macros_Implementation", type: "SQLMacro")
 
-@freestanding(expression)
-public macro sql(
-    _ queryFragment: ISO_9075.Fragment,
-    as queryValueType: Any.Type = Any.self
-) -> SQLQueryExpression<Any> =
-    #externalMacro(module: "SQL_Macros_Implementation", type: "SQLMacro")
 
 @attached(accessor, names: named(get))
 public macro _ColumnDefinition() =

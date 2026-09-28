@@ -594,6 +594,14 @@ public enum InsertValuesBuilder<Value> {
         ValuesRows(rows: _writableRows(expression), elements: [Value.Draft.writableValuesElement])
     }
 
+    public static func buildExpression(_ expression: [Value.Draft]) -> ValuesRows<Value>
+    where Value: PrimaryKeyedTable, Value.Draft: TableDraft {
+        ValuesRows(
+            rows: _writableRows(expression, primaryKeys: Set(Value.columns.primaryKey._names)),
+            elements: [Value.Draft.writableValuesElement]
+        )
+    }
+
     @_disfavoredOverload
     public static func buildExpression<V: QueryExpression>(
         _ expression: [V]
@@ -626,6 +634,11 @@ public enum InsertValuesBuilder<Value> {
 
     public static func buildExpression(_ expression: Value.Draft) -> ValuesRows<Value>
     where Value: Table, Value.Draft: TableDraft {
+        buildExpression([expression])
+    }
+
+    public static func buildExpression(_ expression: Value.Draft) -> ValuesRows<Value>
+    where Value: PrimaryKeyedTable, Value.Draft: TableDraft {
         buildExpression([expression])
     }
 
@@ -743,8 +756,8 @@ public enum InsertValuesBuilder<Value> {
     }
 }
 
-private func _writableRows<T: Table>(_ values: [T]) -> [[ISO_9075.Fragment]] {
-    values.map { value in T.TableColumns.writableColumns.map { $0.render(value) } }
+private func _writableRows<T: Table>(_ values: [T], primaryKeys: Set<String> = []) -> [[ISO_9075.Fragment]] {
+    values.map { value in T.TableColumns.writableColumns.map { $0.rendering(value, primaryKeys: primaryKeys) } }
 }
 
 public struct _ExcludedName: AliasName {

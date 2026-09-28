@@ -13,7 +13,6 @@ struct SQLPlugin: CompilerPlugin {
             ColumnDefaultMacro.self,
             ColumnDefinitionMacro.self,
             ColumnMacro.self,
-            ColumnsMacro.self,
             EphemeralMacro.self,
             PrimaryKeyDefaultMacro.self,
             SQLMacro.self,

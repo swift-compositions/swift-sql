@@ -96,7 +96,7 @@ package enum ColumnCheckGroupMacro: PeerMacro {
                 let attribute = attribute.as(AttributeSyntax.self),
                 let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?.name
                     .text,
-                attributeName == "Column" || attributeName == "Columns",
+                attributeName == "Column",
                 case .argumentList(let arguments) = attribute.arguments
             else { continue }
 
@@ -243,7 +243,6 @@ extension DeclSyntaxProtocol {
                 guard case .attribute(let attribute) = element else { return true }
                 let name = attribute.attributeName.trimmedDescription
                 return name != "ColumnCheck" && name != "CaseCheck" && name != "Column"
-                    && name != "Columns"
             }
             filtered.insert(.attribute(attribute), at: filtered.startIndex)
             return AttributeListSyntax(filtered)

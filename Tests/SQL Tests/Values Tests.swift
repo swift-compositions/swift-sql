@@ -45,10 +45,10 @@ struct `VALUES statements` {
     }
 
     @Test func `single column`() {
-      assertInlineSnapshot(of: Values<String> {
+      assertInlineSnapshot(of: rows(Values {
           "Hello"
           "Goodbye"
-        }, as: .sql) {
+        }), as: .sql) {
           """
           VALUES ('Hello'), ('Goodbye')
           """
@@ -146,10 +146,10 @@ struct `VALUES statements` {
 
     @Test func `select single column`() {
       assertInlineSnapshot(of: Select(
-          Values<Int> {
+          rows(Values {
             1
             2
-          }
+          })
         ), as: .sql) {
           """
           SELECT "column1"
@@ -351,4 +351,8 @@ private struct HighScore {
 private struct Tag {
     let id: Int
     var title = ""
+}
+
+private func rows<each V: QueryRepresentable, S: Statement<(repeat each V)>>(_ statement: S) -> S {
+    statement
 }
