@@ -75,9 +75,37 @@ public struct CommonTableExpressionClause: QueryExpression, Sendable {
     public typealias QueryValue = ()
     let tableName: ISO_9075.Fragment
     let select: ISO_9075.Fragment
+    let materialization: Materialization?
+
+    init(tableName: ISO_9075.Fragment, select: ISO_9075.Fragment, materialization: Materialization? = nil) {
+        self.tableName = tableName
+        self.select = select
+        self.materialization = materialization
+    }
+
     public var queryFragment: ISO_9075.Fragment {
         guard !select.isEmpty else { return "" }
-        return "\(tableName) AS (\(.newline)\(select.indented())\(.newline))"
+        return "\(tableName) AS \(materialization?.queryFragment ?? "")(\(.newline)\(select.indented())\(.newline))"
+    }
+}
+
+extension CommonTableExpressionClause {
+    public enum Materialization: Hashable, Sendable {
+        case materialized
+        case notMaterialized
+
+        var queryFragment: ISO_9075.Fragment {
+            switch self {
+            case .materialized: "MATERIALIZED "
+            case .notMaterialized: "NOT MATERIALIZED "
+            }
+        }
+    }
+}
+
+extension PartialSelectStatement where QueryValue: Table {
+    public func materialized(_ materialization: CommonTableExpressionClause.Materialization = .materialized) -> CommonTableExpressionClause {
+        CommonTableExpressionClause(tableName: "\(QueryValue.self)", select: query, materialization: materialization)
     }
 }
 
@@ -87,6 +115,12 @@ public enum CommonTableExpressionBuilder {
         _ expression: some PartialSelectStatement<CTETable>
     ) -> CommonTableExpressionClause {
         CommonTableExpressionClause(tableName: "\(CTETable.self)", select: expression.query)
+    }
+
+    public static func buildExpression(
+        _ expression: CommonTableExpressionClause
+    ) -> CommonTableExpressionClause {
+        expression
     }
 
     public static func buildBlock(

@@ -211,6 +211,7 @@ public struct _SelectClauses: Sendable {
     var `where`: [ISO_9075.Fragment] = []
     var group: [ISO_9075.Fragment] = []
     var having: [ISO_9075.Fragment] = []
+    var window: [ISO_9075.Fragment] = []
     var order: [ISO_9075.Fragment] = []
     var limit: _LimitClause?
     var valuesElements: [ValuesElement] = []
@@ -260,6 +261,11 @@ public struct Select<Columns, From: _SelectSource, Joins>: Sendable {
         set { clauses.having = newValue }
         _modify { yield &clauses.having }
     }
+    fileprivate var window: [ISO_9075.Fragment] {
+        get { clauses.window }
+        set { clauses.window = newValue }
+        _modify { yield &clauses.window }
+    }
     fileprivate var order: [ISO_9075.Fragment] {
         get { clauses.order }
         set { clauses.order = newValue }
@@ -280,6 +286,7 @@ public struct Select<Columns, From: _SelectSource, Joins>: Sendable {
         where: [ISO_9075.Fragment],
         group: [ISO_9075.Fragment],
         having: [ISO_9075.Fragment],
+        window: [ISO_9075.Fragment],
         order: [ISO_9075.Fragment],
         limit: _LimitClause?
     ) {
@@ -291,6 +298,7 @@ public struct Select<Columns, From: _SelectSource, Joins>: Sendable {
         self.where = `where`
         self.group = group
         self.having = having
+        self.window = window
         self.order = order
         self.limit = limit
     }
@@ -456,6 +464,12 @@ extension Select {
         return select
     }
 
+    public func window(_ name: String, as definition: ISO_9075.Fragment) -> Self {
+        var select = self
+        select.window.append("\(quote: name) AS (\(definition))")
+        return select
+    }
+
     public func limit<each J: Table>(_ maxLength: (some QueryExpression<Int>)?) -> Self
     where Joins == (repeat each J) {
         _limit(maxLength?.queryFragment)
@@ -604,6 +618,7 @@ extension Select where From: Table {
             where: `where`,
             group: group,
             having: having,
+            window: window,
             order: order,
             limit: limit
         )
@@ -631,6 +646,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -670,6 +686,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -697,6 +714,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -734,6 +752,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -765,6 +784,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -796,6 +816,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -823,6 +844,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -870,6 +892,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -915,6 +938,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -947,6 +971,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -979,6 +1004,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -1006,6 +1032,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -1053,6 +1080,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -1098,6 +1126,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -1130,6 +1159,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -1162,6 +1192,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -1195,6 +1226,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -1242,6 +1274,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -1287,6 +1320,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -1321,6 +1355,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -1353,6 +1388,7 @@ extension Select where From: Table {
             where: `where` + other.where,
             group: group + other.group,
             having: having + other.having,
+            window: window + other.window,
             order: order + other.order,
             limit: other.limit ?? limit
         )
@@ -1676,6 +1712,7 @@ extension Select where From: Table {
             where: `where`,
             group: group,
             having: having,
+            window: window,
             order: order,
             limit: limit
         )
@@ -1721,6 +1758,7 @@ public func + <
         where: (lhs.where + rhs.where).removingDuplicates(),
         group: (lhs.group + rhs.group).removingDuplicates(),
         having: (lhs.having + rhs.having).removingDuplicates(),
+        window: (lhs.window + rhs.window).removingDuplicates(),
         order: (lhs.order + rhs.order).removingDuplicates(),
         limit: rhs.limit ?? lhs.limit
     )
@@ -1804,6 +1842,9 @@ extension Select: PartialSelectStatement {
         if !having.isEmpty {
             let having: ISO_9075.Fragment = having.map { "(\($0))" }.joined(separator: " AND ")
             query.append("\(.newlineOrSpace)HAVING \(having)")
+        }
+        if !window.isEmpty {
+            query.append("\(.newlineOrSpace)WINDOW \(window.joined(separator: ", "))")
         }
         if !order.isEmpty {
             query.append("\(.newlineOrSpace)ORDER BY \(order.joined(separator: ", "))")
