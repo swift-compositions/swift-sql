@@ -47,7 +47,7 @@ extension Table {
     ) -> InsertOf<Self> {
         withoutActuallyEscaping(updates) { updates in
             _insert(
-                columnNames: TableColumns.writableColumns.map(\.name),
+                columnNames: TableColumns.writableColumns.map { $0.name },
                 values: .values(values().rows),
                 onConflict: conflictTargets,
                 where: targetFilter,

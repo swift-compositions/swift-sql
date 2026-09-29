@@ -12,11 +12,10 @@ extension QueryExpression where QueryValue: FloatingPoint {
     public func round(
         _ precision: (some QueryExpression<Int>)? = Int?.none
     ) -> some QueryExpression<QueryValue> {
-        if let precision {
-            return QueryFunction("round", self, precision)
-        } else {
-            return QueryFunction("round", self)
-        }
+        SQLQueryExpression(
+            "\(ISO_9075.Keyword.roundOpen)round(\(ISO_9075.Keyword.roundOperandOpen)\(self)\(ISO_9075.Keyword.roundOperandClose)\(precision.map { precision -> ISO_9075.Fragment in ", \(ISO_9075.Keyword.roundPrecisionOpen)\(precision)\(ISO_9075.Keyword.roundPrecisionClose)" } ?? ""))\(ISO_9075.Keyword.roundClose)",
+            as: QueryValue.self
+        )
     }
 }
 

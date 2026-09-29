@@ -1937,7 +1937,7 @@ public struct _LimitClause: QueryExpression, Sendable {
     let offset: ISO_9075.Fragment?
 
     public var queryFragment: ISO_9075.Fragment {
-        var query: ISO_9075.Fragment = "LIMIT \(maxLength ?? "-1")"
+        var query: ISO_9075.Fragment = "LIMIT \(maxLength ?? "\(ISO_9075.Keyword.unboundedLimit)")"
         if let offset {
             query.append(" OFFSET \(offset)")
         }

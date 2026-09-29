@@ -102,3 +102,38 @@ struct Positional: ISO_9075.Dialect {
         #expect(!sql.contains("NULLS"))
     }
 }
+
+struct Unbounded: ISO_9075.Dialect {
+    func placeholder(_ offset: Int) -> String { "?" }
+    var unboundedLimit: String { "-1" }
+    var roundOpen: String { "CAST(" }
+    var roundClose: String { " AS DOUBLE PRECISION)" }
+    var roundOperandOpen: String { "CAST(" }
+    var roundOperandClose: String { " AS NUMERIC)" }
+    var roundPrecisionOpen: String { "CAST(" }
+    var roundPrecisionClose: String { " AS INTEGER)" }
+}
+
+@Suite struct `An offset without a limit` {
+    let select = Reminder.offset(10).select(\.title)
+
+    @Test func `renders the standard unbounded limit`() {
+        #expect(Numbered().render(select.query).sql.hasSuffix("LIMIT ALL OFFSET $1"))
+    }
+
+    @Test func `renders the unbounded limit as the dialect spells it`() {
+        #expect(Unbounded().render(select.query).sql.hasSuffix("LIMIT -1 OFFSET ?"))
+    }
+}
+
+@Suite struct `Rounding` {
+    @Test func `renders the standard round`() {
+        #expect(Numbered().render(2.5.round().queryFragment) == ISO_9075.Rendering(sql: "round($1)", values: [.double(2.5)]))
+        #expect(Numbered().render(2.5.round(1).queryFragment) == ISO_9075.Rendering(sql: "round($1, $2)", values: [.double(2.5), .int(1)]))
+    }
+
+    @Test func `asks the dialect to convert the operand, the precision and the result`() {
+        #expect(Unbounded().render(2.5.round().queryFragment).sql == "CAST(round(CAST(? AS NUMERIC)) AS DOUBLE PRECISION)")
+        #expect(Unbounded().render(2.5.round(1).queryFragment).sql == "CAST(round(CAST(? AS NUMERIC), CAST(? AS INTEGER)) AS DOUBLE PRECISION)")
+    }
+}
