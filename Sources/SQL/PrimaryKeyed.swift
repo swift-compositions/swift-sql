@@ -24,13 +24,13 @@ extension TableDraft {
     public static subscript(
         dynamicMember keyPath: KeyPath<SourceTable.Type, some Statement<SourceTable>>
     ) -> some Statement<Self> {
-        SQLQueryExpression("\(SourceTable.self[keyPath: keyPath])")
+        SQLQueryExpression("\(project(SourceTable.self, through: keyPath))")
     }
 
     public static subscript(
         dynamicMember keyPath: KeyPath<SourceTable.Type, some SelectStatementOf<SourceTable>>
     ) -> SelectOf<Self> {
-        unsafeBitCast(SourceTable.self[keyPath: keyPath].asSelect(), to: SelectOf<Self>.self)
+        unsafeBitCast(project(SourceTable.self, through: keyPath).asSelect(), to: SelectOf<Self>.self)
     }
 
     public static var all: SelectOf<Self> {
@@ -40,6 +40,13 @@ extension TableDraft {
     public static var schemaName: String? { SourceTable.schemaName }
 
     public static var tableName: String { SourceTable.tableName }
+}
+
+package func project<Root, Value>(
+    _ root: Root,
+    through keyPath: KeyPath<Root, Value>
+) -> Value {
+    root[keyPath: keyPath]
 }
 
 public protocol PrimaryKeyedTableDefinition<PrimaryKey>: TableDefinition

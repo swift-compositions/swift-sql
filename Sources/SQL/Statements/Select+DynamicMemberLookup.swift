@@ -7,7 +7,7 @@
             dynamicMember keyPath: KeyPath<From.Type, S>
         ) -> Select<Columns, From, Joins>
         where Columns == (repeat each C), Joins == (repeat each J) {
-            self + From.self[keyPath: keyPath]
+            self + project(From.self, through: keyPath)
         }
 
         public subscript<
@@ -18,7 +18,7 @@
             dynamicMember keyPath: KeyPath<From.Type, Select<C2, From, ()>>
         ) -> Select<(repeat each C1, C2), From, Joins>
         where Columns == (repeat each C1), Joins == (repeat each J) {
-            self + From.self[keyPath: keyPath]
+            self + project(From.self, through: keyPath)
         }
 
         public subscript<
@@ -30,7 +30,7 @@
             dynamicMember keyPath: KeyPath<From.Type, Select<(C2, C3), From, ()>>
         ) -> Select<(repeat each C1, C2, C3), From, Joins>
         where Columns == (repeat each C1), Joins == (repeat each J) {
-            self + From.self[keyPath: keyPath]
+            self + project(From.self, through: keyPath)
         }
 
         public subscript<
@@ -43,7 +43,7 @@
             dynamicMember keyPath: KeyPath<From.Type, Select<(C2, C3, C4), From, ()>>
         ) -> Select<(repeat each C1, C2, C3, C4), From, Joins>
         where Columns == (repeat each C1), Joins == (repeat each J) {
-            self + From.self[keyPath: keyPath]
+            self + project(From.self, through: keyPath)
         }
 
         public subscript<
@@ -57,7 +57,7 @@
             dynamicMember keyPath: KeyPath<From.Type, Select<(C2, C3, C4, C5), From, ()>>
         ) -> Select<(repeat each C1, C2, C3, C4, C5), From, Joins>
         where Columns == (repeat each C1), Joins == (repeat each J) {
-            self + From.self[keyPath: keyPath]
+            self + project(From.self, through: keyPath)
         }
 
         public subscript<
@@ -69,7 +69,7 @@
             dynamicMember keyPath: KeyPath<From.Type, Select<C2, From, J2>>
         ) -> Select<(repeat each C1, C2), From, (repeat each J1, J2)>
         where Columns == (repeat each C1), Joins == (repeat each J1) {
-            self + From.self[keyPath: keyPath]
+            self + project(From.self, through: keyPath)
         }
 
         public subscript<
@@ -82,7 +82,7 @@
             dynamicMember keyPath: KeyPath<From.Type, Select<(C2, C3), From, J2>>
         ) -> Select<(repeat each C1, C2, C3), From, (repeat each J1, J2)>
         where Columns == (repeat each C1), Joins == (repeat each J1) {
-            self + From.self[keyPath: keyPath]
+            self + project(From.self, through: keyPath)
         }
 
         public subscript<
@@ -96,7 +96,7 @@
             dynamicMember keyPath: KeyPath<From.Type, Select<(C2, C3, C4), From, J2>>
         ) -> Select<(repeat each C1, C2, C3, C4), From, (repeat each J1, J2)>
         where Columns == (repeat each C1), Joins == (repeat each J1) {
-            self + From.self[keyPath: keyPath]
+            self + project(From.self, through: keyPath)
         }
 
         public subscript<
@@ -111,7 +111,7 @@
             dynamicMember keyPath: KeyPath<From.Type, Select<(C2, C3, C4, C5), From, J2>>
         ) -> Select<(repeat each C1, C2, C3, C4, C5), From, (repeat each J1, J2)>
         where Columns == (repeat each C1), Joins == (repeat each J1) {
-            self + From.self[keyPath: keyPath]
+            self + project(From.self, through: keyPath)
         }
 
         public subscript<
@@ -123,7 +123,7 @@
             dynamicMember keyPath: KeyPath<From.Type, Select<(), From, (J2, J3)>>
         ) -> Select<(repeat each C), From, (repeat each J1, J2, J3)>
         where Columns == (repeat each C), Joins == (repeat each J1) {
-            self + From.self[keyPath: keyPath]
+            self + project(From.self, through: keyPath)
         }
 
         public subscript<
@@ -136,7 +136,7 @@
             dynamicMember keyPath: KeyPath<From.Type, Select<C2, From, (J2, J3)>>
         ) -> Select<(repeat each C1, C2), From, (repeat each J1, J2, J3)>
         where Columns == (repeat each C1), Joins == (repeat each J1) {
-            self + From.self[keyPath: keyPath]
+            self + project(From.self, through: keyPath)
         }
 
         public subscript<
@@ -150,7 +150,7 @@
             dynamicMember keyPath: KeyPath<From.Type, Select<(C2, C3), From, (J2, J3)>>
         ) -> Select<(repeat each C1, C2, C3), From, (repeat each J1, J2, J3)>
         where Columns == (repeat each C1), Joins == (repeat each J1) {
-            self + From.self[keyPath: keyPath]
+            self + project(From.self, through: keyPath)
         }
 
         public subscript<
@@ -165,7 +165,7 @@
             dynamicMember keyPath: KeyPath<From.Type, Select<(C2, C3, C4), From, (J2, J3)>>
         ) -> Select<(repeat each C1, C2, C3, C4), From, (repeat each J1, J2, J3)>
         where Columns == (repeat each C1), Joins == (repeat each J1) {
-            self + From.self[keyPath: keyPath]
+            self + project(From.self, through: keyPath)
         }
 
         public subscript<
@@ -181,7 +181,7 @@
             dynamicMember keyPath: KeyPath<From.Type, Select<(C2, C3, C4, C5), From, (J2, J3)>>
         ) -> Select<(repeat each C1, C2, C3, C4, C5), From, (repeat each J1, J2, J3)>
         where Columns == (repeat each C1), Joins == (repeat each J1) {
-            self + From.self[keyPath: keyPath]
+            self + project(From.self, through: keyPath)
         }
     }
 
@@ -196,7 +196,7 @@
         where Columns == (repeat each C), Joins == (repeat each J) {
             self
                 + unsafeBitCast(
-                    From.SourceTable.self[keyPath: keyPath].asSelect(),
+                    project(From.SourceTable.self, through: keyPath).asSelect(),
                     to: Select<(), From, ()>.self
                 )
         }
@@ -211,7 +211,7 @@
         where Columns == (repeat each C1), Joins == (repeat each J) {
             self
                 + unsafeBitCast(
-                    From.SourceTable.self[keyPath: keyPath],
+                    project(From.SourceTable.self, through: keyPath),
                     to: Select<C2, From, ()>.self
                 )
         }
@@ -229,7 +229,7 @@
         where Columns == (repeat each C1), Joins == (repeat each J) {
             self
                 + unsafeBitCast(
-                    From.SourceTable.self[keyPath: keyPath],
+                    project(From.SourceTable.self, through: keyPath),
                     to: Select<(C2, C3), From, ()>.self
                 )
         }
@@ -248,7 +248,7 @@
         where Columns == (repeat each C1), Joins == (repeat each J) {
             self
                 + unsafeBitCast(
-                    From.SourceTable.self[keyPath: keyPath],
+                    project(From.SourceTable.self, through: keyPath),
                     to: Select<(C2, C3, C4), From, ()>.self
                 )
         }
@@ -268,7 +268,7 @@
         where Columns == (repeat each C1), Joins == (repeat each J) {
             self
                 + unsafeBitCast(
-                    From.SourceTable.self[keyPath: keyPath],
+                    project(From.SourceTable.self, through: keyPath),
                     to: Select<(C2, C3, C4, C5), From, ()>.self
                 )
         }
@@ -284,7 +284,7 @@
         where Columns == (repeat each C1), Joins == (repeat each J1) {
             self
                 + unsafeBitCast(
-                    From.SourceTable.self[keyPath: keyPath],
+                    project(From.SourceTable.self, through: keyPath),
                     to: Select<C2, From, J2>.self
                 )
         }
@@ -303,7 +303,7 @@
         where Columns == (repeat each C1), Joins == (repeat each J1) {
             self
                 + unsafeBitCast(
-                    From.SourceTable.self[keyPath: keyPath],
+                    project(From.SourceTable.self, through: keyPath),
                     to: Select<(C2, C3), From, J2>.self
                 )
         }
@@ -323,7 +323,7 @@
         where Columns == (repeat each C1), Joins == (repeat each J1) {
             self
                 + unsafeBitCast(
-                    From.SourceTable.self[keyPath: keyPath],
+                    project(From.SourceTable.self, through: keyPath),
                     to: Select<(C2, C3, C4), From, J2>.self
                 )
         }
@@ -344,7 +344,7 @@
         where Columns == (repeat each C1), Joins == (repeat each J1) {
             self
                 + unsafeBitCast(
-                    From.SourceTable.self[keyPath: keyPath],
+                    project(From.SourceTable.self, through: keyPath),
                     to: Select<(C2, C3, C4, C5), From, J2>.self
                 )
         }
@@ -362,7 +362,7 @@
         where Columns == (repeat each C), Joins == (repeat each J1) {
             self
                 + unsafeBitCast(
-                    From.SourceTable.self[keyPath: keyPath],
+                    project(From.SourceTable.self, through: keyPath),
                     to: Select<(), From, (J2, J3)>.self
                 )
         }
@@ -381,7 +381,7 @@
         where Columns == (repeat each C1), Joins == (repeat each J1) {
             self
                 + unsafeBitCast(
-                    From.SourceTable.self[keyPath: keyPath],
+                    project(From.SourceTable.self, through: keyPath),
                     to: Select<C2, From, (J2, J3)>.self
                 )
         }
@@ -401,7 +401,7 @@
         where Columns == (repeat each C1), Joins == (repeat each J1) {
             self
                 + unsafeBitCast(
-                    From.SourceTable.self[keyPath: keyPath],
+                    project(From.SourceTable.self, through: keyPath),
                     to: Select<(C2, C3), From, (J2, J3)>.self
                 )
         }
@@ -422,7 +422,7 @@
         where Columns == (repeat each C1), Joins == (repeat each J1) {
             self
                 + unsafeBitCast(
-                    From.SourceTable.self[keyPath: keyPath],
+                    project(From.SourceTable.self, through: keyPath),
                     to: Select<(C2, C3, C4), From, (J2, J3)>.self
                 )
         }
@@ -444,7 +444,7 @@
         where Columns == (repeat each C1), Joins == (repeat each J1) {
             self
                 + unsafeBitCast(
-                    From.SourceTable.self[keyPath: keyPath],
+                    project(From.SourceTable.self, through: keyPath),
                     to: Select<(C2, C3, C4, C5), From, (J2, J3)>.self
                 )
         }

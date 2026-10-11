@@ -36,7 +36,7 @@ public struct Where<From: Table>: Sendable {
     }
 
         public static subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
-            From.self[keyPath: keyPath]
+            project(From.self, through: keyPath)
         }
 
         public subscript<each C: QueryRepresentable, each J: Table>(
@@ -44,18 +44,18 @@ public struct Where<From: Table>: Sendable {
                 From.Type, Select<(repeat each C), From, (repeat each J)>
             >
         ) -> Select<(repeat each C), From, (repeat each J)> {
-            self + From.self[keyPath: keyPath]
+            self + project(From.self, through: keyPath)
         }
 
         public subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
-            self + From.self[keyPath: keyPath]
+            self + project(From.self, through: keyPath)
         }
 
         public subscript(
             dynamicMember keyPath: KeyPath<From.SourceTable.Type, Where<From.SourceTable>>
         ) -> Self
         where From: TableDraft {
-            self + unsafeBitCast(From.SourceTable.self[keyPath: keyPath], to: Self.self)
+            self + unsafeBitCast(project(From.SourceTable.self, through: keyPath), to: Self.self)
         }
 }
 
