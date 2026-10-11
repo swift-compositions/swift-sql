@@ -43,6 +43,26 @@ struct Numbered: ISO_9075.Dialect {
 
 }
 
+@Suite struct `Membership in a list` {
+    @Test func `in binds each element`() {
+        let rendering = Numbered().render(Reminder.where { $0.id.in([1, 2]) }.query)
+        #expect(rendering.sql.hasSuffix(#"WHERE (("reminder"."id") IN (($1), ($2)))"#))
+        #expect(rendering.values == [.int(1), .int(2)])
+    }
+
+    @Test func `in an empty list matches nothing`() {
+        let rendering = Numbered().render(Reminder.where { $0.id.in([Int]()) }.query)
+        #expect(rendering.sql.hasSuffix("WHERE ((1 = 0))"))
+        #expect(rendering.values.isEmpty)
+    }
+
+    @Test func `not in an empty list matches everything`() {
+        let rendering = Numbered().render(Reminder.where { $0.id.notIn([Int]()) }.query)
+        #expect(rendering.sql.hasSuffix("WHERE ((1 = 1))"))
+        #expect(rendering.values.isEmpty)
+    }
+}
+
 struct Positional: ISO_9075.Dialect {
     func placeholder(_ offset: Int) -> String { "?" }
     var defaultPrimaryKey: String { "NULL" }
