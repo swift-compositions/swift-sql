@@ -58,6 +58,7 @@ let package = Package(
                 .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "CasePathsMacrosSupport", package: "swift-case-paths", condition: .when(traits: ["CasePaths"])),
             ]
         ),
         .target(
@@ -103,6 +104,10 @@ let package = Package(
                 "SQL Macros",
                 "SQL Test Support",
                 .product(name: "Order", package: "swift-order"),
+                .product(name: "Byte", package: "swift-byte", condition: .when(traits: ["CasePaths"])),
+                .product(name: "Time", package: "swift-time", condition: .when(traits: ["CasePaths"])),
+                .product(name: "RFC 4122", package: "swift-rfc-4122", condition: .when(traits: ["CasePaths"])),
+                .product(name: "CasePaths", package: "swift-case-paths", condition: .when(traits: ["CasePaths"])),
                 .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
                 .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
             ]

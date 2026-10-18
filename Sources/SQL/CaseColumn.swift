@@ -92,7 +92,7 @@ public import ISO_9075_Foundation
             let column = Values.QueryOutput.columns[keyPath: keyPath].base
             return CaseColumnGroup(
                 base: ColumnGroup<Root, Member?>(
-                    column.name,
+                    column.groupName,
                     keyPath: base.keyPath.appending(
                         path: \.[flattenedMember: \Member.self, column: column.keyPath]
                     )
@@ -110,7 +110,7 @@ public import ISO_9075_Foundation
             let column = Payload.QueryOutput.columns[keyPath: keyPath]
             return OptionalColumnGroup(
                 base: ColumnGroup<Root, Member?>(
-                    column.name,
+                    column.groupName,
                     keyPath: base.keyPath.appending(
                         path: \.[flattenedMember: \Member.self, column: column.keyPath]
                     )
@@ -162,7 +162,7 @@ public import ISO_9075_Foundation
             let column = Values.columns[keyPath: keyPath]
             return CaseColumnGroup(
                 base: ColumnGroup<Root, Member?>(
-                    column.name,
+                    column.groupName,
                     keyPath: self.keyPath.appending(path: column.keyPath)
                 )
             )
@@ -353,7 +353,7 @@ public import ISO_9075_Foundation
             let column = Base.columns[keyPath: keyPath]
             return CaseColumnGroup(
                 base: ColumnGroup(
-                    column.name,
+                    column.groupName,
                     keyPath: \.[member: \Member?.self, column: column.keyPath]
                 )
             )

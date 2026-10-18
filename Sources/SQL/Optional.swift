@@ -190,7 +190,7 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
             ) -> ColumnGroup<Optional, Member??> {
                 let column = Wrapped.columns[keyPath: keyPath].base
                 return ColumnGroup<Optional, Member??>(
-                    column.name,
+                    column.groupName,
                     keyPath: \.[member: \Member?.self, column: column.keyPath]
                 )
             }
