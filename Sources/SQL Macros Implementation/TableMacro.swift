@@ -1321,6 +1321,7 @@ extension TableMacro: MemberMacro {
                 tokenKind == .keyword(.private) || tokenKind == .keyword(.fileprivate)
             }
             let draftAccess: String
+            var draftMembers = draftProperties
             if isReducedVisibility(declaration.accessLevelModifier?.name.tokenKind)
                 || context.lexicalContext.contains(where: {
                     isReducedVisibility($0.declGroupAccessLevelModifier?.name.tokenKind)
@@ -1331,6 +1332,16 @@ extension TableMacro: MemberMacro {
                 switch declaration.accessLevelModifier?.name.tokenKind {
                 case nil, .keyword(.internal):
                     draftAccess = ""
+                case .keyword(let access):
+                    draftAccess = "\(declaration.accessLevelModifier?.name.text ?? "") "
+                    if [.public, .package].contains(access),
+                        let initializer = MemberwiseInitializer(
+                            access: access,
+                            properties: draftProperties
+                        )
+                    {
+                        draftMembers.append(initializer.declaration)
+                    }
                 default:
                     draftAccess = "\(declaration.accessLevelModifier?.name.text ?? "") "
                 }
@@ -1341,7 +1352,7 @@ extension TableMacro: MemberMacro {
                 \(raw: draftAccess)struct Draft: \
                 \(moduleName)::TableDraft, \(moduleName)::PartialSelectStatement {
                 public typealias SourceTable = \(type)
-                \(draftProperties, separator: "\n")
+                \(draftMembers, separator: "\n")
                 }
                 """
         }
