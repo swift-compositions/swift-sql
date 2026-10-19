@@ -26,11 +26,7 @@ public func assertQuery<each V: QueryRepresentable, S: Statement<(repeat each V)
         sql: sql,
         results: results,
         snapshotTrailingClosureOffset: snapshotTrailingClosureOffset,
-        fileID: fileID,
-        filePath: filePath,
-        function: function,
-        line: line,
-        column: column
+        location: (fileID: fileID, filePath: filePath, function: function, line: line, column: column)
     )
 }
 
@@ -58,11 +54,7 @@ public func assertQuery<S: PartialSelectStatement>(
         sql: sql,
         results: results,
         snapshotTrailingClosureOffset: snapshotTrailingClosureOffset,
-        fileID: fileID,
-        filePath: filePath,
-        function: function,
-        line: line,
-        column: column
+        location: (fileID: fileID, filePath: filePath, function: function, line: line, column: column)
     )
 }
 
@@ -185,12 +177,9 @@ private func _assertQuery(
     sql: (() -> String)?,
     results: (() -> String)?,
     snapshotTrailingClosureOffset: Int,
-    fileID: StaticString,
-    filePath: StaticString,
-    function: StaticString,
-    line: UInt,
-    column: UInt
+    location: (fileID: StaticString, filePath: StaticString, function: StaticString, line: UInt, column: UInt)
 ) {
+    let (fileID, filePath, function, line, column) = location
     assertInlineSnapshot(
         of: query,
         as: .sql,
