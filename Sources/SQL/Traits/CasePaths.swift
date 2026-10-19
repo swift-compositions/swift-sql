@@ -1,5 +1,5 @@
 #if CasePaths
-        public import CasePaths
+    public import CasePaths
 
     extension ColumnGroup where QueryValue: CasePathable & Table {
         public func `is`<V>(

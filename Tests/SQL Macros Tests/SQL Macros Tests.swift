@@ -1,6 +1,6 @@
 import MacroTesting
-import SnapshotTesting
 import SQL_Macros_Implementation
+import SnapshotTesting
 import Testing
 
 @Suite(.macros([TableMacro.self], record: .missing))

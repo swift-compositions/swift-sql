@@ -1,6 +1,6 @@
-public import SnapshotTesting
-public import SQL
 import ISO_9075_Foundation
+public import SQL
+public import SnapshotTesting
 
 extension Snapshotting where Value: Statement {
     public static var sql: Snapshotting<Value, String> {

@@ -89,7 +89,6 @@ extension Optional: QueryRepresentable where Wrapped: QueryRepresentable {
         Wrapped._queryFragment(jsonDecoding: queryFragment)
     }
 
-
 }
 
 extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Table {

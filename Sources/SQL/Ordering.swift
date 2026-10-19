@@ -40,15 +40,17 @@ public struct _OrderingTerm<Value>: QueryExpression, Sendable {
     }
 
     public var queryFragment: ISO_9075.Fragment {
-        let direction: ISO_9075.Fragment = switch direction {
-        case .ascending: "ASC"
-        case .descending: "DESC"
-        }
-        let nulls: ISO_9075.Fragment = switch nullOrdering {
-        case .first: " NULLS FIRST"
-        case .last: " NULLS LAST"
-        case nil: ""
-        }
+        let direction: ISO_9075.Fragment =
+            switch direction {
+            case .ascending: "ASC"
+            case .descending: "DESC"
+            }
+        let nulls: ISO_9075.Fragment =
+            switch nullOrdering {
+            case .first: " NULLS FIRST"
+            case .last: " NULLS LAST"
+            case nil: ""
+            }
         return "\(baseQueryFragment) \(direction)\(nulls)"
     }
 }

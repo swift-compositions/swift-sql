@@ -1,3 +1,7 @@
+// swift-format-ignore-file: AmbiguousTrailingClosureOverload
+// REASON: each clause has an expression-closure overload and a @QueryFragmentBuilder overload;
+// @_disfavoredOverload and the builder attribute resolve a trailing closure, so callers are not ambiguous.
+
 public import ISO_9075_Foundation
 
 extension Table {
@@ -21,7 +25,7 @@ extension Table {
     }
 }
 
-    @dynamicMemberLookup
+@dynamicMemberLookup
 public struct Where<From: Table>: Sendable {
     public static func + (lhs: Self, rhs: Self) -> Self {
         Where(predicates: (lhs.predicates + rhs.predicates).removingDuplicates())
@@ -35,28 +39,28 @@ public struct Where<From: Table>: Sendable {
         self.scope = scope
     }
 
-        public static subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
-            project(From.self, through: keyPath)
-        }
+    public static subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
+        project(From.self, through: keyPath)
+    }
 
-        public subscript<each C: QueryRepresentable, each J: Table>(
-            dynamicMember keyPath: KeyPath<
-                From.Type, Select<(repeat each C), From, (repeat each J)>
-            >
-        ) -> Select<(repeat each C), From, (repeat each J)> {
-            self + project(From.self, through: keyPath)
-        }
+    public subscript<each C: QueryRepresentable, each J: Table>(
+        dynamicMember keyPath: KeyPath<
+            From.Type, Select<(repeat each C), From, (repeat each J)>
+        >
+    ) -> Select<(repeat each C), From, (repeat each J)> {
+        self + project(From.self, through: keyPath)
+    }
 
-        public subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
-            self + project(From.self, through: keyPath)
-        }
+    public subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
+        self + project(From.self, through: keyPath)
+    }
 
-        public subscript(
-            dynamicMember keyPath: KeyPath<From.SourceTable.Type, Where<From.SourceTable>>
-        ) -> Self
-        where From: TableDraft {
-            self + unsafeBitCast(project(From.SourceTable.self, through: keyPath), to: Self.self)
-        }
+    public subscript(
+        dynamicMember keyPath: KeyPath<From.SourceTable.Type, Where<From.SourceTable>>
+    ) -> Self
+    where From: TableDraft {
+        self + unsafeBitCast(project(From.SourceTable.self, through: keyPath), to: Self.self)
+    }
 }
 
 extension Where: SelectStatement {

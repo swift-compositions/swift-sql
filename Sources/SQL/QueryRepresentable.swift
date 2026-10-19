@@ -22,7 +22,6 @@ public protocol QueryRepresentable<QueryOutput>: QueryDecodable {
 
     static func _valuesColumnIndex(of keyPath: AnyKeyPath) -> Int?
 
-
 }
 
 extension QueryRepresentable {
@@ -39,7 +38,6 @@ extension QueryRepresentable {
     public static func queryFragment(decoding queryFragment: ISO_9075.Fragment) -> ISO_9075.Fragment {
         queryFragment
     }
-
 
 }
 

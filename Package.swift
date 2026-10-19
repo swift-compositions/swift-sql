@@ -83,7 +83,7 @@ let package = Package(
         .target(
             name: "SQL Migrations",
             dependencies: [
-                .product(name: "ISO 9075 Call-Level Interface", package: "swift-iso-9075"),
+                .product(name: "ISO 9075 Call-Level Interface", package: "swift-iso-9075")
             ]
         ),
         .target(

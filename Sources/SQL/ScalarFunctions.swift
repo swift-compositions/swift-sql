@@ -64,11 +64,8 @@ extension QueryExpression where QueryValue == String {
     public func ltrim(
         _ characters: (some QueryExpression<QueryValue>)? = QueryValue?.none
     ) -> some QueryExpression<QueryValue> {
-        if let characters {
-            return QueryFunction("ltrim", self, characters)
-        } else {
-            return QueryFunction("ltrim", self)
-        }
+        guard let characters else { return QueryFunction("ltrim", self) }
+        return QueryFunction("ltrim", self, characters)
     }
 
     public func octetLength() -> some QueryExpression<Int> {
@@ -87,32 +84,23 @@ extension QueryExpression where QueryValue == String {
     public func rtrim(
         _ characters: (some QueryExpression<QueryValue>)? = QueryValue?.none
     ) -> some QueryExpression<QueryValue> {
-        if let characters {
-            return QueryFunction("rtrim", self, characters)
-        } else {
-            return QueryFunction("rtrim", self)
-        }
+        guard let characters else { return QueryFunction("rtrim", self) }
+        return QueryFunction("rtrim", self, characters)
     }
 
     public func substr(
         _ offset: some QueryExpression<Int>,
         _ length: (some QueryExpression<Int>)? = Int?.none
     ) -> some QueryExpression<QueryValue> {
-        if let length {
-            return QueryFunction("substr", self, offset, length)
-        } else {
-            return QueryFunction("substr", self, offset)
-        }
+        guard let length else { return QueryFunction("substr", self, offset) }
+        return QueryFunction("substr", self, offset, length)
     }
 
     public func trim(
         _ characters: (some QueryExpression<QueryValue>)? = QueryValue?.none
     ) -> some QueryExpression<QueryValue> {
-        if let characters {
-            return QueryFunction("trim", self, characters)
-        } else {
-            return QueryFunction("trim", self)
-        }
+        guard let characters else { return QueryFunction("trim", self) }
+        return QueryFunction("trim", self, characters)
     }
 }
 

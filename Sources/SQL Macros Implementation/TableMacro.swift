@@ -1,10 +1,10 @@
+import Standard_Library_Extensions
 import SwiftBasicFormat
 import SwiftDiagnostics
 import SwiftParser
 public import SwiftSyntax
 import SwiftSyntaxBuilder
 public import SwiftSyntaxMacros
-import Standard_Library_Extensions
 
 #if CasePaths
     import CasePathsMacrosSupport
@@ -101,8 +101,9 @@ extension TableMacro: ExtensionMacro {
                 switch argument.label {
                 case nil:
                     if node.attributeName.identifier == "_Draft" {
-                        let memberAccess = argument.expression.cast(MemberAccessExprSyntax.self)
-                        draftTableType = TypeSyntax("\(memberAccess.base!.trimmed)")
+                        if let base = argument.expression.cast(MemberAccessExprSyntax.self).base {
+                            draftTableType = TypeSyntax("\(base.trimmed)")
+                        }
                     } else if !argument.expression.isNonEmptyStringLiteral {
                         diagnostics.append(
                             Diagnostic(
@@ -750,13 +751,11 @@ extension TableMacro: MemberMacro {
             return []
         }
         let type = IdentifierTypeSyntax(name: declarationName.trimmed)
-        var allColumns:
-            [(name: TokenSyntax, firstName: TokenSyntax, type: TypeSyntax?, default: ExprSyntax?)] =
-                []
+        var allColumns: [(name: TokenSyntax, firstName: TokenSyntax, type: TypeSyntax?, default: ExprSyntax?)] =
+            []
         var allColumnNames: [TokenSyntax] = []
         var codingKeys: [(identifier: TokenSyntax, rawValue: ExprSyntax?)] = []
-        var codableEnumCases:
-            [(identifier: TokenSyntax, label: TokenSyntax?, payloadType: TypeSyntax)] = []
+        var codableEnumCases: [(identifier: TokenSyntax, label: TokenSyntax?, payloadType: TypeSyntax)] = []
         var writableColumns: [TokenSyntax] = []
         var selectedColumns: [(name: TokenSyntax, type: TypeSyntax?)] = []
         var columnsProperties: [DeclSyntax] = []
@@ -1121,8 +1120,10 @@ extension TableMacro: MemberMacro {
                 let requirements = witnessColumns.map {
                     "associatedtype \($0.name)\nstatic var \($0.name.text.trimmingBackticks())Default: \($0.name) { get }"
                 }
-                let witnesses = witnessColumns.map {
-                    "@\(macrosModuleName)::_ColumnDefault\npublic static var \($0.name.text.trimmingBackticks())Default = \($0.default!)"
+                let witnesses = witnessColumns.compactMap { column in
+                    column.default.map {
+                        "@\(macrosModuleName)::_ColumnDefault\npublic static var \(column.name.text.trimmingBackticks())Default = \($0)"
+                    }
                 }
                 columnTypesDecl = """
                     public protocol _$ColumnTypes {

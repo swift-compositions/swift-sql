@@ -733,8 +733,7 @@ public enum InsertValuesBuilder<Value> {
         component
     }
 
-    public static func buildLimitedAvailability(_ component: ValuesRows<Value>) -> ValuesRows<Value>
-    {
+    public static func buildLimitedAvailability(_ component: ValuesRows<Value>) -> ValuesRows<Value> {
         component
     }
 

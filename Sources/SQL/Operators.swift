@@ -114,14 +114,12 @@ extension _Null: ExpressibleByNilLiteral {
 
 extension QueryExpression where QueryValue: QueryRepresentable & _OptionalProtocol {
     @_documentation(visibility: private)
-    public func eq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool>
-    {
+    public func eq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool> {
         BinaryOperator(lhs: self, operator: "=", rhs: other)
     }
 
     @_documentation(visibility: private)
-    public func neq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool>
-    {
+    public func neq(_ other: some QueryExpression<QueryValue.Wrapped>) -> some QueryExpression<Bool> {
         BinaryOperator(lhs: self, operator: "<>", rhs: other)
     }
 

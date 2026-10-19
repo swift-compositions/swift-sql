@@ -18,14 +18,17 @@ struct Numbered: ISO_9075.Dialect {
 @Suite struct `Rendering statements` {
     @Test func `a filtered select binds its values`() {
         let rendering = Numbered().render(Reminder.where { $0.isCompleted.eq(true) }.select(\.title).query)
-        #expect(rendering == ISO_9075.Rendering(
-            sql: """
-                SELECT "reminder"."title"
-                FROM "reminder"
-                WHERE (("reminder"."isCompleted") = ($1))
-                """,
-            values: [.bool(true)]
-        ))
+        #expect(
+            rendering
+                == ISO_9075.Rendering(
+                    sql: """
+                        SELECT "reminder"."title"
+                        FROM "reminder"
+                        WHERE (("reminder"."isCompleted") = ($1))
+                        """,
+                    values: [.bool(true)]
+                )
+        )
     }
 
     @Test func `an insert binds each given column of its draft`() {
@@ -64,7 +67,6 @@ struct Positional: ISO_9075.Dialect {
         #expect(Positional().render(insert.query).sql.hasSuffix("VALUES\n(?, ?, ?), (NULL, ?, ?)"))
     }
 }
-
 
 @Suite struct `Statement modifiers` {
     @Test func `an insert places its modifier after the verb`() {

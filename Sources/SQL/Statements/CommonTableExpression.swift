@@ -66,7 +66,6 @@ public struct With<Base: Statement>: Statement, Sendable {
 
 extension With: PartialSelectStatement where Base: PartialSelectStatement {}
 
-
 extension ISO_9075.Fragment {
     fileprivate var presence: Self? { isEmpty ? nil : self }
 }

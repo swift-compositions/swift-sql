@@ -1,3 +1,3 @@
 import SwiftSyntax
 
-    let nonisolated: TokenSyntax? = .keyword(.nonisolated, trailingTrivia: .space)
+let nonisolated: TokenSyntax? = .keyword(.nonisolated, trailingTrivia: .space)

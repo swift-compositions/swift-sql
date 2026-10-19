@@ -12,8 +12,7 @@ extension AliasName {
 }
 
 extension Table {
-    public static func `as`<Name: AliasName>(_ aliasName: Name.Type) -> TableAlias<Self, Name>.Type
-    {
+    public static func `as`<Name: AliasName>(_ aliasName: Name.Type) -> TableAlias<Self, Name>.Type {
         TableAlias.self
     }
 }

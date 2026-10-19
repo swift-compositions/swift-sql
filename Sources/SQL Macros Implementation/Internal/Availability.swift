@@ -34,21 +34,15 @@ extension AttributeListSyntax.Element {
 
 extension AttributeSyntax {
     var availability: AttributeSyntax? {
-        if attributeName.identifier == "available" {
-            return self
-        } else {
-            return nil
-        }
+        guard attributeName.identifier == "available" else { return nil }
+        return self
     }
 }
 
 extension IfConfigClauseSyntax {
     var availability: IfConfigClauseSyntax? {
-        if let availability = elements?.availability {
-            return with(\.elements, availability)
-        } else {
-            return nil
-        }
+        guard let availability = elements?.availability else { return nil }
+        return with(\.elements, availability)
     }
 
     var clonedAsIf: IfConfigClauseSyntax {
@@ -60,11 +54,8 @@ extension IfConfigClauseSyntax.Elements {
     var availability: IfConfigClauseSyntax.Elements? {
         switch self {
         case .attributes(let attributes):
-            if let availability = attributes.availability {
-                return .attributes(availability)
-            } else {
-                return nil
-            }
+            guard let availability = attributes.availability else { return nil }
+            return .attributes(availability)
         default:
             return nil
         }
@@ -83,11 +74,8 @@ extension IfConfigDeclSyntax {
                 }
             }
         }
-        if elements.isEmpty {
-            return nil
-        } else {
-            return with(\.clauses, IfConfigClauseListSyntax(elements))
-        }
+        guard !elements.isEmpty else { return nil }
+        return with(\.clauses, IfConfigClauseListSyntax(elements))
     }
 }
 

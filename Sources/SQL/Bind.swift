@@ -1,7 +1,6 @@
 public import ISO_9075_Foundation
 
-public struct BindQueryExpression<QueryValue: QueryRepresentable & QueryExpression>: QueryExpression
-{
+public struct BindQueryExpression<QueryValue: QueryRepresentable & QueryExpression>: QueryExpression {
     public let base: QueryValue
 
     public init(

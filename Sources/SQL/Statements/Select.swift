@@ -1,3 +1,7 @@
+// swift-format-ignore-file: AmbiguousTrailingClosureOverload
+// REASON: each clause has an expression-closure overload and a @QueryFragmentBuilder overload;
+// @_disfavoredOverload and the builder attribute resolve a trailing closure, so callers are not ambiguous.
+
 public import ISO_9075_Foundation
 
 extension Table {
@@ -217,7 +221,7 @@ public struct _SelectClauses: Sendable {
     var valuesElements: [ValuesElement] = []
 }
 
-    @dynamicMemberLookup
+@dynamicMemberLookup
 public struct Select<Columns, From: _SelectSource, Joins>: Sendable {
     @CopyOnWrite var clauses = _SelectClauses()
 
@@ -500,7 +504,6 @@ extension Select where From: Table {
         self.isEmpty = isEmpty
         self.where = `where`
     }
-
 
     public func select<each C1: QueryRepresentable, C2: QueryExpression>(
         _ selection: KeyPath<From.TableColumns, C2>
@@ -1701,7 +1704,10 @@ extension Select where From: Table {
     {
         var iterator = columns.makeIterator()
         func next<Element>() -> SQLQueryExpression<Element> {
-            SQLQueryExpression(iterator.next()!)
+            guard let column = iterator.next() else {
+                preconditionFailure("a selection has one column for each of its values")
+            }
+            return SQLQueryExpression(column)
         }
         return Select<(repeat (each C2).QueryValue), From, Joins>(
             isEmpty: isEmpty,

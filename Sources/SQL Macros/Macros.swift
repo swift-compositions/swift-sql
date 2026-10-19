@@ -215,7 +215,6 @@ public macro sql<QueryValue>(
 ) -> SQLQueryExpression<QueryValue> =
     #externalMacro(module: "SQL_Macros_Implementation", type: "SQLMacro")
 
-
 @attached(accessor, names: named(get))
 public macro _ColumnDefinition() =
     #externalMacro(module: "SQL_Macros_Implementation", type: "ColumnDefinitionMacro")
