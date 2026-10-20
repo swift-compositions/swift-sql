@@ -195,10 +195,7 @@ extension Select where From: TableDraft {
     ) -> Select<Columns, From, Joins>
     where Columns == (repeat each C), Joins == (repeat each J) {
         self
-            + unsafeBitCast(
-                project(From.SourceTable.self, through: keyPath).asSelect(),
-                to: Select<(), From, ()>.self
-            )
+            + Select<(), From, ()>(clauses: project(From.SourceTable.self, through: keyPath).asSelect().clauses)
     }
 
     public subscript<
@@ -210,10 +207,7 @@ extension Select where From: TableDraft {
     ) -> Select<(repeat each C1, C2), From, Joins>
     where Columns == (repeat each C1), Joins == (repeat each J) {
         self
-            + unsafeBitCast(
-                project(From.SourceTable.self, through: keyPath),
-                to: Select<C2, From, ()>.self
-            )
+            + Select<C2, From, ()>(clauses: project(From.SourceTable.self, through: keyPath).clauses)
     }
 
     public subscript<
@@ -228,10 +222,7 @@ extension Select where From: TableDraft {
     ) -> Select<(repeat each C1, C2, C3), From, Joins>
     where Columns == (repeat each C1), Joins == (repeat each J) {
         self
-            + unsafeBitCast(
-                project(From.SourceTable.self, through: keyPath),
-                to: Select<(C2, C3), From, ()>.self
-            )
+            + Select<(C2, C3), From, ()>(clauses: project(From.SourceTable.self, through: keyPath).clauses)
     }
 
     public subscript<
@@ -247,10 +238,7 @@ extension Select where From: TableDraft {
     ) -> Select<(repeat each C1, C2, C3, C4), From, Joins>
     where Columns == (repeat each C1), Joins == (repeat each J) {
         self
-            + unsafeBitCast(
-                project(From.SourceTable.self, through: keyPath),
-                to: Select<(C2, C3, C4), From, ()>.self
-            )
+            + Select<(C2, C3, C4), From, ()>(clauses: project(From.SourceTable.self, through: keyPath).clauses)
     }
 
     public subscript<
@@ -267,10 +255,7 @@ extension Select where From: TableDraft {
     ) -> Select<(repeat each C1, C2, C3, C4, C5), From, Joins>
     where Columns == (repeat each C1), Joins == (repeat each J) {
         self
-            + unsafeBitCast(
-                project(From.SourceTable.self, through: keyPath),
-                to: Select<(C2, C3, C4, C5), From, ()>.self
-            )
+            + Select<(C2, C3, C4, C5), From, ()>(clauses: project(From.SourceTable.self, through: keyPath).clauses)
     }
 
     public subscript<
@@ -283,10 +268,7 @@ extension Select where From: TableDraft {
     ) -> Select<(repeat each C1, C2), From, (repeat each J1, J2)>
     where Columns == (repeat each C1), Joins == (repeat each J1) {
         self
-            + unsafeBitCast(
-                project(From.SourceTable.self, through: keyPath),
-                to: Select<C2, From, J2>.self
-            )
+            + Select<C2, From, J2>(clauses: project(From.SourceTable.self, through: keyPath).clauses)
     }
 
     public subscript<
@@ -302,10 +284,7 @@ extension Select where From: TableDraft {
     ) -> Select<(repeat each C1, C2, C3), From, (repeat each J1, J2)>
     where Columns == (repeat each C1), Joins == (repeat each J1) {
         self
-            + unsafeBitCast(
-                project(From.SourceTable.self, through: keyPath),
-                to: Select<(C2, C3), From, J2>.self
-            )
+            + Select<(C2, C3), From, J2>(clauses: project(From.SourceTable.self, through: keyPath).clauses)
     }
 
     public subscript<
@@ -322,10 +301,7 @@ extension Select where From: TableDraft {
     ) -> Select<(repeat each C1, C2, C3, C4), From, (repeat each J1, J2)>
     where Columns == (repeat each C1), Joins == (repeat each J1) {
         self
-            + unsafeBitCast(
-                project(From.SourceTable.self, through: keyPath),
-                to: Select<(C2, C3, C4), From, J2>.self
-            )
+            + Select<(C2, C3, C4), From, J2>(clauses: project(From.SourceTable.self, through: keyPath).clauses)
     }
 
     public subscript<
@@ -343,10 +319,7 @@ extension Select where From: TableDraft {
     ) -> Select<(repeat each C1, C2, C3, C4, C5), From, (repeat each J1, J2)>
     where Columns == (repeat each C1), Joins == (repeat each J1) {
         self
-            + unsafeBitCast(
-                project(From.SourceTable.self, through: keyPath),
-                to: Select<(C2, C3, C4, C5), From, J2>.self
-            )
+            + Select<(C2, C3, C4, C5), From, J2>(clauses: project(From.SourceTable.self, through: keyPath).clauses)
     }
 
     public subscript<
@@ -361,10 +334,7 @@ extension Select where From: TableDraft {
     ) -> Select<(repeat each C), From, (repeat each J1, J2, J3)>
     where Columns == (repeat each C), Joins == (repeat each J1) {
         self
-            + unsafeBitCast(
-                project(From.SourceTable.self, through: keyPath),
-                to: Select<(), From, (J2, J3)>.self
-            )
+            + Select<(), From, (J2, J3)>(clauses: project(From.SourceTable.self, through: keyPath).clauses)
     }
 
     public subscript<
@@ -380,10 +350,7 @@ extension Select where From: TableDraft {
     ) -> Select<(repeat each C1, C2), From, (repeat each J1, J2, J3)>
     where Columns == (repeat each C1), Joins == (repeat each J1) {
         self
-            + unsafeBitCast(
-                project(From.SourceTable.self, through: keyPath),
-                to: Select<C2, From, (J2, J3)>.self
-            )
+            + Select<C2, From, (J2, J3)>(clauses: project(From.SourceTable.self, through: keyPath).clauses)
     }
 
     public subscript<
@@ -400,10 +367,7 @@ extension Select where From: TableDraft {
     ) -> Select<(repeat each C1, C2, C3), From, (repeat each J1, J2, J3)>
     where Columns == (repeat each C1), Joins == (repeat each J1) {
         self
-            + unsafeBitCast(
-                project(From.SourceTable.self, through: keyPath),
-                to: Select<(C2, C3), From, (J2, J3)>.self
-            )
+            + Select<(C2, C3), From, (J2, J3)>(clauses: project(From.SourceTable.self, through: keyPath).clauses)
     }
 
     public subscript<
@@ -421,10 +385,7 @@ extension Select where From: TableDraft {
     ) -> Select<(repeat each C1, C2, C3, C4), From, (repeat each J1, J2, J3)>
     where Columns == (repeat each C1), Joins == (repeat each J1) {
         self
-            + unsafeBitCast(
-                project(From.SourceTable.self, through: keyPath),
-                to: Select<(C2, C3, C4), From, (J2, J3)>.self
-            )
+            + Select<(C2, C3, C4), From, (J2, J3)>(clauses: project(From.SourceTable.self, through: keyPath).clauses)
     }
 
     public subscript<
@@ -443,9 +404,6 @@ extension Select where From: TableDraft {
     ) -> Select<(repeat each C1, C2, C3, C4, C5), From, (repeat each J1, J2, J3)>
     where Columns == (repeat each C1), Joins == (repeat each J1) {
         self
-            + unsafeBitCast(
-                project(From.SourceTable.self, through: keyPath),
-                to: Select<(C2, C3, C4, C5), From, (J2, J3)>.self
-            )
+            + Select<(C2, C3, C4, C5), From, (J2, J3)>(clauses: project(From.SourceTable.self, through: keyPath).clauses)
     }
 }

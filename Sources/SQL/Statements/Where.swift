@@ -59,7 +59,8 @@ public struct Where<From: Table>: Sendable {
         dynamicMember keyPath: KeyPath<From.SourceTable.Type, Where<From.SourceTable>>
     ) -> Self
     where From: TableDraft {
-        self + unsafeBitCast(project(From.SourceTable.self, through: keyPath), to: Self.self)
+        let projected = project(From.SourceTable.self, through: keyPath)
+        return self + Self(predicates: projected.predicates, scope: projected.scope)
     }
 }
 

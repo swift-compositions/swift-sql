@@ -1,9 +1,9 @@
-public import Byte
+import Byte
 public import Foundation
 public import ISO_9075_Foundation
-public import RFC_4122
+import RFC_4122
 public import SQL
-public import Time
+import Time
 
 extension Date: QueryBindable {
     public var queryBinding: ISO_9075.Value {

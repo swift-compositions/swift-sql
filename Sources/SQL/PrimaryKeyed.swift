@@ -1,4 +1,4 @@
-public import ISO_9075_Foundation
+import ISO_9075_Foundation
 
 public protocol PrimaryKeyedTable<PrimaryKey>: Table
 where
@@ -30,11 +30,11 @@ extension TableDraft {
     public static subscript(
         dynamicMember keyPath: KeyPath<SourceTable.Type, some SelectStatementOf<SourceTable>>
     ) -> SelectOf<Self> {
-        unsafeBitCast(project(SourceTable.self, through: keyPath).asSelect(), to: SelectOf<Self>.self)
+        SelectOf<Self>(clauses: project(SourceTable.self, through: keyPath).asSelect().clauses)
     }
 
     public static var all: SelectOf<Self> {
-        unsafeBitCast(SourceTable.all.asSelect(), to: SelectOf<Self>.self)
+        SelectOf<Self>(clauses: SourceTable.all.asSelect().clauses)
     }
 
     public static var schemaName: String? { SourceTable.schemaName }

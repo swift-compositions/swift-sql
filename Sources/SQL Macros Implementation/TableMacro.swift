@@ -1427,9 +1427,6 @@ extension TableMacro: MemberMacro {
 
             """
 
-        var codingKeysDecl: DeclSyntax?
-        var codableDecls: [DeclSyntax] = []
-
         var tableMembers: [DeclSyntax] = []
         if node.attributeName.identifier != "_Draft" {
             tableMembers.append(
@@ -1479,10 +1476,6 @@ extension TableMacro: MemberMacro {
                 "public \(nonisolated)static var _columnWidth: Swift.Int { \(raw: columnWidth) }",
             ]
             + tableMembers
-        if let codingKeysDecl {
-            members.append(codingKeysDecl)
-        }
-        members.append(contentsOf: codableDecls)
         #if CasePaths
             if declaration.is(EnumDeclSyntax.self) {
                 members += try CasePathableMacro.expansion(

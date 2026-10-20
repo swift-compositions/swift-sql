@@ -1,4 +1,3 @@
-public import ISO_9075_Foundation
 public import SQL
 public import SQL_Macros
 import Testing
