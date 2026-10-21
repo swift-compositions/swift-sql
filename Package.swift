@@ -55,7 +55,6 @@ let package = Package(
         .macro(
             name: "SQL Macros Implementation",
             dependencies: [
-                .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "CasePathsMacrosSupport", package: "swift-case-paths", condition: .when(traits: ["CasePaths"])),
@@ -123,7 +122,6 @@ let package = Package(
         .testTarget(
             name: "SQL Macros Tests",
             dependencies: [
-                "SQL Macros",
                 "SQL Macros Implementation",
                 .product(name: "MacroTesting", package: "swift-macro-testing"),
                 .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),

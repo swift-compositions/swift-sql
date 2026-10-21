@@ -1,4 +1,3 @@
-import Standard_Library_Extensions
 import SwiftBasicFormat
 import SwiftDiagnostics
 import SwiftParser
