@@ -5,6 +5,19 @@
 public import ISO_9075_Foundation
 
 extension Table {
+    /// An update statement that uses a conflict-resolution algorithm.
+    ///
+    /// - Parameters:
+    ///   - resolution: The algorithm to use when an update violates a constraint.
+    ///   - updates: A closure describing the column updates to perform.
+    /// - Returns: An update statement.
+    public static func update(
+        or resolution: Conflict.Resolution,
+        set updates: (inout Updates<Self>) -> Void
+    ) -> UpdateOf<Self> {
+        Where().update(or: resolution, set: updates)
+    }
+
     public static func update(
         set updates: (inout Updates<Self>) -> Void
     ) -> UpdateOf<Self> {
@@ -13,6 +26,27 @@ extension Table {
 }
 
 extension PrimaryKeyedTable {
+    /// An update statement for a row's primary key that uses a conflict-resolution algorithm.
+    ///
+    /// - Parameters:
+    ///   - resolution: The algorithm to use when the update violates a constraint.
+    ///   - row: The row containing the new values and the primary key to update.
+    /// - Returns: An update statement.
+    public static func update(
+        or resolution: Conflict.Resolution,
+        _ row: Self
+    ) -> UpdateOf<Self> {
+        update(or: resolution) { updates in
+            for column in TableColumns.writableColumns
+            where !columns.primaryKey._names.contains(column.name) {
+                updates.set(column, column.render(row))
+            }
+        }
+        .where {
+            $0.primaryKey.eq(PrimaryKey(queryOutput: row[keyPath: $0.primaryKey.keyPath]))
+        }
+    }
+
     public static func update(
         _ row: Self
     ) -> UpdateOf<Self> {
@@ -30,7 +64,7 @@ extension PrimaryKeyedTable {
 
 public struct Update<From: Table, Returning> {
     var isEmpty: Bool
-    package var conflictResolution: ISO_9075.Fragment?
+    package var conflictResolution: Conflict.Resolution?
     var updates: Updates<From>
     var `where`: [ISO_9075.Fragment]
     var returning: [ISO_9075.Fragment]
@@ -47,7 +81,7 @@ public struct Update<From: Table, Returning> {
 
     package init(
         isEmpty: Bool,
-        conflictResolution: ISO_9075.Fragment? = nil,
+        conflictResolution: Conflict.Resolution? = nil,
         updates: Updates<From>,
         where: [ISO_9075.Fragment] = [],
         returning: [ISO_9075.Fragment] = []
@@ -97,7 +131,7 @@ extension Update: Statement {
 
         var query: ISO_9075.Fragment = "UPDATE "
         if let conflictResolution {
-            query.append("\(conflictResolution) ")
+            query.append("OR \(conflictResolution) ")
         }
         if let schemaName = From.schemaName {
             query.append("\(quote: schemaName).")
@@ -115,13 +149,5 @@ extension Update: Statement {
             query.append("\(.newlineOrSpace)RETURNING \(returning.joined(separator: ", "))")
         }
         return query
-    }
-}
-
-extension Update {
-    public func _modifying(_ clause: ISO_9075.Fragment) -> Self {
-        var update = self
-        update.conflictResolution = clause
-        return update
     }
 }

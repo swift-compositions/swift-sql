@@ -348,6 +348,24 @@ extension Where: SelectStatement {
         )
     }
 
+    /// An update statement for the filtered table that uses a conflict-resolution algorithm.
+    ///
+    /// - Parameters:
+    ///   - resolution: The algorithm to use when an update violates a constraint.
+    ///   - updates: A closure describing the column updates to perform.
+    /// - Returns: An update statement.
+    public func update(
+        or resolution: Conflict.Resolution,
+        set updates: (inout Updates<From>) -> Void
+    ) -> UpdateOf<From> {
+        Update(
+            isEmpty: scope == .empty,
+            conflictResolution: resolution,
+            updates: Updates(updates),
+            where: scope == .unscoped ? predicates : From.all._selectClauses.where + predicates
+        )
+    }
+
     public var query: ISO_9075.Fragment {
         asSelect().query
     }

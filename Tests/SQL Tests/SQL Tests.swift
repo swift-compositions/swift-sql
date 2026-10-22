@@ -74,9 +74,24 @@ struct Positional: ISO_9075.Dialect {
         #expect(Numbered().render(insert.query).sql.hasPrefix(#"INSERT OR REPLACE INTO "reminder""#))
     }
 
-    @Test func `an update places its modifier after the verb`() {
-        let update = Reminder.update { $0.title = #bind("Taxes") }._modifying("OR IGNORE")
-        #expect(Numbered().render(update.query).sql.hasPrefix(#"UPDATE OR IGNORE "reminder""#))
+    @Test(
+        arguments: [
+            (Conflict.Resolution.rollback, "ROLLBACK"),
+            (.abort, "ABORT"),
+            (.fail, "FAIL"),
+            (.ignore, "IGNORE"),
+            (.replace, "REPLACE"),
+        ]
+    )
+    func `an update places its conflict resolution after the verb`(
+        resolution: Conflict.Resolution,
+        keyword: String
+    ) {
+        let update = Reminder.update(or: resolution) { $0.title = #bind("Taxes") }
+            .where { $0.id.eq(1) }
+        #expect(
+            Numbered().render(update.query).sql.hasPrefix(#"UPDATE OR \#(keyword) "reminder""#)
+        )
     }
 }
 
