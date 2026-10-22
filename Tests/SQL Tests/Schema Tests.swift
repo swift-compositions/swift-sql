@@ -57,7 +57,7 @@ extension Schema.DDL.Unit {
         #expect(
             rendering.sql
                 == """
-                CREATE UNIQUE INDEX IF NOT EXISTS "main"."documents_title_rating" ON "documents" (lower("title"), "rating") WHERE (("rating") IS NOT NULL)
+                CREATE UNIQUE INDEX IF NOT EXISTS "main"."documents_title_rating" ON "documents" (lower("title"), "rating") WHERE (("rating") IS DISTINCT FROM (NULL))
                 """
         )
         #expect(rendering.values.isEmpty)

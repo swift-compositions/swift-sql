@@ -62,7 +62,10 @@ extension Schema {
             query.append("\(quote: name) ON \(quote: Root.tableName)")
             query.append(" (\(terms.joined(separator: ", ")))")
             if !predicate.isEmpty {
-                query.append(" WHERE \(predicate.map { "(\($0))" }.joined(separator: " AND "))")
+                let predicate: ISO_9075.Fragment = predicate
+                    .map { "(\($0))" }
+                    .joined(separator: " AND ")
+                query.append(" WHERE \(predicate)")
             }
             return query
         }
