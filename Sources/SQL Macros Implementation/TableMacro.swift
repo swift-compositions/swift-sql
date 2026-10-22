@@ -757,6 +757,7 @@ extension TableMacro: MemberMacro {
         var allColumnNames: [TokenSyntax] = []
         var codingKeys: [(identifier: TokenSyntax, rawValue: ExprSyntax?)] = []
         var codableEnumCases: [(identifier: TokenSyntax, label: TokenSyntax?, payloadType: TypeSyntax)] = []
+        var enumColumnChecks: [DeclSyntax] = []
         var writableColumns: [TokenSyntax] = []
         var selectedColumns: [(name: TokenSyntax, type: TypeSyntax?)] = []
         var columnsProperties: [DeclSyntax] = []
@@ -1244,6 +1245,20 @@ extension TableMacro: MemberMacro {
                     }
                 }
 
+                let checkIndex = enumColumnChecks.count / 2
+                enumColumnChecks.append(
+                    """
+                    @\(macrosModuleName)::CaseCheck(\(parameter.type.trimmed).self)
+                    static func _caseCheck\(raw: checkIndex)() {}
+                    """
+                )
+                enumColumnChecks.append(
+                    """
+                    @\(macrosModuleName)::ColumnCheck(\(columnQueryValueType.trimmed).self)
+                    static func _columnCheck\(raw: checkIndex)() {}
+                    """
+                )
+
                 let isRenamedColumn =
                     columnName.as(StringLiteralExprSyntax.self)?.representedLiteralValue
                     != identifier.text.trimmingBackticks()
@@ -1479,6 +1494,15 @@ extension TableMacro: MemberMacro {
                 "public \(nonisolated)static var _columnWidth: Swift.Int { \(raw: columnWidth) }",
             ]
             + tableMembers
+        if !enumColumnChecks.isEmpty {
+            members.append(
+                """
+                private enum _$ColumnChecks {
+                \(enumColumnChecks, separator: "\n")
+                }
+                """
+            )
+        }
         #if CasePaths
             if declaration.is(EnumDeclSyntax.self) {
                 members += try CasePathableMacro.expansion(
@@ -1508,37 +1532,7 @@ extension TableMacro: MemberAttributeMacro {
         }
         #if CasePaths
             if declaration.is(EnumDeclSyntax.self) {
-                guard
-                    let caseDecl = member.as(EnumCaseDeclSyntax.self),
-                    caseDecl.elements.count == 1,
-                    let element = caseDecl.elements.first,
-                    let parameters = element.parameterClause?.parameters,
-                    parameters.count == 1,
-                    let parameter = parameters.first
-                else { return [] }
-
-                let payloadType = parameter.type.trimmed
-                var columnType: TypeSyntax = payloadType
-                for attribute in caseDecl.attributes {
-                    guard
-                        let attribute = attribute.as(AttributeSyntax.self),
-                        let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?
-                            .name.text,
-                        attributeName == "Column",
-                        case .argumentList(let arguments) = attribute.arguments
-                    else { continue }
-                    for argument in arguments {
-                        guard
-                            argument.label?.text == "as",
-                            let memberAccess = argument.expression.as(MemberAccessExprSyntax.self),
-                            memberAccess.declName.baseName.tokenKind == .keyword(.self),
-                            let base = memberAccess.base
-                        else { continue }
-                        columnType = "\(raw: base.trimmedDescription)"
-                    }
-                }
-
-                return ["@\(macrosModuleName)::CaseCheck(\(payloadType).self)"]
+                return []
             }
         #endif
         guard
