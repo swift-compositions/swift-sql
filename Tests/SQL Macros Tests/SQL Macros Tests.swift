@@ -1,9 +1,8 @@
-import MacroTesting
 import SQL_Macros_Implementation
-import SnapshotTesting
+import SwiftSyntaxMacrosGenericTestSupport
 import Testing
 
-@Suite(.macros([TableMacro.self], record: .missing))
+@Suite
 struct `Table macro` {
     @Test func `a table names its columns through SQL module selectors`() {
         assertMacro {
@@ -730,4 +729,17 @@ struct `Table macro` {
             """#
         }
     }
+}
+
+private func assertMacro(
+    _ source: () -> String,
+    expansion: () -> String
+) {
+    assertMacroExpansion(
+        source(),
+        expandedSource: expansion(),
+        macroSpecs: ["Table": .init(type: TableMacro.self)],
+        indentationWidth: .spaces(2),
+        failureHandler: { Issue.record(Comment(rawValue: $0.message)) }
+    )
 }
