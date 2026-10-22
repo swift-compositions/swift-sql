@@ -122,6 +122,7 @@ let package = Package(
             name: "SQL Macros Tests",
             dependencies: [
                 "SQL Macros Implementation",
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacroExpansion", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacrosGenericTestSupport", package: "swift-syntax"),
             ]
