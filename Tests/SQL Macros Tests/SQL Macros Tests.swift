@@ -1,4 +1,5 @@
 import SQL_Macros_Implementation
+import SwiftSyntaxMacroExpansion
 import SwiftSyntaxMacrosGenericTestSupport
 import Testing
 
