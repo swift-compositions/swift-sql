@@ -1535,7 +1535,8 @@ extension TableMacro: MemberAttributeMacro {
                 }
 
                 return [
-                    "@\(macrosModuleName)::CaseCheck(\(payloadType).self)",
+                    "@\(macrosModuleName)::CaseCheck(\(payloadType).self)"
+                        .with(\.trailingTrivia, .newline),
                     "@\(macrosModuleName)::ColumnCheck(\(columnType).self)",
                 ]
             }
@@ -1616,6 +1617,7 @@ extension TableMacro: MemberAttributeMacro {
                         """
                         @Column("\(raw: identifier)")
                         """
+                        .with(\.trailingTrivia, .newline)
                     ] + checkAttribute
                 }
             }
@@ -1626,6 +1628,7 @@ extension TableMacro: MemberAttributeMacro {
             "\(raw: identifier)"\(raw: identifier == "id" ? ", primaryKey: true" : "")\
             )
             """
+            .with(\.trailingTrivia, .newline)
         ] + checkAttribute
     }
 }
