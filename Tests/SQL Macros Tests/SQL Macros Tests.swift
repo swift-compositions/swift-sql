@@ -1,20 +1,37 @@
 import SQL_Macros_Implementation
-import SwiftSyntaxMacrosTestSupport
+import SwiftSyntax
+import SwiftSyntaxMacroExpansion
+import SwiftSyntaxMacrosGenericTestSupport
 import Testing
 
 private func assertTableMacro(
     _ source: () -> String,
     expansion: () -> String,
+    fileID: StaticString = #fileID,
     file: StaticString = #filePath,
-    line: UInt = #line
+    line: UInt = #line,
+    column: UInt = #column
 ) {
     assertMacroExpansion(
         source(),
         expandedSource: expansion(),
-        macros: ["Table": TableMacro.self],
+        macroSpecs: ["Table": MacroSpec(type: TableMacro.self)],
         indentationWidth: .spaces(2),
-        file: file,
-        line: line
+        failureHandler: { failure in
+            Issue.record(
+                Comment(rawValue: failure.message),
+                sourceLocation: SourceLocation(
+                    fileID: failure.location.fileID,
+                    filePath: failure.location.filePath,
+                    line: failure.location.line,
+                    column: failure.location.column
+                )
+            )
+        },
+        fileID: fileID,
+        filePath: file,
+        line: line,
+        column: column
     )
 }
 
