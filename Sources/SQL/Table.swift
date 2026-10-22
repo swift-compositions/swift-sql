@@ -24,6 +24,8 @@ public protocol Table: QueryRepresentable, PartialSelectStatement, _SelectSource
 
     static var tableFragment: ISO_9075.Fragment { get }
 
+    static var _primaryKeyNames: Set<String> { get }
+
     static var all: DefaultScope { get }
 }
 
@@ -50,6 +52,8 @@ extension Table {
     public static var tableFragment: ISO_9075.Fragment {
         ISO_9075.Fragment(quote: tableName)
     }
+
+    public static var _primaryKeyNames: Set<String> { [] }
 
     static var _allColumnsFragment: ISO_9075.Fragment {
         columns.queryFragment

@@ -3,6 +3,8 @@ public import ISO_9075_Foundation
 public struct Column<Root: Table> {
     public let name: String
     public let isWritable: Bool
+    public let storage: Schema.Storage
+    public let isNullable: Bool
     package let render: (Root) -> ISO_9075.Fragment
     package let isNull: (Root) -> Bool
     package let decoding: @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment
@@ -12,6 +14,8 @@ public struct Column<Root: Table> {
     package init(
         name: String,
         isWritable: Bool,
+        storage: Schema.Storage,
+        isNullable: Bool,
         render: @escaping (Root) -> ISO_9075.Fragment,
         isNull: @escaping (Root) -> Bool,
         decoding: @escaping @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment,
@@ -20,6 +24,8 @@ public struct Column<Root: Table> {
     ) {
         self.name = name
         self.isWritable = isWritable
+        self.storage = storage
+        self.isNullable = isNullable
         self.render = render
         self.isNull = isNull
         self.decoding = decoding
@@ -36,6 +42,8 @@ public struct Column<Root: Table> {
         self.init(
             name: name,
             isWritable: isWritable,
+            storage: Value.storage,
+            isNullable: Value.isNullable,
             render: { Value(queryOutput: $0[keyPath: keyPath]).queryFragment },
             isNull: { Value(queryOutput: $0[keyPath: keyPath]).queryBinding == .null },
             decoding: { Value.queryFragment(decoding: $0) },
@@ -45,7 +53,8 @@ public struct Column<Root: Table> {
     }
 
     public var queryFragment: ISO_9075.Fragment {
-        let column: ISO_9075.Fragment = "\(Root.self).\(quote: name)"
+        let column: ISO_9075.Fragment =
+            _isDefiningSchema ? "\(quote: name)" : "\(Root.self).\(quote: name)"
         return _isSelecting ? decoding(column) : column
     }
 
@@ -61,6 +70,8 @@ public struct Column<Root: Table> {
         Column<TableAlias<Root, Name>>(
             name: name,
             isWritable: isWritable,
+            storage: storage,
+            isNullable: isNullable,
             render: { [render] alias in render(alias.base) },
             isNull: { [isNull] alias in isNull(alias.base) },
             decoding: decoding,
@@ -73,6 +84,8 @@ public struct Column<Root: Table> {
         Column<Root?>(
             name: name,
             isWritable: isWritable,
+            storage: storage,
+            isNullable: true,
             render: { [render] root in root.map(render) ?? "NULL" },
             isNull: { [isNull] root in root.map(isNull) ?? true },
             decoding: decoding,
@@ -85,6 +98,8 @@ public struct Column<Root: Table> {
         Column<Outer>(
             name: name,
             isWritable: isWritable,
+            storage: storage,
+            isNullable: isNullable,
             render: { [render] outer in render(outer[keyPath: path]) },
             isNull: { [isNull] outer in isNull(outer[keyPath: path]) },
             decoding: decoding,

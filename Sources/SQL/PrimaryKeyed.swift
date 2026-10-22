@@ -77,6 +77,10 @@ extension PrimaryKeyedTableDefinition where PrimaryColumn: TableColumnExpression
 }
 
 extension PrimaryKeyedTable {
+    public static var _primaryKeyNames: Set<String> {
+        Set(columns.primaryKey._names)
+    }
+
     public static func find(
         _ primaryKey: some QueryExpression<PrimaryKey>
     ) -> Where<Self> {

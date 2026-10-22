@@ -192,6 +192,10 @@ extension TableAlias: QueryExpression where Base: QueryExpression {
 }
 
 extension TableAlias: QueryBindable where Base: QueryBindable {
+    public static var storage: Schema.Storage { Base.storage }
+
+    public static var isNullable: Bool { Base.isNullable }
+
     public var queryBinding: ISO_9075.Value {
         base.queryBinding
     }

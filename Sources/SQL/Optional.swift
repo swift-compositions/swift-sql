@@ -27,6 +27,10 @@ extension [Byte]: _OptionalPromotable {}
 extension Optional: QueryBindable where Wrapped: QueryBindable {
     public typealias QueryValue = Wrapped.QueryValue?
 
+    public static var storage: Schema.Storage { Wrapped.storage }
+
+    public static var isNullable: Bool { true }
+
     public var queryBinding: ISO_9075.Value {
         self?.queryBinding ?? .null
     }

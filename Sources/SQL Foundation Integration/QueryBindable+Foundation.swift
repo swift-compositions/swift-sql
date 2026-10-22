@@ -6,6 +6,8 @@ public import SQL
 import Time
 
 extension Date: QueryBindable {
+    public static var storage: Schema.Storage { .text }
+
     public var queryBinding: ISO_9075.Value {
         let seconds = timeIntervalSince1970.rounded(.down)
         return .timestamp(
@@ -26,6 +28,8 @@ extension Date: QueryBindable {
 }
 
 extension UUID: QueryBindable {
+    public static var storage: Schema.Storage { .text }
+
     public var queryBinding: ISO_9075.Value { .uuid(RFC_4122.UUID(bytes: uuid)) }
 
     public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
@@ -34,6 +38,8 @@ extension UUID: QueryBindable {
 }
 
 extension Data: QueryBindable {
+    public static var storage: Schema.Storage { .blob }
+
     public var queryBinding: ISO_9075.Value { .blob(map(Byte.init(bitPattern:))) }
 
     public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {
@@ -42,6 +48,8 @@ extension Data: QueryBindable {
 }
 
 extension URL: QueryBindable {
+    public static var storage: Schema.Storage { .text }
+
     public var queryBinding: ISO_9075.Value { .text(absoluteString) }
 
     public init(decoder: inout some QueryDecoder) throws(QueryDecodingError) {

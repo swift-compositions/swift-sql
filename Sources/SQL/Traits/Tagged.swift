@@ -6,6 +6,10 @@
     where Tag: ~Copyable & ~Escapable, Underlying: _OptionalPromotable {}
 
     extension Tagged: QueryBindable where Tag: ~Copyable & ~Escapable, Underlying: QueryBindable {
+        public static var storage: Schema.Storage { Underlying.storage }
+
+        public static var isNullable: Bool { Underlying.isNullable }
+
         public var queryBinding: ISO_9075.Value {
             underlying.queryBinding
         }

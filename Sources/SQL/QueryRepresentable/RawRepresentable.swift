@@ -24,6 +24,8 @@ extension Optional where Wrapped: RawRepresentable, Wrapped.RawValue: QueryBinda
 }
 
 extension _RawRepresentableRawRepresentation: QueryBindable {
+    public static var storage: Schema.Storage { QueryOutput.RawValue.storage }
+
     public var queryBinding: ISO_9075.Value {
         queryOutput.rawValue.queryBinding
     }

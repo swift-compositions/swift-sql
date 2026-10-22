@@ -67,7 +67,8 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
     }
 
     public var queryFragment: ISO_9075.Fragment {
-        let column: ISO_9075.Fragment = "\(Root.self).\(quote: name)"
+        let column: ISO_9075.Fragment =
+            _isDefiningSchema ? "\(quote: name)" : "\(Root.self).\(quote: name)"
         return _isSelecting ? Value.queryFragment(decoding: column) : column
     }
 
@@ -173,7 +174,8 @@ public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBind
     }
 
     public var queryFragment: ISO_9075.Fragment {
-        let column: ISO_9075.Fragment = "\(Root.self).\(quote: name)"
+        let column: ISO_9075.Fragment =
+            _isDefiningSchema ? "\(quote: name)" : "\(Root.self).\(quote: name)"
         return _isSelecting ? Value.queryFragment(decoding: column) : column
     }
 
