@@ -93,6 +93,7 @@ private func tokenizer(
 ) -> String {
     options.reduce(into: name) { specification, option in
         guard let value = option.1 else { return }
+
         let escaped = value
             .split(separator: "'", omittingEmptySubsequences: false)
             .joined(separator: "''")
