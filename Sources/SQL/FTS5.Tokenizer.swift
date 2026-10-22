@@ -94,7 +94,8 @@ private func tokenizer(
     options.reduce(into: name) { specification, option in
         guard let value = option.1 else { return }
 
-        let escaped = value
+        let escaped =
+            value
             .split(separator: "'", omittingEmptySubsequences: false)
             .joined(separator: "''")
         specification.append(" \(option.0) '\(escaped)'")
