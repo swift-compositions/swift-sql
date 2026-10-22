@@ -2,6 +2,24 @@
     public import Tagged
     public import ISO_9075_Foundation
 
+    public protocol _TaggedProtocol<Untagged> {
+        associatedtype Untagged
+    }
+
+    extension Tagged: _TaggedProtocol where Underlying: Copyable & Escapable {
+        public typealias Untagged = Underlying
+    }
+
+    extension QueryExpression where QueryValue: _TaggedProtocol {
+        /// The expression with its phantom tag removed.
+        ///
+        /// Use this projection to compare a tagged column with an expression or value of its
+        /// underlying type. It does not change the generated SQL.
+        public var untag: some QueryExpression<QueryValue.Untagged> {
+            SQLQueryExpression(queryFragment)
+        }
+    }
+
     extension Tagged: _OptionalPromotable
     where Tag: ~Copyable & ~Escapable, Underlying: _OptionalPromotable {}
 
