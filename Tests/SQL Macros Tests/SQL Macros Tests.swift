@@ -90,6 +90,7 @@ struct `Table macro` {
             }
             """#,
             macroSpecs: tableMacros,
+            indentationWidth: .spaces(2),
             failureHandler: { Issue.record(Comment(rawValue: $0.message)) }
         )
     }
@@ -263,6 +264,7 @@ struct `Table macro` {
             }
             """#,
             macroSpecs: tableMacros,
+            indentationWidth: .spaces(2),
             failureHandler: { Issue.record(Comment(rawValue: $0.message)) }
         )
     }
@@ -376,6 +378,7 @@ struct `Table macro` {
             }
             """#,
             macroSpecs: tableMacros,
+            indentationWidth: .spaces(2),
             failureHandler: { Issue.record(Comment(rawValue: $0.message)) }
         )
     }
@@ -519,6 +522,7 @@ struct `Table macro` {
             }
             """#,
             macroSpecs: tableMacros,
+            indentationWidth: .spaces(2),
             failureHandler: { Issue.record(Comment(rawValue: $0.message)) }
         )
     }
@@ -633,6 +637,7 @@ struct `Table macro` {
             }
             """#,
             macroSpecs: tableMacros,
+            indentationWidth: .spaces(2),
             failureHandler: { Issue.record(Comment(rawValue: $0.message)) }
         )
     }
@@ -735,6 +740,7 @@ struct `Table macro` {
             }
             """#,
             macroSpecs: tableMacros,
+            indentationWidth: .spaces(2),
             failureHandler: { Issue.record(Comment(rawValue: $0.message)) }
         )
     }
