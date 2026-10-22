@@ -18,8 +18,7 @@ struct `Table macro` {
             """,
             expandedSource: #"""
                 struct Reminder {
-                  @Column("id", primaryKey: true)
-                  @SQL_Macros::ColumnCheck(Int.self)
+                  @Column("id", primaryKey: true) @SQL_Macros::ColumnCheck(Int.self)
                   let id: Int
 
                   public nonisolated struct TableColumns: SQL::TableDefinition, SQL::PrimaryKeyedTableDefinition {
@@ -114,23 +113,17 @@ struct `Table macro` {
             """,
             expandedSource: #"""
                 public struct Reminder {
-                  @Column("id", primaryKey: true)
-                  @SQL_Macros::ColumnCheck(Int.self)
+                  @Column("id", primaryKey: true) @SQL_Macros::ColumnCheck(Int.self)
                   public let id: Int
-                  @Column("listID")
-                  @SQL_Macros::ColumnCheck(Int.self)
+                  @Column("listID") @SQL_Macros::ColumnCheck(Int.self)
                   public let listID: Int
-                  @Column("title")
-                  @SQL_Macros::ColumnCheck(String.self)
+                  @Column("title") @SQL_Macros::ColumnCheck(String.self)
                   public var title: String = "Untitled"
-                  @Column("notes")
-                  @SQL_Macros::ColumnCheck(String?.self)
+                  @Column("notes") @SQL_Macros::ColumnCheck(String?.self)
                   public var notes: String?
-                  @Column("priority")
-                  @SQL_Macros::ColumnCheck(Optional<Int>.self)
+                  @Column("priority") @SQL_Macros::ColumnCheck(Optional<Int>.self)
                   public var priority: Optional<Int>
-                  @Column("isCompleted")
-                  @SQL_Macros::ColumnCheck(Swift.Bool.self)
+                  @Column("isCompleted") @SQL_Macros::ColumnCheck(Swift.Bool.self)
                   public var isCompleted = false
                   public var isOverdue: Bool { false }
                   public static let limit = 10
@@ -289,14 +282,11 @@ struct `Table macro` {
             """,
             expandedSource: #"""
                 struct Reminder {
-                  @Column("id", primaryKey: true)
-                  @SQL_Macros::ColumnCheck(Int.self)
+                  @Column("id", primaryKey: true) @SQL_Macros::ColumnCheck(Int.self)
                   let id: Int
-                  @Column("title")
-                  @SQL_Macros::ColumnCheck(Swift.String.self)
+                  @Column("title") @SQL_Macros::ColumnCheck(Swift.String.self)
                   var title = ""
-                  @Column("notes")
-                  @SQL_Macros::ColumnCheck(String?.self)
+                  @Column("notes") @SQL_Macros::ColumnCheck(String?.self)
                   var notes: String?
 
                   public nonisolated struct TableColumns: SQL::TableDefinition, SQL::PrimaryKeyedTableDefinition {
@@ -407,17 +397,13 @@ struct `Table macro` {
             """,
             expandedSource: #"""
                 package struct Counter {
-                  @Column("id", primaryKey: true)
-                  @SQL_Macros::ColumnCheck(Swift.Int.self)
+                  @Column("id", primaryKey: true) @SQL_Macros::ColumnCheck(Swift.Int.self)
                   package var id = 1
-                  @Column("label")
-                  @SQL_Macros::ColumnCheck(Swift.String.self)
+                  @Column("label") @SQL_Macros::ColumnCheck(Swift.String.self)
                   package var label = "count"
-                  @Column("ratio")
-                  @SQL_Macros::ColumnCheck(Swift.Double.self)
+                  @Column("ratio") @SQL_Macros::ColumnCheck(Swift.Double.self)
                   package var ratio = 0.5
-                  @Column("isActive")
-                  @SQL_Macros::ColumnCheck(Swift.Bool.self)
+                  @Column("isActive") @SQL_Macros::ColumnCheck(Swift.Bool.self)
                   package var isActive = true
 
                   public nonisolated struct TableColumns: SQL::TableDefinition, SQL::PrimaryKeyedTableDefinition {
@@ -553,11 +539,9 @@ struct `Table macro` {
             """,
             expandedSource: #"""
                 public struct Reminder {
-                  @Column("id", primaryKey: true)
-                  @SQL_Macros::ColumnCheck(Int.self)
+                  @Column("id", primaryKey: true) @SQL_Macros::ColumnCheck(Int.self)
                   public let id: Int
-                  @Column("title")
-                  @SQL_Macros::ColumnCheck(String(repeating: "a", count: 2))
+                  @Column("title") @SQL_Macros::ColumnCheck(String(repeating: "a", count: 2))
                   public var title = String(repeating: "a", count: 2)
 
                   public protocol _$ColumnTypes {
@@ -670,11 +654,9 @@ struct `Table macro` {
             """,
             expandedSource: #"""
                 public struct Reminder {
-                  @Column("id", primaryKey: true)
-                  @SQL_Macros::ColumnCheck(Int.self)
+                  @Column("id", primaryKey: true) @SQL_Macros::ColumnCheck(Int.self)
                   public let id: Int
-                  @Column("title")
-                  @SQL_Macros::ColumnCheck(Swift.String.self)
+                  @Column("title") @SQL_Macros::ColumnCheck(Swift.String.self)
                   var title = ""
 
                   public nonisolated struct TableColumns: SQL::TableDefinition, SQL::PrimaryKeyedTableDefinition {
