@@ -11,6 +11,56 @@ struct Reminder {
     var isCompleted = false
 }
 
+@Table
+struct Evidence {
+    let id: Int
+    let reminderID: Int
+    let namespace: String
+}
+
+extension Existence {
+    @Suite struct Test {
+        @Suite struct Unit {}
+    }
+}
+
+extension Existence.Test.Unit {
+    @Test func `exists accepts a correlated typed select`() {
+        let query = Reminder.where { reminder in
+            .exists {
+                Evidence.where { evidence in
+                    evidence.reminderID.eq(reminder.id)
+                        && evidence.namespace.eq("retrieval")
+                }
+                .select { _ in 1 }
+            }
+        }
+
+        let rendering = Numbered().render(query.query)
+        #expect(rendering.sql.contains("WHERE (EXISTS ("))
+        #expect(rendering.sql.contains(#"FROM "evidence""#))
+        #expect(
+            rendering.sql.contains(
+                #"(("evidence"."reminderID") = ("reminder"."id"))"#
+            )
+        )
+        #expect(rendering.values == [.int(1), .text("retrieval")])
+    }
+
+    @Test func `not exists accepts a correlated typed select`() {
+        let query = Reminder.where { reminder in
+            .notExists {
+                Evidence.where { evidence in
+                    evidence.reminderID.eq(reminder.id)
+                }
+                .select { _ in 1 }
+            }
+        }
+
+        #expect(Numbered().render(query.query).sql.contains("WHERE (NOT EXISTS ("))
+    }
+}
+
 struct Numbered: ISO_9075.Dialect {
     func placeholder(_ offset: Int) -> String { "$\(offset)" }
 }
