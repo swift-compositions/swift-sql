@@ -1,12 +1,27 @@
-import MacroTesting
 import SQL_Macros_Implementation
-import SnapshotTesting
+import SwiftSyntaxMacrosTestSupport
 import Testing
 
-@Suite(.macros([TableMacro.self], record: .missing))
+private func assertTableMacro(
+    _ source: () -> String,
+    expansion: () -> String,
+    file: StaticString = #filePath,
+    line: UInt = #line
+) {
+    assertMacroExpansion(
+        source(),
+        expandedSource: expansion(),
+        macros: ["Table": TableMacro.self],
+        indentationWidth: .spaces(2),
+        file: file,
+        line: line
+    )
+}
+
+@Suite
 struct `Table macro` {
     @Test func `a table names its columns through SQL module selectors`() {
-        assertMacro {
+        assertTableMacro {
             """
             @Table
             struct Reminder {
@@ -92,7 +107,7 @@ struct `Table macro` {
     }
 
     @Test func `a public draft spells its memberwise initializer publicly`() {
-        assertMacro {
+        assertTableMacro {
             """
             @Table
             public struct Reminder {
@@ -264,7 +279,7 @@ struct `Table macro` {
     }
 
     @Test func `an internal draft keeps the implicit memberwise initializer`() {
-        assertMacro {
+        assertTableMacro {
             """
             @Table
             struct Reminder {
@@ -376,7 +391,7 @@ struct `Table macro` {
     }
 
     @Test func `a package draft infers literal and optional literal types`() {
-        assertMacro {
+        assertTableMacro {
             """
             @Table
             package struct Counter {
@@ -518,7 +533,7 @@ struct `Table macro` {
     }
 
     @Test func `a draft with an unspellable property type keeps the implicit initializer`() {
-        assertMacro {
+        assertTableMacro {
             """
             @Table
             public struct Reminder {
@@ -631,7 +646,7 @@ struct `Table macro` {
     }
 
     @Test func `a public draft with an internal property keeps the implicit initializer`() {
-        assertMacro {
+        assertTableMacro {
             """
             @Table
             public struct Reminder {
