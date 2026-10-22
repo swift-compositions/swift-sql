@@ -1534,9 +1534,10 @@ extension TableMacro: MemberAttributeMacro {
                     }
                 }
 
-                return [
+                let caseCheck: AttributeSyntax =
                     "@\(macrosModuleName)::CaseCheck(\(payloadType).self)"
-                        .with(\.trailingTrivia, .newline),
+                return [
+                    caseCheck.with(\.trailingTrivia, .newline),
                     "@\(macrosModuleName)::ColumnCheck(\(columnType).self)",
                 ]
             }
@@ -1613,22 +1614,24 @@ extension TableMacro: MemberAttributeMacro {
                             }
                         )
                     else { continue }
-                    return [
+                    let implicitColumn: AttributeSyntax =
                         """
                         @Column("\(raw: identifier)")
                         """
-                        .with(\.trailingTrivia, .newline)
+                    return [
+                        implicitColumn.with(\.trailingTrivia, .newline)
                     ] + checkAttribute
                 }
             }
         }
-        return [
+        let implicitColumn: AttributeSyntax =
             """
             @Column(\
             "\(raw: identifier)"\(raw: identifier == "id" ? ", primaryKey: true" : "")\
             )
             """
-            .with(\.trailingTrivia, .newline)
+        return [
+            implicitColumn.with(\.trailingTrivia, .newline)
         ] + checkAttribute
     }
 }
