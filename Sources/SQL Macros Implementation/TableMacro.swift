@@ -94,6 +94,7 @@ extension TableMacro: ExtensionMacro {
         let selfRewriter = SelfRewriter(
             selfEquivalent: type.as(IdentifierTypeSyntax.self)?.name ?? "QueryValue"
         )
+        let hasExplicitPrimaryKey = declaration.hasExplicitPrimaryKey
         if case .argumentList(let arguments) = node.arguments {
             for argumentIndex in arguments.indices {
                 let argument = arguments[argumentIndex]
@@ -175,7 +176,8 @@ extension TableMacro: ExtensionMacro {
                     ?? binding.initializer?.value.literalType)
                     .map { $0.rewritten(selfRewriter) }
                 var columnQueryOutputType = columnQueryValueType
-                var isPrimaryKey = primaryKey == nil && identifier.text == "id"
+                var isPrimaryKey =
+                    !hasExplicitPrimaryKey && primaryKey == nil && identifier.text == "id"
                 var isEphemeral = false
                 var isExplicitColumn = false
                 var isGenerated = false
@@ -780,6 +782,7 @@ extension TableMacro: MemberMacro {
                 content: declarationName.trimmed.text.lowercasingLeadingUppercase
             )
         )
+        let hasExplicitPrimaryKey = declaration.hasExplicitPrimaryKey
         if node.attributeName.identifier != "_Draft",
             case .argumentList(let arguments) = node.arguments
         {
@@ -815,7 +818,8 @@ extension TableMacro: MemberMacro {
                     .map { $0.rewritten(selfRewriter) }
                 var columnQueryOutputType = columnQueryValueType
                 var isPrimaryKey =
-                    primaryKey == nil
+                    !hasExplicitPrimaryKey
+                    && primaryKey == nil
                     && identifier.text == "id"
                     && node.attributeName.identifier != "_Draft"
                 var isEphemeral = false
@@ -1534,10 +1538,7 @@ extension TableMacro: MemberAttributeMacro {
                     }
                 }
 
-                return [
-                    "@\(macrosModuleName)::CaseCheck(\(payloadType).self)",
-                    "@\(macrosModuleName)::ColumnCheck(\(columnType).self)",
-                ]
+                return ["@\(macrosModuleName)::CaseCheck(\(payloadType).self)"]
             }
         #endif
         guard
@@ -1586,46 +1587,6 @@ extension TableMacro: MemberAttributeMacro {
         } else {
             checkAttribute = []
         }
-        if columnAttribute != nil {
-            return checkAttribute
-        }
-        if identifier == "id" {
-            for member in declaration.memberBlock.members {
-                guard
-                    let property = member.decl.as(VariableDeclSyntax.self),
-                    !property.isStatic,
-                    !property.isComputed
-                else { continue }
-                for attribute in property.attributes {
-                    guard
-                        let attribute = attribute.as(AttributeSyntax.self),
-                        let attributeName = attribute.attributeName.as(IdentifierTypeSyntax.self)?
-                            .name.text,
-                        attributeName == "Column",
-                        case .argumentList(let arguments) = attribute.arguments,
-                        arguments.contains(
-                            where: {
-                                $0.label?.text.trimmingBackticks() == "primaryKey"
-                                    && $0.expression.as(BooleanLiteralExprSyntax.self)?.literal
-                                        .tokenKind
-                                        == .keyword(.true)
-                            }
-                        )
-                    else { continue }
-                    return [
-                        """
-                        @Column("\(raw: identifier)")
-                        """
-                    ] + checkAttribute
-                }
-            }
-        }
-        return [
-            """
-            @Column(\
-            "\(raw: identifier)"\(raw: identifier == "id" ? ", primaryKey: true" : "")\
-            )
-            """
-        ] + checkAttribute
+        return checkAttribute
     }
 }

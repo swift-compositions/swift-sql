@@ -14,6 +14,28 @@ extension DeclGroupSyntax {
             ?? self.as(EnumDeclSyntax.self)?.name
     }
 
+    var hasExplicitPrimaryKey: Bool {
+        memberBlock.members.contains { member in
+            guard
+                let property = member.decl.as(VariableDeclSyntax.self),
+                !property.isStatic,
+                !property.isComputed
+            else { return false }
+            return property.attributes.contains { element in
+                guard
+                    let attribute = element.as(AttributeSyntax.self),
+                    attribute.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "Column",
+                    case .argumentList(let arguments) = attribute.arguments
+                else { return false }
+                return arguments.contains { argument in
+                    argument.label?.text.trimmingBackticks() == "primaryKey"
+                        && argument.expression.as(BooleanLiteralExprSyntax.self)?.literal.tokenKind
+                            == .keyword(.true)
+                }
+            }
+        }
+    }
+
     func macroApplication(for name: String) -> AttributeSyntax? {
         for attribute in attributes {
             switch attribute {
