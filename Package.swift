@@ -107,6 +107,7 @@ let package = Package(
                 .product(name: "Time", package: "swift-time", condition: .when(traits: ["CasePaths"])),
                 .product(name: "RFC 4122", package: "swift-rfc-4122", condition: .when(traits: ["CasePaths"])),
                 .product(name: "CasePaths", package: "swift-case-paths", condition: .when(traits: ["CasePaths"])),
+                .product(name: "Tagged", package: "swift-tagged", condition: .when(traits: ["Tagged"])),
                 .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
                 .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
             ]

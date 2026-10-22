@@ -2,6 +2,7 @@
     import ISO_9075_Foundation
     import SQL
     import SQL_Macros
+    import Tagged
     import Testing
 
     private enum Identifier {}
