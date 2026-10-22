@@ -111,6 +111,13 @@ let package = Package(
             ]
         ),
         .testTarget(
+            name: "SQL Schema Tests",
+            dependencies: [
+                .target(name: "SQL"),
+                .target(name: "SQL Macros"),
+            ]
+        ),
+        .testTarget(
             name: "SQL Migrations Tests",
             dependencies: [
                 "SQL Migrations",
