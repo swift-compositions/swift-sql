@@ -1,20 +1,21 @@
-import MacroTesting
 import SQL_Macros_Implementation
-import SnapshotTesting
+import SwiftSyntaxMacroExpansion
+import SwiftSyntaxMacrosGenericTestSupport
 import Testing
 
-@Suite(.macros([TableMacro.self], record: .missing))
+private let tableMacros = ["Table": MacroSpec(type: TableMacro.self)]
+
+@Suite
 struct `Table macro` {
     @Test func `a table names its columns through SQL module selectors`() {
-        assertMacro {
+        assertMacroExpansion(
             """
             @Table
             struct Reminder {
               let id: Int
             }
-            """
-        } expansion: {
-            #"""
+            """,
+            expandedSource: #"""
             struct Reminder {
               @Column("id", primaryKey: true) @SQL_Macros::ColumnCheck(Int.self)
               let id: Int
@@ -87,12 +88,14 @@ struct `Table macro` {
                 self.id = id
               }
             }
-            """#
-        }
+            """#,
+            macroSpecs: tableMacros,
+            failureHandler: { Issue.record(Comment(rawValue: $0.message)) }
+        )
     }
 
     @Test func `a public draft spells its memberwise initializer publicly`() {
-        assertMacro {
+        assertMacroExpansion(
             """
             @Table
             public struct Reminder {
@@ -105,9 +108,8 @@ struct `Table macro` {
               public var isOverdue: Bool { false }
               public static let limit = 10
             }
-            """
-        } expansion: {
-            #"""
+            """,
+            expandedSource: #"""
             public struct Reminder {
               @Column("id", primaryKey: true) @SQL_Macros::ColumnCheck(Int.self)
               public let id: Int
@@ -259,12 +261,14 @@ struct `Table macro` {
                 self.isCompleted = isCompleted
               }
             }
-            """#
-        }
+            """#,
+            macroSpecs: tableMacros,
+            failureHandler: { Issue.record(Comment(rawValue: $0.message)) }
+        )
     }
 
     @Test func `an internal draft keeps the implicit memberwise initializer`() {
-        assertMacro {
+        assertMacroExpansion(
             """
             @Table
             struct Reminder {
@@ -272,9 +276,8 @@ struct `Table macro` {
               var title = ""
               var notes: String?
             }
-            """
-        } expansion: {
-            #"""
+            """,
+            expandedSource: #"""
             struct Reminder {
               @Column("id", primaryKey: true) @SQL_Macros::ColumnCheck(Int.self)
               let id: Int
@@ -371,12 +374,14 @@ struct `Table macro` {
                 self.title = title
               }
             }
-            """#
-        }
+            """#,
+            macroSpecs: tableMacros,
+            failureHandler: { Issue.record(Comment(rawValue: $0.message)) }
+        )
     }
 
     @Test func `a package draft infers literal and optional literal types`() {
-        assertMacro {
+        assertMacroExpansion(
             """
             @Table
             package struct Counter {
@@ -385,9 +390,8 @@ struct `Table macro` {
               package var ratio = 0.5
               package var isActive = true
             }
-            """
-        } expansion: {
-            #"""
+            """,
+            expandedSource: #"""
             package struct Counter {
               @Column("id", primaryKey: true) @SQL_Macros::ColumnCheck(Swift.Int.self)
               package var id = 1
@@ -513,21 +517,22 @@ struct `Table macro` {
                 self.isActive = isActive
               }
             }
-            """#
-        }
+            """#,
+            macroSpecs: tableMacros,
+            failureHandler: { Issue.record(Comment(rawValue: $0.message)) }
+        )
     }
 
     @Test func `a draft with an unspellable property type keeps the implicit initializer`() {
-        assertMacro {
+        assertMacroExpansion(
             """
             @Table
             public struct Reminder {
               public let id: Int
               public var title = String(repeating: "a", count: 2)
             }
-            """
-        } expansion: {
-            #"""
+            """,
+            expandedSource: #"""
             public struct Reminder {
               @Column("id", primaryKey: true) @SQL_Macros::ColumnCheck(Int.self)
               public let id: Int
@@ -626,21 +631,22 @@ struct `Table macro` {
                 self.title = title
               }
             }
-            """#
-        }
+            """#,
+            macroSpecs: tableMacros,
+            failureHandler: { Issue.record(Comment(rawValue: $0.message)) }
+        )
     }
 
     @Test func `a public draft with an internal property keeps the implicit initializer`() {
-        assertMacro {
+        assertMacroExpansion(
             """
             @Table
             public struct Reminder {
               public let id: Int
               var title = ""
             }
-            """
-        } expansion: {
-            #"""
+            """,
+            expandedSource: #"""
             public struct Reminder {
               @Column("id", primaryKey: true) @SQL_Macros::ColumnCheck(Int.self)
               public let id: Int
@@ -727,7 +733,9 @@ struct `Table macro` {
                 self.title = title
               }
             }
-            """#
-        }
+            """#,
+            macroSpecs: tableMacros,
+            failureHandler: { Issue.record(Comment(rawValue: $0.message)) }
+        )
     }
 }

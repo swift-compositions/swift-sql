@@ -30,7 +30,6 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-case-paths.git", from: "1.7.2"),
         .package(url: "https://github.com/pointfreeco/swift-custom-dump.git", from: "1.3.3"),
         .package(url: "https://github.com/swift-iso/swift-iso-9075.git", branch: "main"),
-        .package(url: "https://github.com/pointfreeco/swift-macro-testing.git", from: "0.6.3"),
         .package(url: "https://github.com/swift-ietf/swift-rfc-4122.git", branch: "main"),
         .package(url: "https://github.com/pointfreeco/swift-snapshot-testing.git", from: "1.18.4"),
         .package(url: "https://github.com/swift-atoms/swift-standard-library-extensions.git", branch: "main"),
@@ -123,8 +122,8 @@ let package = Package(
             name: "SQL Macros Tests",
             dependencies: [
                 "SQL Macros Implementation",
-                .product(name: "MacroTesting", package: "swift-macro-testing"),
-                .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
+                .product(name: "SwiftSyntaxMacroExpansion", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxMacrosGenericTestSupport", package: "swift-syntax"),
             ]
         ),
     ],
