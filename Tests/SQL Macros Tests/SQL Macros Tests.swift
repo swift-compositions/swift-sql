@@ -1,9 +1,39 @@
-import MacroTesting
 import SQL_Macros_Implementation
-import SnapshotTesting
+import SwiftSyntaxMacrosGenericTestSupport
 import Testing
 
-@Suite(.macros([TableMacro.self], record: .missing))
+private func assertMacro(
+    _ source: () -> String,
+    expansion: () -> String,
+    fileID: StaticString = #fileID,
+    filePath: StaticString = #filePath,
+    line: UInt = #line,
+    column: UInt = #column
+) {
+    assertMacroExpansion(
+        source(),
+        expandedSource: expansion(),
+        macroSpecs: ["Table": MacroSpec(type: TableMacro.self)],
+        indentationWidth: .spaces(2),
+        failureHandler: { failure in
+            Issue.record(
+                Comment(rawValue: failure.message),
+                sourceLocation: SourceLocation(
+                    fileID: failure.location.fileID,
+                    filePath: failure.location.filePath,
+                    line: failure.location.line,
+                    column: failure.location.column
+                )
+            )
+        },
+        fileID: fileID,
+        filePath: filePath,
+        line: line,
+        column: column
+    )
+}
+
+@Suite
 struct `Table macro` {
     @Test func `a table names its columns through SQL module selectors`() {
         assertMacro {
