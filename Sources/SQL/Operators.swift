@@ -414,14 +414,28 @@ extension SQLQueryExpression<String> {
 }
 
 extension QueryExpression where QueryValue: QueryExpression {
+    /// An empty list renders as a constant false predicate, since `IN ()` is not valid SQL.
     public func `in`<S: Sequence>(_ expression: S) -> some QueryExpression<Bool>
     where S.Element: QueryExpression<QueryValue> {
-        BinaryOperator(lhs: self, operator: "IN", rhs: S.Expression(elements: expression))
+        let elements = Array(expression)
+        guard !elements.isEmpty else { return SQLQueryExpression("(1 = 0)", as: Bool.self) }
+        return SQLQueryExpression(
+            BinaryOperator<Bool>(lhs: self, operator: "IN", rhs: [S.Element].Expression(elements: elements))
+                .queryFragment,
+            as: Bool.self
+        )
     }
 
+    /// An empty list renders as a constant true predicate, since `NOT IN ()` is not valid SQL.
     public func notIn<S: Sequence>(_ expression: S) -> some QueryExpression<Bool>
     where S.Element: QueryExpression<QueryValue> {
-        BinaryOperator(lhs: self, operator: "NOT IN", rhs: S.Expression(elements: expression))
+        let elements = Array(expression)
+        guard !elements.isEmpty else { return SQLQueryExpression("(1 = 1)", as: Bool.self) }
+        return SQLQueryExpression(
+            BinaryOperator<Bool>(lhs: self, operator: "NOT IN", rhs: [S.Element].Expression(elements: elements))
+                .queryFragment,
+            as: Bool.self
+        )
     }
 
     public func `in`(_ query: some Statement<QueryValue>) -> some QueryExpression<Bool> {
