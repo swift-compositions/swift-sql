@@ -45,3 +45,24 @@ import Testing
         #expect(database.executed.count == 2)
     }
 }
+
+@Suite struct `Reading the bookkeeping` {
+    @Test func `applied reads every recorded name`() async throws {
+        let database = TestDatabase()
+        database.script([TestDatabase.Row(["name": .text("v1")]), TestDatabase.Row(["name": .text("v2")])])
+        let applied = try await database.read { (connection: TestDatabase.Connection) throws(ISO_9075.Error) in
+            try Migrator<TestDatabase>.applied(in: connection)
+        }
+        #expect(applied == ["v1", "v2"])
+        #expect(database.executed.first?.sql == #"SELECT "name" FROM "_sql_migrations""#)
+    }
+
+    @Test func `record inserts the name in the caller's transaction`() async throws {
+        let database = TestDatabase()
+        try await database.write { (connection: TestDatabase.Connection) throws(ISO_9075.Error) in
+            try Migrator<TestDatabase>.record("v3", in: connection)
+        }
+        #expect(database.executed.map(\.values) == [[.text("v3")]])
+        #expect(database.executed.first?.sql.hasPrefix(#"INSERT INTO "_sql_migrations""#) == true)
+    }
+}

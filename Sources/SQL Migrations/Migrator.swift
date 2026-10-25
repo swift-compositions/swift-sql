@@ -46,17 +46,9 @@ extension Migrator {
                 )
                 """
             )
-            applied = Set(
-                try await database.read { (connection: Database.Connection) throws(ISO_9075.Error) -> [String] in
-                    try connection.fetchAll("SELECT \(quote: "name") FROM \(Self.appliedTable)") {
-                        row throws(ISO_9075.Error) in
-                        switch try row.value(named: "name") {
-                        case .text(let name): name
-                        case let value: throw .decoding("a migration name, not \(value)")
-                        }
-                    }
-                }
-            )
+            applied = try await database.read { (connection: Database.Connection) throws(ISO_9075.Error) -> Set<String> in
+                try Self.applied(in: connection)
+            }
         } catch {
             throw .database(error)
         }
@@ -65,13 +57,29 @@ extension Migrator {
         }
     }
 
+    /// The names of the migrations recorded as applied on `connection`, which must hold the bookkeeping table.
+    public static func applied(in connection: Database.Connection) throws(ISO_9075.Error) -> Set<String> {
+        Set(
+            try connection.fetchAll("SELECT \(quote: "name") FROM \(Self.appliedTable)") {
+                row throws(ISO_9075.Error) in
+                switch try row.value(named: "name") {
+                case .text(let name): name
+                case let value: throw .decoding("a migration name, not \(value)")
+                }
+            }
+        )
+    }
+
+    /// Records `name` as applied on `connection`, inside the caller's transaction.
+    public static func record(_ name: String, in connection: Database.Connection) throws(ISO_9075.Error) {
+        _ = try connection.execute("INSERT INTO \(Self.appliedTable) (\(quote: "name")) VALUES (\(.text(name)))")
+    }
+
     private func apply(_ migration: Migration<Database.Connection>, to database: Database) async throws(Error) {
         do {
             try await database.write { (connection: Database.Connection) throws(ISO_9075.Error) in
                 try migration.up(connection)
-                _ = try connection.execute(
-                    "INSERT INTO \(Self.appliedTable) (\(quote: "name")) VALUES (\(.text(migration.name)))"
-                )
+                try Self.record(migration.name, in: connection)
             }
         } catch {
             throw .migration(name: migration.name, error)
