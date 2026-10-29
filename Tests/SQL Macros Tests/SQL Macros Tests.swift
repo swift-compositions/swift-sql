@@ -110,7 +110,7 @@ struct `Table macro` {
               }
             }
 
-            nonisolated extension Reminder: SQL::Table, SQL::PrimaryKeyedTable, SQL::PartialSelectStatement {
+            nonisolated extension Reminder: SQL::Table, SQL::PrimaryKeyedTable, SQL::PartialSelectStatement, SQL::_SelectSource {
               public nonisolated init(decoder: inout some SQL::QueryDecoder) throws(SQL::QueryDecodingError) {
                 let id = try decoder.decode(Self.columns.id)
                 guard let id else {
@@ -265,7 +265,7 @@ struct `Table macro` {
               }
             }
 
-            nonisolated extension Reminder: SQL::Table, SQL::PrimaryKeyedTable, SQL::PartialSelectStatement {
+            nonisolated extension Reminder: SQL::Table, SQL::PrimaryKeyedTable, SQL::PartialSelectStatement, SQL::_SelectSource {
               public nonisolated init(decoder: inout some SQL::QueryDecoder) throws(SQL::QueryDecodingError) {
                 let id = try decoder.decode(Self.columns.id)
                 let listID = try decoder.decode(Self.columns.listID)
@@ -388,7 +388,7 @@ struct `Table macro` {
               }
             }
 
-            nonisolated extension Reminder: SQL::Table, SQL::PrimaryKeyedTable, SQL::PartialSelectStatement {
+            nonisolated extension Reminder: SQL::Table, SQL::PrimaryKeyedTable, SQL::PartialSelectStatement, SQL::_SelectSource {
               public nonisolated init(decoder: inout some SQL::QueryDecoder) throws(SQL::QueryDecodingError) {
                 let id = try decoder.decode(Self.columns.id)
                 let title = try decoder.decode(Self.columns.title)
@@ -521,7 +521,7 @@ struct `Table macro` {
               }
             }
 
-            nonisolated extension Counter: SQL::Table, SQL::PrimaryKeyedTable, SQL::PartialSelectStatement {
+            nonisolated extension Counter: SQL::Table, SQL::PrimaryKeyedTable, SQL::PartialSelectStatement, SQL::_SelectSource {
               public nonisolated init(decoder: inout some SQL::QueryDecoder) throws(SQL::QueryDecodingError) {
                 let id = try decoder.decode(Self.columns.id)
                 let label = try decoder.decode(Self.columns.label)
@@ -644,7 +644,7 @@ struct `Table macro` {
               }
             }
 
-            nonisolated extension Reminder: SQL::Table, SQL::PrimaryKeyedTable, SQL::PartialSelectStatement {
+            nonisolated extension Reminder: SQL::Table, SQL::PrimaryKeyedTable, SQL::PartialSelectStatement, SQL::_SelectSource {
               public nonisolated init(decoder: inout some SQL::QueryDecoder) throws(SQL::QueryDecodingError) {
                 let id = try decoder.decode(Self.columns.id)
                 let title = try decoder.decode(Self.columns.title)
@@ -745,7 +745,7 @@ struct `Table macro` {
               }
             }
 
-            nonisolated extension Reminder: SQL::Table, SQL::PrimaryKeyedTable, SQL::PartialSelectStatement {
+            nonisolated extension Reminder: SQL::Table, SQL::PrimaryKeyedTable, SQL::PartialSelectStatement, SQL::_SelectSource {
               public nonisolated init(decoder: inout some SQL::QueryDecoder) throws(SQL::QueryDecodingError) {
                 let id = try decoder.decode(Self.columns.id)
                 let title = try decoder.decode(Self.columns.title)

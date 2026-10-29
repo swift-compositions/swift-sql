@@ -697,6 +697,7 @@ extension TableMacro: ExtensionMacro {
 
         if draftTableType == nil {
             conformances.append("\(moduleName)::PartialSelectStatement")
+            conformances.append("\(moduleName)::_SelectSource")
         }
 
         var extensionMembers: [DeclSyntax] = []
