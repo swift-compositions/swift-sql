@@ -5,6 +5,13 @@
 import ISO_9075_Foundation
 
 extension Delete {
+    public func returning<QueryValue: QueryRepresentable>(
+        _ selection: (From.TableColumns) -> TableColumn<From, QueryValue>
+    ) -> Delete<From, QueryValue> {
+        returning(fragments: [selection(From.columns).returningFragment])
+    }
+
+    @_disfavoredOverload
     public func returning<each QueryValue: QueryRepresentable>(
         _ selection: (From.TableColumns) -> (repeat TableColumn<From, each QueryValue>)
     ) -> Delete<From, (repeat each QueryValue)> {
@@ -22,6 +29,13 @@ extension Delete {
 }
 
 extension Insert {
+    public func returning<QueryValue: QueryRepresentable>(
+        _ selection: (Into.TableColumns) -> TableColumn<Into, QueryValue>
+    ) -> Insert<Into, QueryValue> {
+        returning(fragments: [selection(Into.columns).returningFragment])
+    }
+
+    @_disfavoredOverload
     public func returning<each QueryValue: QueryRepresentable>(
         _ selection: (Into.TableColumns) -> (repeat TableColumn<Into, each QueryValue>)
     ) -> Insert<Into, (repeat each QueryValue)> {
@@ -39,6 +53,13 @@ extension Insert {
 }
 
 extension Update {
+    public func returning<QueryValue: QueryRepresentable>(
+        _ selection: (From.TableColumns) -> TableColumn<From, QueryValue>
+    ) -> Update<From, QueryValue> {
+        returning(fragments: [selection(From.columns).returningFragment])
+    }
+
+    @_disfavoredOverload
     public func returning<each QueryValue: QueryRepresentable>(
         _ selection: (From.TableColumns) -> (repeat TableColumn<From, each QueryValue>)
     ) -> Update<From, (repeat each QueryValue)> {

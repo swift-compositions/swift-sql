@@ -505,14 +505,20 @@ extension Select where From: Table {
         self.where = `where`
     }
 
-    public func select<each C1: QueryRepresentable, C2: QueryExpression>(
-        _ selection: KeyPath<From.TableColumns, C2>
-    ) -> Select<(repeat each C1, C2.QueryValue), From, ()>
-    where Columns == (repeat each C1), C2.QueryValue: QueryRepresentable, Joins == () {
+    public func select<C: QueryExpression>(
+        _ selection: KeyPath<From.TableColumns, C>
+    ) -> Select<C.QueryValue, From, ()>
+    where Columns == (), C.QueryValue: QueryRepresentable, Joins == () {
         select { $0[keyPath: selection] }
     }
 
-    @_disfavoredOverload
+    public func select<C1: QueryRepresentable, each C2: QueryRepresentable, C3: QueryExpression>(
+        _ selection: KeyPath<From.TableColumns, C3>
+    ) -> Select<(C1, repeat each C2, C3.QueryValue), From, ()>
+    where Columns == (C1, repeat each C2), C3.QueryValue: QueryRepresentable, Joins == () {
+        select { $0[keyPath: selection] }
+    }
+
     public func select<C: QueryExpression, each J: Table>(
         _ selection: ((From.TableColumns, repeat (each J).TableColumns)) -> C
     ) -> Select<C.QueryValue, From, Joins>
@@ -528,25 +534,18 @@ extension Select where From: Table {
         _select(selection)
     }
 
-    public func select<each C1: QueryRepresentable, C2: QueryExpression>(
-        _ selection: (From.TableColumns) -> C2
-    ) -> Select<(repeat each C1, C2.QueryValue), From, ()>
-    where Columns == (repeat each C1), C2.QueryValue: QueryRepresentable, Joins == () {
-        _select(selection)
-    }
-
-    public func select<each C1: QueryRepresentable, C2: QueryExpression, each J: Table>(
-        _ selection: ((From.TableColumns, repeat (each J).TableColumns)) -> C2
-    ) -> Select<(repeat each C1, C2.QueryValue), From, Joins>
-    where Columns == (repeat each C1), C2.QueryValue: QueryRepresentable, Joins == (repeat each J) {
+    public func select<C1: QueryRepresentable, each C2: QueryRepresentable, C3: QueryExpression, each J: Table>(
+        _ selection: ((From.TableColumns, repeat (each J).TableColumns)) -> C3
+    ) -> Select<(C1, repeat each C2, C3.QueryValue), From, Joins>
+    where Columns == (C1, repeat each C2), C3.QueryValue: QueryRepresentable, Joins == (repeat each J) {
         _select(selection)
     }
 
     @_disfavoredOverload
-    public func select<each C1: QueryRepresentable, C2: QueryExpression, each J: Table>(
-        _ selection: (From.TableColumns, repeat (each J).TableColumns) -> C2
-    ) -> Select<(repeat each C1, C2.QueryValue), From, Joins>
-    where Columns == (repeat each C1), C2.QueryValue: QueryRepresentable, Joins == (repeat each J) {
+    public func select<C1: QueryRepresentable, each C2: QueryRepresentable, C3: QueryExpression, each J: Table>(
+        _ selection: (From.TableColumns, repeat (each J).TableColumns) -> C3
+    ) -> Select<(C1, repeat each C2, C3.QueryValue), From, Joins>
+    where Columns == (C1, repeat each C2), C3.QueryValue: QueryRepresentable, Joins == (repeat each J) {
         _select(selection)
     }
 
@@ -1648,19 +1647,19 @@ extension Select where From: Table {
         return select { _ in .count(filter: filter) }
     }
 
-    public func count<each C: QueryRepresentable, each J: Table>() -> Select<
-        (repeat each C, Int), From, (repeat each J)
+    public func count<C1: QueryRepresentable, each C2: QueryRepresentable, each J: Table>() -> Select<
+        (C1, repeat each C2, Int), From, (repeat each J)
     >
-    where Columns == (repeat each C), Joins == (repeat each J) {
+    where Columns == (C1, repeat each C2), Joins == (repeat each J) {
         select { _ in .count() }
     }
 
-    public func count<each C: QueryRepresentable, each J: Table, Filter: QueryExpression<Bool>>(
+    public func count<C1: QueryRepresentable, each C2: QueryRepresentable, each J: Table, Filter: QueryExpression<Bool>>(
         filter: (From.TableColumns, repeat (each J).TableColumns) -> Filter
     ) -> Select<
-        (repeat each C, Int), From, (repeat each J)
+        (C1, repeat each C2, Int), From, (repeat each J)
     >
-    where Columns == (repeat each C), Joins == (repeat each J) {
+    where Columns == (C1, repeat each C2), Joins == (repeat each J) {
         let filter = filter(From.columns, repeat (each J).columns)
         return select { _ in .count(filter: filter) }
     }
@@ -1678,19 +1677,19 @@ extension Select where From: Table {
         return select { _, _ in .count(filter: filter) }
     }
 
-    public func count<each C: QueryRepresentable>() -> Select<
-        (repeat each C, Int), From, Joins
+    public func count<C1: QueryRepresentable, each C2: QueryRepresentable>() -> Select<
+        (C1, repeat each C2, Int), From, Joins
     >
-    where Columns == (repeat each C), Joins: Table {
+    where Columns == (C1, repeat each C2), Joins: Table {
         select { _, _ in .count() }
     }
 
-    public func count<each C: QueryRepresentable, Filter: QueryExpression<Bool>>(
+    public func count<C1: QueryRepresentable, each C2: QueryRepresentable, Filter: QueryExpression<Bool>>(
         filter: (From.TableColumns, Joins.TableColumns) -> Filter
     ) -> Select<
-        (repeat each C, Int), From, Joins
+        (C1, repeat each C2, Int), From, Joins
     >
-    where Columns == (repeat each C), Joins: Table {
+    where Columns == (C1, repeat each C2), Joins: Table {
         let filter = filter(From.columns, Joins.columns)
         return select { _, _ in .count(filter: filter) }
     }
