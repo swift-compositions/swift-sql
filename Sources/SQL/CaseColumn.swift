@@ -1,6 +1,6 @@
-import ISO_9075_Foundation
-
 #if CasePaths
+    public import ISO_9075_Foundation
+
     public struct CaseColumn<Root: Table, Payload: QueryRepresentable & QueryBindable>:
         WritableTableColumnExpression
     {
