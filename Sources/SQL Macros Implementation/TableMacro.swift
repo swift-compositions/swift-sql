@@ -1544,8 +1544,7 @@ extension TableMacro: MemberAttributeMacro {
             !property.hasMacroApplication("Ephemeral"),
             property.bindings.count == 1,
             let binding = property.bindings.first,
-            let identifier = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text
-                .trimmingBackticks()
+            binding.pattern.is(IdentifierPatternSyntax.self)
         else { return [] }
 
         var columnAttribute: AttributeSyntax?

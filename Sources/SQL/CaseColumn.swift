@@ -1,4 +1,4 @@
-public import ISO_9075_Foundation
+import ISO_9075_Foundation
 
 #if CasePaths
     public struct CaseColumn<Root: Table, Payload: QueryRepresentable & QueryBindable>:
