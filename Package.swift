@@ -62,16 +62,16 @@ let package = Package(
         .target(
             name: "SQL Macros",
             dependencies: [
-                "SQL",
+                .target(name: "SQL"),
                 .product(name: "ISO 9075 Foundation", package: "swift-iso-9075"),
-                "SQL Macros Implementation",
+                .target(name: "SQL Macros Implementation"),
                 .product(name: "CasePaths", package: "swift-case-paths", condition: .when(traits: ["CasePaths"])),
             ]
         ),
         .target(
             name: "SQL Foundation Integration",
             dependencies: [
-                "SQL",
+                .target(name: "SQL"),
                 .product(name: "ISO 9075 Foundation", package: "swift-iso-9075"),
                 .product(name: "Byte", package: "swift-byte"),
                 .product(name: "Time", package: "swift-time"),
@@ -87,7 +87,7 @@ let package = Package(
         .target(
             name: "SQL Test Support",
             dependencies: [
-                "SQL",
+                .target(name: "SQL"),
                 .product(name: "ISO 9075 Foundation", package: "swift-iso-9075"),
                 .product(name: "ISO 9075 Call-Level Interface", package: "swift-iso-9075"),
                 .product(name: "CustomDump", package: "swift-custom-dump"),
@@ -98,9 +98,9 @@ let package = Package(
         .testTarget(
             name: "SQL Tests",
             dependencies: [
-                "SQL",
-                "SQL Macros",
-                "SQL Test Support",
+                .target(name: "SQL"),
+                .target(name: "SQL Macros"),
+                .target(name: "SQL Test Support"),
                 .product(name: "Order", package: "swift-order"),
                 .product(name: "Byte", package: "swift-byte"),
                 .product(name: "Time", package: "swift-time"),
@@ -113,8 +113,8 @@ let package = Package(
         .testTarget(
             name: "SQL Migrations Tests",
             dependencies: [
-                "SQL Migrations",
-                "SQL Test Support",
+                .target(name: "SQL Migrations"),
+                .target(name: "SQL Test Support"),
                 .product(name: "ISO 9075 Call-Level Interface", package: "swift-iso-9075"),
             ]
         ),
