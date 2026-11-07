@@ -89,24 +89,28 @@
         func placeholder(_ offset: Int) -> String { "$\(offset)" }
     }
 
-    @Suite struct `An enum table` {
-        @Test func `binds the active case and nulls the others`() {
-            let rendering = Dollar().render(Attachment.insert { Attachment.note("Groceries") }.query)
-            #expect(rendering.sql.hasPrefix(#"INSERT INTO "attachment""#))
-            #expect(rendering.sql.hasSuffix("(\"link\", \"note\")\nVALUES\n(NULL, $1)"))
-            #expect(rendering.values == [.text("Groceries")])
-        }
+enum `Enum Table Tests` {}
 
-        @Test func `decodes the case whose column is set`() throws {
-            var note = RenderedValues(values: [.null, .text("Groceries")])
-            #expect(try Attachment(decoder: &note) == .note("Groceries"))
-            var link = RenderedValues(values: [.text("https://example.com"), .null])
-            #expect(try Attachment(decoder: &link) == .link("https://example.com"))
-        }
+extension `Enum Table Tests` {
+        @Suite struct `An enum table` {
+            @Test func `binds the active case and nulls the others`() {
+                let rendering = Dollar().render(Attachment.insert { Attachment.note("Groceries") }.query)
+                #expect(rendering.sql.hasPrefix(#"INSERT INTO "attachment""#))
+                #expect(rendering.sql.hasSuffix("(\"link\", \"note\")\nVALUES\n(NULL, $1)"))
+                #expect(rendering.values == [.text("Groceries")])
+            }
 
-        @Test func `filters on a case`() {
-            let rendering = Dollar().render(Attachment.where { $0.note.isNot(nil) }.query)
-            #expect(rendering.sql.contains(#""attachment"."note""#))
+            @Test func `decodes the case whose column is set`() throws {
+                var note = RenderedValues(values: [.null, .text("Groceries")])
+                #expect(try Attachment(decoder: &note) == .note("Groceries"))
+                var link = RenderedValues(values: [.text("https://example.com"), .null])
+                #expect(try Attachment(decoder: &link) == .link("https://example.com"))
+            }
+
+            @Test func `filters on a case`() {
+                let rendering = Dollar().render(Attachment.where { $0.note.isNot(nil) }.query)
+                #expect(rendering.sql.contains(#""attachment"."note""#))
+            }
         }
-    }
+}
 #endif
