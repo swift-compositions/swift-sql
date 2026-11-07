@@ -14,9 +14,6 @@ package enum ColumnCheckFailRawRepresentableMacro: PeerMacro {
 
 #if CasePaths
     package enum CaseCheckFailMacro: PeerMacro {
-    }
-
-    extension CaseCheckFailMacro {
         package static func expansion(
             of node: AttributeSyntax,
             providingPeersOf declaration: some DeclSyntaxProtocol,

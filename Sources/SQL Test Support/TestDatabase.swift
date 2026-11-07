@@ -25,6 +25,7 @@ extension TestDatabase {
     }
 
     public struct Dialect: ISO_9075.Dialect {
+        public func placeholder(_ offset: Int) -> String { "$\(offset)" }
     }
 
     public struct Row: ISO_9075.Row, Sendable {
@@ -34,6 +35,11 @@ extension TestDatabase {
         public init(_ pairs: KeyValuePairs<String, ISO_9075.Value>) {
             self.columns = pairs.map(\.key)
             self.values = pairs.map(\.value)
+        }
+
+        public func value(at index: Int) throws(ISO_9075.Error) -> ISO_9075.Value {
+            guard values.indices.contains(index) else { throw .decoding("no column at \(index)") }
+            return values[index]
         }
     }
 
@@ -75,34 +81,20 @@ extension TestDatabase {
     }
 }
 
-extension TestDatabase.Dialect {
-    public func placeholder(_ offset: Int) -> String { "$\(offset)" }
-}
-
-extension TestDatabase.Row {
-    public func value(at index: Int) throws(ISO_9075.Error) -> ISO_9075.Value {
-        guard values.indices.contains(index) else { throw .decoding("no column at \(index)") }
-        return values[index]
-    }
-}
-
 extension TestDatabase {
     public struct Connection: ISO_9075.Connection {
         let database: TestDatabase
-    }
-}
+        public var dialect: Dialect { Dialect() }
 
-extension TestDatabase.Connection {
-    public var dialect: Dialect { Dialect() }
+        public func execute(_ statement: ISO_9075.Rendering) throws(ISO_9075.Error) -> Int {
+            database.record(statement).count
+        }
 
-    public func execute(_ statement: ISO_9075.Rendering) throws(ISO_9075.Error) -> Int {
-        database.record(statement).count
-    }
-
-    public func fetchAll<Value>(
-        _ statement: ISO_9075.Rendering,
-        decode: (Row) throws(ISO_9075.Error) -> Value
-    ) throws(ISO_9075.Error) -> [Value] {
-        try database.record(statement).map { row throws(ISO_9075.Error) in try decode(row) }
+        public func fetchAll<Value>(
+            _ statement: ISO_9075.Rendering,
+            decode: (Row) throws(ISO_9075.Error) -> Value
+        ) throws(ISO_9075.Error) -> [Value] {
+            try database.record(statement).map { row throws(ISO_9075.Error) in try decode(row) }
+        }
     }
 }
