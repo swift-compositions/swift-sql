@@ -25,6 +25,9 @@ extension Table {
 
 @dynamicMemberLookup
 public struct Where<From: Table>: Sendable {
+    public static func + (lhs: Self, rhs: Self) -> Self {
+        Where(predicates: (lhs.predicates + rhs.predicates).removingDuplicates())
+    }
 
     var predicates: [ISO_9075.Fragment]
     var scope: Scope
@@ -32,6 +35,30 @@ public struct Where<From: Table>: Sendable {
     package init(predicates: [ISO_9075.Fragment] = [], scope: Scope = .default) {
         self.predicates = predicates
         self.scope = scope
+    }
+
+    public static subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
+        project(From.self, through: keyPath)
+    }
+
+    public subscript<each C: QueryRepresentable, each J: Table>(
+        dynamicMember keyPath: KeyPath<
+            From.Type, Select<(repeat each C), From, (repeat each J)>
+        >
+    ) -> Select<(repeat each C), From, (repeat each J)> {
+        self + project(From.self, through: keyPath)
+    }
+
+    public subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
+        self + project(From.self, through: keyPath)
+    }
+
+    public subscript(
+        dynamicMember keyPath: KeyPath<From.SourceTable.Type, Where<From.SourceTable>>
+    ) -> Self
+    where From: TableDraft {
+        let projected = project(From.SourceTable.self, through: keyPath)
+        return self + Self(predicates: projected.predicates, scope: projected.scope)
     }
 }
 
@@ -321,35 +348,5 @@ extension Where: SelectStatement {
 
     public var query: ISO_9075.Fragment {
         asSelect().query
-    }
-}
-
-extension Where {
-    public static func + (lhs: Self, rhs: Self) -> Self {
-        Where(predicates: (lhs.predicates + rhs.predicates).removingDuplicates())
-    }
-
-    public static subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
-        project(From.self, through: keyPath)
-    }
-
-    public subscript<each C: QueryRepresentable, each J: Table>(
-        dynamicMember keyPath: KeyPath<
-            From.Type, Select<(repeat each C), From, (repeat each J)>
-        >
-    ) -> Select<(repeat each C), From, (repeat each J)> {
-        self + project(From.self, through: keyPath)
-    }
-
-    public subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {
-        self + project(From.self, through: keyPath)
-    }
-
-    public subscript(
-        dynamicMember keyPath: KeyPath<From.SourceTable.Type, Where<From.SourceTable>>
-    ) -> Self
-    where From: TableDraft {
-        let projected = project(From.SourceTable.self, through: keyPath)
-        return self + Self(predicates: projected.predicates, scope: projected.scope)
     }
 }

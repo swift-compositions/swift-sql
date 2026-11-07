@@ -442,6 +442,10 @@ private enum InsertValues {
     case `default`
     case values([[ISO_9075.Fragment]])
     case selection(ISO_9075.Fragment, hasUpsertParsingAmbiguity: Bool)
+
+    static func select(_ statement: some PartialSelectStatement) -> Self {
+        .selection(statement.query, hasUpsertParsingAmbiguity: statement._hasUpsertParsingAmbiguity)
+    }
 }
 
 public struct Insert<Into: Table, Returning> {
@@ -453,6 +457,19 @@ public struct Insert<Into: Table, Returning> {
     var updates: Updates<Into>?
     var updateFilter: [ISO_9075.Fragment]
     var returning: [ISO_9075.Fragment]
+
+    public func returning<R>(fragments: [ISO_9075.Fragment]) -> Insert<Into, R> {
+        Insert<Into, R>(
+            conflictResolution: conflictResolution,
+            columnNames: columnNames,
+            conflictTargetColumnNames: conflictTargetColumnNames,
+            conflictTargetFilter: conflictTargetFilter,
+            values: values,
+            updates: updates,
+            updateFilter: updateFilter,
+            returning: fragments
+        )
+    }
 
     fileprivate init(
         conflictResolution: ISO_9075.Fragment?,
@@ -743,6 +760,7 @@ private func _writableRows<T: Table>(_ values: [T], primaryKeys: Set<String> = [
 }
 
 public struct _ExcludedName: AliasName {
+    public static var aliasName: String { "excluded" }
 }
 
 extension Table {
@@ -766,31 +784,4 @@ extension Insert {
         insert.conflictResolution = clause
         return insert
     }
-}
-
-extension InsertValues {
-
-    static func select(_ statement: some PartialSelectStatement) -> Self {
-        .selection(statement.query, hasUpsertParsingAmbiguity: statement._hasUpsertParsingAmbiguity)
-    }
-}
-
-extension Insert {
-
-    public func returning<R>(fragments: [ISO_9075.Fragment]) -> Insert<Into, R> {
-        Insert<Into, R>(
-            conflictResolution: conflictResolution,
-            columnNames: columnNames,
-            conflictTargetColumnNames: conflictTargetColumnNames,
-            conflictTargetFilter: conflictTargetFilter,
-            values: values,
-            updates: updates,
-            updateFilter: updateFilter,
-            returning: fragments
-        )
-    }
-}
-
-extension _ExcludedName {
-    public static var aliasName: String { "excluded" }
 }

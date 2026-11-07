@@ -30,6 +30,7 @@ public protocol WritableTableColumnExpression<Root, Value>: TableColumnExpressio
 public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
     WritableTableColumnExpression
 {
+    public typealias QueryValue = Value
 
     public let name: String
 
@@ -38,6 +39,10 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
 
     @usableFromInline
     let _keyPath: () -> KeyPath<Root, Value.QueryOutput>
+
+    public var defaultValue: Value.QueryOutput? { _defaultValue() }
+
+    public var keyPath: KeyPath<Root, Value.QueryOutput> { _keyPath() }
 
     @inlinable
     public init(
@@ -60,56 +65,6 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
         self._defaultValue = defaultValue
         self._keyPath = keyPath
     }
-}
-
-public enum _TableColumn<Root: Table, Value: QueryRepresentable> {
-}
-
-public enum GeneratedColumnStorage {
-    case virtual, stored
-}
-
-public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
-    TableColumnExpression
-{
-
-    public let name: String
-
-    @usableFromInline
-    let _defaultValue: () -> Value.QueryOutput?
-
-    @usableFromInline
-    let _keyPath: () -> KeyPath<Root, Value.QueryOutput>
-
-    @inlinable
-    public init(
-        _ name: String,
-        keyPath: @autoclosure @escaping () -> KeyPath<Root, Value.QueryOutput>,
-        default defaultValue: @autoclosure @escaping () -> Value.QueryOutput? = nil
-    ) {
-        self.name = name
-        self._defaultValue = defaultValue
-        self._keyPath = keyPath
-    }
-
-    @inlinable
-    public init(
-        _ name: String,
-        keyPath: @autoclosure @escaping () -> KeyPath<Root, Value.QueryOutput>,
-        default defaultValue: @autoclosure @escaping () -> Value? = nil
-    ) where Value == Value.QueryOutput {
-        self.name = name
-        self._defaultValue = defaultValue
-        self._keyPath = keyPath
-    }
-}
-
-extension TableColumn {
-    public typealias QueryValue = Value
-
-    public var defaultValue: Value.QueryOutput? { _defaultValue() }
-
-    public var keyPath: KeyPath<Root, Value.QueryOutput> { _keyPath() }
 
     public var queryFragment: ISO_9075.Fragment {
         let column: ISO_9075.Fragment = "\(Root.self).\(quote: name)"
@@ -123,7 +78,7 @@ extension TableColumn {
     public var _writableColumns: [Column<Root>] { _columns }
 }
 
-extension _TableColumn {
+public enum _TableColumn<Root: Table, Value: QueryRepresentable> {
     @inlinable
     public static func `for`(
         _ name: String,
@@ -174,12 +129,48 @@ extension _TableColumn {
     }
 }
 
-extension GeneratedColumn {
+public enum GeneratedColumnStorage {
+    case virtual, stored
+}
+
+public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
+    TableColumnExpression
+{
     public typealias QueryValue = Value
+
+    public let name: String
+
+    @usableFromInline
+    let _defaultValue: () -> Value.QueryOutput?
+
+    @usableFromInline
+    let _keyPath: () -> KeyPath<Root, Value.QueryOutput>
 
     public var defaultValue: Value.QueryOutput? { _defaultValue() }
 
     public var keyPath: KeyPath<Root, Value.QueryOutput> { _keyPath() }
+
+    @inlinable
+    public init(
+        _ name: String,
+        keyPath: @autoclosure @escaping () -> KeyPath<Root, Value.QueryOutput>,
+        default defaultValue: @autoclosure @escaping () -> Value.QueryOutput? = nil
+    ) {
+        self.name = name
+        self._defaultValue = defaultValue
+        self._keyPath = keyPath
+    }
+
+    @inlinable
+    public init(
+        _ name: String,
+        keyPath: @autoclosure @escaping () -> KeyPath<Root, Value.QueryOutput>,
+        default defaultValue: @autoclosure @escaping () -> Value? = nil
+    ) where Value == Value.QueryOutput {
+        self.name = name
+        self._defaultValue = defaultValue
+        self._keyPath = keyPath
+    }
 
     public var queryFragment: ISO_9075.Fragment {
         let column: ISO_9075.Fragment = "\(Root.self).\(quote: name)"

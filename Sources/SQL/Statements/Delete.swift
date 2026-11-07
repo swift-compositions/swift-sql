@@ -22,36 +22,6 @@ public struct Delete<From: Table, Returning> {
     var `where`: [ISO_9075.Fragment] = []
     var returning: [ISO_9075.Fragment] = []
 
-}
-
-public typealias DeleteOf<From: Table> = Delete<From, ()>
-
-extension Delete: Statement {
-    public typealias QueryValue = Returning
-
-    public var query: ISO_9075.Fragment {
-        guard !isEmpty else { return "" }
-        var query: ISO_9075.Fragment = "DELETE FROM "
-        if let schemaName = From.schemaName {
-            query.append("\(quote: schemaName).")
-        }
-        query.append("\(quote: From.tableName)")
-        if let tableAlias = From.tableAlias {
-            query.append(" AS \(quote: tableAlias)")
-        }
-        if !`where`.isEmpty {
-            let `where`: ISO_9075.Fragment = `where`.map { "(\($0))" }.joined(separator: " AND ")
-            query.append("\(.newlineOrSpace)WHERE \(`where`)")
-        }
-        if !returning.isEmpty {
-            query.append("\(.newlineOrSpace)RETURNING \(returning.joined(separator: ", "))")
-        }
-        return query
-    }
-}
-
-extension Delete {
-
     public func returning<R>(fragments: [ISO_9075.Fragment]) -> Delete<From, R> {
         Delete<From, R>(isEmpty: isEmpty, where: `where`, returning: fragments)
     }
@@ -79,5 +49,32 @@ extension Delete {
         var update = self
         update.where.append(contentsOf: predicate(From.columns))
         return update
+    }
+
+}
+
+public typealias DeleteOf<From: Table> = Delete<From, ()>
+
+extension Delete: Statement {
+    public typealias QueryValue = Returning
+
+    public var query: ISO_9075.Fragment {
+        guard !isEmpty else { return "" }
+        var query: ISO_9075.Fragment = "DELETE FROM "
+        if let schemaName = From.schemaName {
+            query.append("\(quote: schemaName).")
+        }
+        query.append("\(quote: From.tableName)")
+        if let tableAlias = From.tableAlias {
+            query.append(" AS \(quote: tableAlias)")
+        }
+        if !`where`.isEmpty {
+            let `where`: ISO_9075.Fragment = `where`.map { "(\($0))" }.joined(separator: " AND ")
+            query.append("\(.newlineOrSpace)WHERE \(`where`)")
+        }
+        if !returning.isEmpty {
+            query.append("\(.newlineOrSpace)RETURNING \(returning.joined(separator: ", "))")
+        }
+        return query
     }
 }

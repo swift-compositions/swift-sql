@@ -22,6 +22,13 @@ public struct TableAlias<
     Name: AliasName
 >: _OptionalPromotable {
     let base: Base
+
+    package subscript<Member: QueryRepresentable>(
+        member _: KeyPath<Member, Member>,
+        column keyPath: KeyPath<Base, Member.QueryOutput>
+    ) -> Member.QueryOutput {
+        base[keyPath: keyPath]
+    }
 }
 
 extension TableAlias: Table, PartialSelectStatement, Statement where Base: Table {
@@ -252,15 +259,5 @@ extension ISO_9075.Fragment {
             )
         }
         return query
-    }
-}
-
-extension TableAlias {
-
-    package subscript<Member: QueryRepresentable>(
-        member _: KeyPath<Member, Member>,
-        column keyPath: KeyPath<Base, Member.QueryOutput>
-    ) -> Member.QueryOutput {
-        base[keyPath: keyPath]
     }
 }

@@ -43,9 +43,6 @@ public struct Column<Root: Table> {
             keyPath: keyPath
         )
     }
-}
-
-extension Column {
 
     public var queryFragment: ISO_9075.Fragment {
         let column: ISO_9075.Fragment = "\(Root.self).\(quote: name)"

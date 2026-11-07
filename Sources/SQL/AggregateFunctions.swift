@@ -103,9 +103,6 @@ public struct AggregateFunctionExpression<QueryValue>: QueryExpression, Sendable
         self.order = order
         self.filter = filter
     }
-}
-
-extension AggregateFunctionExpression {
 
     public var queryFragment: ISO_9075.Fragment {
         var query: ISO_9075.Fragment = "\(name)("

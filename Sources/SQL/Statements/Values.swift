@@ -3,6 +3,7 @@
 public import ISO_9075_Foundation
 
 public struct Values<QueryValue>: PartialSelectStatement, _SelectSource {
+    public typealias From = Never
 
     private let rows: [[ISO_9075.Fragment]]
     package let _valuesElements: [ValuesElement]
@@ -11,6 +12,17 @@ public struct Values<QueryValue>: PartialSelectStatement, _SelectSource {
         let built = values()
         rows = built.rows
         _valuesElements = built.elements
+    }
+
+    public var query: ISO_9075.Fragment {
+        guard !rows.isEmpty else { return "" }
+        var query: ISO_9075.Fragment = "VALUES "
+        query.append(
+            rows
+                .map { "(\($0.joined(separator: ", ")))" as ISO_9075.Fragment }
+                .joined(separator: ", ")
+        )
+        return query
     }
 }
 
@@ -123,20 +135,5 @@ extension Select where Joins == () {
             columns: names.indices.map { "\(quote: names[$0] ?? "column\($0 + 1)")" },
             elements: _valuesElements
         )
-    }
-}
-
-extension Values {
-    public typealias From = Never
-
-    public var query: ISO_9075.Fragment {
-        guard !rows.isEmpty else { return "" }
-        var query: ISO_9075.Fragment = "VALUES "
-        query.append(
-            rows
-                .map { "(\($0.joined(separator: ", ")))" as ISO_9075.Fragment }
-                .joined(separator: ", ")
-        )
-        return query
     }
 }
