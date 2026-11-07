@@ -33,16 +33,6 @@ public struct Update<From: Table, Returning> {
     var `where`: [ISO_9075.Fragment]
     var returning: [ISO_9075.Fragment]
 
-    public func returning<R>(fragments: [ISO_9075.Fragment]) -> Update<From, R> {
-        Update<From, R>(
-            isEmpty: isEmpty,
-            conflictResolution: conflictResolution,
-            updates: updates,
-            where: `where`,
-            returning: fragments
-        )
-    }
-
     package init(
         isEmpty: Bool,
         conflictResolution: ISO_9075.Fragment? = nil,
@@ -55,31 +45,6 @@ public struct Update<From: Table, Returning> {
         self.updates = updates
         self.where = `where`
         self.returning = returning
-    }
-
-    public func `where`(
-        _ keyPath: KeyPath<From.TableColumns, some QueryExpression<some _OptionalPromotable<Bool?>>>
-    ) -> Self {
-        var update = self
-        update.where.append(From.columns[keyPath: keyPath].queryFragment)
-        return update
-    }
-
-    @_disfavoredOverload
-    public func `where`(
-        _ predicate: (From.TableColumns) -> some QueryExpression<some _OptionalPromotable<Bool?>>
-    ) -> Self {
-        var update = self
-        update.where.append(predicate(From.columns).queryFragment)
-        return update
-    }
-
-    public func `where`(
-        @QueryFragmentBuilder<Bool> _ predicate: (From.TableColumns) -> [ISO_9075.Fragment]
-    ) -> Self {
-        var update = self
-        update.where.append(contentsOf: predicate(From.columns))
-        return update
     }
 
 }
@@ -120,6 +85,44 @@ extension Update {
     public func _modifying(_ clause: ISO_9075.Fragment) -> Self {
         var update = self
         update.conflictResolution = clause
+        return update
+    }
+}
+
+extension Update {
+
+    public func returning<R>(fragments: [ISO_9075.Fragment]) -> Update<From, R> {
+        Update<From, R>(
+            isEmpty: isEmpty,
+            conflictResolution: conflictResolution,
+            updates: updates,
+            where: `where`,
+            returning: fragments
+        )
+    }
+
+    public func `where`(
+        _ keyPath: KeyPath<From.TableColumns, some QueryExpression<some _OptionalPromotable<Bool?>>>
+    ) -> Self {
+        var update = self
+        update.where.append(From.columns[keyPath: keyPath].queryFragment)
+        return update
+    }
+
+    @_disfavoredOverload
+    public func `where`(
+        _ predicate: (From.TableColumns) -> some QueryExpression<some _OptionalPromotable<Bool?>>
+    ) -> Self {
+        var update = self
+        update.where.append(predicate(From.columns).queryFragment)
+        return update
+    }
+
+    public func `where`(
+        @QueryFragmentBuilder<Bool> _ predicate: (From.TableColumns) -> [ISO_9075.Fragment]
+    ) -> Self {
+        var update = self
+        update.where.append(contentsOf: predicate(From.columns))
         return update
     }
 }

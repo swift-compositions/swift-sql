@@ -3,14 +3,26 @@ public import ISO_9075_Foundation
 @dynamicMemberLookup
 public struct OptionalColumnGroup<Root: Table, Values: Table>: _TableColumnExpression
 where Values.QueryOutput: Table {
-    public typealias QueryValue = Values?
-    public typealias Value = Values?
 
     package let base: ColumnGroup<Root, Values?>
 
     package init(base: ColumnGroup<Root, Values?>) {
         self.base = base
     }
+}
+
+extension Optional where Wrapped: Table {
+    subscript<Member: QueryRepresentable>(
+        flattenedMember _: KeyPath<Member, Member>,
+        column keyPath: KeyPath<Wrapped, Member.QueryOutput?>
+    ) -> Member.QueryOutput? {
+        self?[keyPath: keyPath] ?? nil
+    }
+}
+
+extension OptionalColumnGroup {
+    public typealias QueryValue = Values?
+    public typealias Value = Values?
 
     public var groupName: String { base.groupName }
 
@@ -68,14 +80,5 @@ where Values.QueryOutput: Table {
                 )
             )
         )
-    }
-}
-
-extension Optional where Wrapped: Table {
-    subscript<Member: QueryRepresentable>(
-        flattenedMember _: KeyPath<Member, Member>,
-        column keyPath: KeyPath<Wrapped, Member.QueryOutput?>
-    ) -> Member.QueryOutput? {
-        self?[keyPath: keyPath] ?? nil
     }
 }

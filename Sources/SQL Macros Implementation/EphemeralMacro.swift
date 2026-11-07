@@ -2,6 +2,9 @@ public import SwiftSyntax
 public import SwiftSyntaxMacros
 
 public enum EphemeralMacro: PeerMacro {
+}
+
+extension EphemeralMacro {
     public static func expansion<D: DeclSyntaxProtocol, C: MacroExpansionContext>(
         of node: AttributeSyntax,
         providingPeersOf declaration: D,

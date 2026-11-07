@@ -121,10 +121,6 @@ public struct QueryFunction<QueryValue>: QueryExpression {
         self.name = name
         self.arguments = Array(repeat each arguments)
     }
-
-    public var queryFragment: ISO_9075.Fragment {
-        "\(name)(\(arguments.joined(separator: ", ")))"
-    }
 }
 
 public struct CoalesceFunction<QueryValue>: QueryExpression {
@@ -133,6 +129,25 @@ public struct CoalesceFunction<QueryValue>: QueryExpression {
     fileprivate init(_ arguments: [ISO_9075.Fragment]) {
         self.arguments = arguments
     }
+}
+
+extension CoalesceFunction where QueryValue: _OptionalProtocol {
+    public static func ?? (
+        lhs: some QueryExpression<QueryValue>,
+        rhs: Self
+    ) -> Self {
+        Self([lhs.queryFragment] + rhs.arguments)
+    }
+}
+
+extension QueryFunction {
+
+    public var queryFragment: ISO_9075.Fragment {
+        "\(name)(\(arguments.joined(separator: ", ")))"
+    }
+}
+
+extension CoalesceFunction {
 
     public var queryFragment: ISO_9075.Fragment {
         "coalesce(\(arguments.joined(separator: ", ")))"
@@ -142,15 +157,6 @@ public struct CoalesceFunction<QueryValue>: QueryExpression {
         lhs: some QueryExpression<T>,
         rhs: Self
     ) -> CoalesceFunction<QueryValue> {
-        Self([lhs.queryFragment] + rhs.arguments)
-    }
-}
-
-extension CoalesceFunction where QueryValue: _OptionalProtocol {
-    public static func ?? (
-        lhs: some QueryExpression<QueryValue>,
-        rhs: Self
-    ) -> Self {
         Self([lhs.queryFragment] + rhs.arguments)
     }
 }

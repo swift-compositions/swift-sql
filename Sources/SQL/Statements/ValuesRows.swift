@@ -8,6 +8,9 @@ public struct ValuesRows<Value>: Sendable {
         self.rows = rows
         self.elements = elements
     }
+}
+
+extension ValuesRows {
 
     package mutating func append(_ other: Self) {
         rows.append(contentsOf: other.rows)

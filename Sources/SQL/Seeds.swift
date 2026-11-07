@@ -7,10 +7,6 @@ public struct Seeds: Swift.Sequence {
         self.seeds = build()
     }
 
-    public func makeIterator() -> Iterator {
-        Iterator(seeds: seeds[...])
-    }
-
     public struct Iterator: IteratorProtocol {
         var seeds: ArraySlice<Seed>
 
@@ -106,5 +102,12 @@ public enum SeedsBuilder {
 
     public static func buildPartialBlock(accumulated: [Seed], next: [Seed]) -> [Seed] {
         accumulated + next
+    }
+}
+
+extension Seeds {
+
+    public func makeIterator() -> Iterator {
+        Iterator(seeds: seeds[...])
     }
 }

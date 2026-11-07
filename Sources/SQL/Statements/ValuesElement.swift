@@ -10,32 +10,6 @@ public struct ValuesElement: Sendable {
         self.columns = columns
         self.fieldOffsets = fieldOffsets
     }
-
-    public struct Column: Sendable {
-        package let name: String?
-        package let decoding: @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment
-
-        package init(name: String?, decoding: @escaping @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment) {
-            self.name = name
-            self.decoding = decoding
-        }
-
-    }
-
-    package static func elements<each V: QueryRepresentable>(for types: repeat (each V).Type) -> [ValuesElement] {
-        var elements: [ValuesElement] = []
-        var offset = 0
-        for type in repeat each types {
-            func append<T: QueryRepresentable>(_: T.Type) {
-                let alignment = MemoryLayout<T>.alignment
-                offset = (offset + alignment - 1) / alignment * alignment
-                elements.append(ValuesElement(offset: offset, columns: T._valuesColumns, fieldOffsets: T._valuesFieldOffsets))
-                offset += MemoryLayout<T>.size
-            }
-            append(type)
-        }
-        return elements
-    }
 }
 
 extension QueryRepresentable {
@@ -89,5 +63,34 @@ extension Table {
             offset: 0,
             columns: TableColumns.writableColumns.map { ValuesElement.Column(name: $0.name, decoding: $0.decoding) }
         )
+    }
+}
+
+extension ValuesElement {
+
+    public struct Column: Sendable {
+        package let name: String?
+        package let decoding: @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment
+
+        package init(name: String?, decoding: @escaping @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment) {
+            self.name = name
+            self.decoding = decoding
+        }
+
+    }
+
+    package static func elements<each V: QueryRepresentable>(for types: repeat (each V).Type) -> [ValuesElement] {
+        var elements: [ValuesElement] = []
+        var offset = 0
+        for type in repeat each types {
+            func append<T: QueryRepresentable>(_: T.Type) {
+                let alignment = MemoryLayout<T>.alignment
+                offset = (offset + alignment - 1) / alignment * alignment
+                elements.append(ValuesElement(offset: offset, columns: T._valuesColumns, fieldOffsets: T._valuesFieldOffsets))
+                offset += MemoryLayout<T>.size
+            }
+            append(type)
+        }
+        return elements
     }
 }

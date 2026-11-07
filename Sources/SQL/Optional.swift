@@ -291,9 +291,12 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
 
 public struct _UnwrapExpression<Base: QueryExpression>: QueryExpression
 where Base.QueryValue: _OptionalProtocol {
-    public typealias QueryValue = Base.QueryValue.Wrapped
 
     let base: Base
+}
+
+extension _UnwrapExpression {
+    public typealias QueryValue = Base.QueryValue.Wrapped
 
     public var queryFragment: ISO_9075.Fragment { base.queryFragment }
 }

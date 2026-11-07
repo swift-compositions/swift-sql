@@ -22,8 +22,6 @@ extension PartialSelectStatement {
 }
 
 private struct CompoundSelect<QueryValue>: PartialSelectStatement {
-    typealias From = Never
-    typealias Joins = Never
 
     struct Operator {
         static var except: Self { Self(queryFragment: "EXCEPT") }
@@ -45,14 +43,19 @@ private struct CompoundSelect<QueryValue>: PartialSelectStatement {
         hasUpsertParsingAmbiguity =
             self.rhs.isEmpty ? lhs._hasUpsertParsingAmbiguity : rhs._hasUpsertParsingAmbiguity
     }
+}
+
+extension CompoundSelect {
+    var _hasUpsertParsingAmbiguity: Bool { hasUpsertParsingAmbiguity }
+}
+
+extension CompoundSelect {
+    typealias From = Never
+    typealias Joins = Never
 
     var query: ISO_9075.Fragment {
         guard !lhs.isEmpty else { return rhs }
         guard !rhs.isEmpty else { return lhs }
         return "\(lhs)\(.newlineOrSpace)\(`operator`.indented())\(.newlineOrSpace)\(rhs)"
     }
-}
-
-extension CompoundSelect {
-    var _hasUpsertParsingAmbiguity: Bool { hasUpsertParsingAmbiguity }
 }

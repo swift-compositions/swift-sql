@@ -102,10 +102,6 @@ extension QueryExpression where QueryValue: QueryRepresentable & QueryExpression
 }
 
 public struct _Null<Wrapped: QueryExpression>: QueryExpression {
-    public typealias QueryValue = Wrapped?
-    public var queryFragment: ISO_9075.Fragment {
-        Wrapped?.none.queryFragment
-    }
 }
 
 extension _Null: ExpressibleByNilLiteral {
@@ -470,10 +466,6 @@ private struct UnaryOperator<QueryValue>: QueryExpression {
         self.base = base.queryFragment
         self.separator = separator
     }
-
-    var queryFragment: ISO_9075.Fragment {
-        "\(`operator`)\(separator)(\(base))"
-    }
 }
 
 public struct BinaryOperator<QueryValue>: QueryExpression {
@@ -490,21 +482,53 @@ public struct BinaryOperator<QueryValue>: QueryExpression {
         self.operator = `operator`
         self.rhs = rhs.queryFragment
     }
-
-    public var queryFragment: ISO_9075.Fragment {
-        "(\(lhs)) \(`operator`) (\(rhs))"
-    }
 }
 
 private struct LikeOperator<
     LHS: QueryExpression<String>,
     RHS: QueryExpression<String>
 >: QueryExpression {
-    typealias QueryValue = Bool
 
     let string: LHS
     let pattern: RHS
     let escape: Character?
+}
+
+extension Sequence where Element: QueryExpression, Element.QueryValue: QueryExpression {
+    fileprivate typealias Expression = _SequenceExpression<Self>
+}
+
+private struct _SequenceExpression<S: Swift.Sequence>: QueryExpression
+where S.Element: QueryExpression, S.Element.QueryValue: QueryExpression {
+    let queryFragment: ISO_9075.Fragment
+    init(elements: S) {
+        queryFragment = elements.map { "(\($0.queryFragment))" }.joined(separator: ", ")
+    }
+}
+
+extension _Null {
+    public typealias QueryValue = Wrapped?
+    public var queryFragment: ISO_9075.Fragment {
+        Wrapped?.none.queryFragment
+    }
+}
+
+extension UnaryOperator {
+
+    var queryFragment: ISO_9075.Fragment {
+        "\(`operator`)\(separator)(\(base))"
+    }
+}
+
+extension BinaryOperator {
+
+    public var queryFragment: ISO_9075.Fragment {
+        "(\(lhs)) \(`operator`) (\(rhs))"
+    }
+}
+
+extension LikeOperator {
+    typealias QueryValue = Bool
 
     var queryFragment: ISO_9075.Fragment {
         var query: ISO_9075.Fragment = "(\(string.queryFragment) LIKE \(pattern.queryFragment)"
@@ -516,15 +540,6 @@ private struct LikeOperator<
     }
 }
 
-extension Sequence where Element: QueryExpression, Element.QueryValue: QueryExpression {
-    fileprivate typealias Expression = _SequenceExpression<Self>
-}
-
-private struct _SequenceExpression<S: Swift.Sequence>: QueryExpression
-where S.Element: QueryExpression, S.Element.QueryValue: QueryExpression {
+extension _SequenceExpression {
     typealias QueryValue = S
-    let queryFragment: ISO_9075.Fragment
-    init(elements: S) {
-        queryFragment = elements.map { "(\($0.queryFragment))" }.joined(separator: ", ")
-    }
 }

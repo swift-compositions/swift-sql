@@ -7,6 +7,27 @@ public struct Updates<Base: Table> {
     init(_ body: (inout Self) -> Void) {
         body(&self)
     }
+}
+
+extension Updates: QueryExpression {
+    public typealias QueryValue = Never
+
+    public var queryFragment: ISO_9075.Fragment {
+        "SET \(updates.map { "\(quote: $0) = \($1)" }.joined(separator: ", "))"
+    }
+}
+
+@dynamicMemberLookup
+public struct UpdatesGroup<Base: Table, Values: Table> where Values.QueryOutput: Table {
+    package let group: ColumnGroup<Base, Values>
+    package var updates: [(String, ISO_9075.Fragment)] = []
+
+    package init(group: ColumnGroup<Base, Values>) {
+        self.group = group
+    }
+}
+
+extension Updates {
 
     var isEmpty: Bool {
         updates.isEmpty
@@ -104,22 +125,7 @@ public struct Updates<Base: Table> {
     }
 }
 
-extension Updates: QueryExpression {
-    public typealias QueryValue = Never
-
-    public var queryFragment: ISO_9075.Fragment {
-        "SET \(updates.map { "\(quote: $0) = \($1)" }.joined(separator: ", "))"
-    }
-}
-
-@dynamicMemberLookup
-public struct UpdatesGroup<Base: Table, Values: Table> where Values.QueryOutput: Table {
-    package let group: ColumnGroup<Base, Values>
-    package var updates: [(String, ISO_9075.Fragment)] = []
-
-    package init(group: ColumnGroup<Base, Values>) {
-        self.group = group
-    }
+extension UpdatesGroup {
 
     public subscript<Member>(
         dynamicMember keyPath: KeyPath<Values.TableColumns, TableColumn<Values.QueryOutput, Member>>

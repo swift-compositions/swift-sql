@@ -51,18 +51,6 @@ struct MemberwiseInitializer {
             assignments.append("self.\(identifier.text) = \(identifier.text)")
         }
     }
-
-    var declaration: DeclSyntax {
-        guard !parameters.isEmpty
-        else { return "\(TokenSyntax.keyword(access)) init() {\n}" }
-        return """
-            \(TokenSyntax.keyword(access)) init(
-            \(raw: parameters.joined(separator: ",\n"))
-            ) {
-            \(raw: assignments.joined(separator: "\n"))
-            }
-            """
-    }
 }
 
 extension ExprSyntax {
@@ -84,5 +72,20 @@ extension TypeSyntax {
     fileprivate var isFunctionType: Bool {
         self.is(FunctionTypeSyntax.self)
             || self.as(AttributedTypeSyntax.self)?.baseType.is(FunctionTypeSyntax.self) == true
+    }
+}
+
+extension MemberwiseInitializer {
+
+    var declaration: DeclSyntax {
+        guard !parameters.isEmpty
+        else { return "\(TokenSyntax.keyword(access)) init() {\n}" }
+        return """
+            \(TokenSyntax.keyword(access)) init(
+            \(raw: parameters.joined(separator: ",\n"))
+            ) {
+            \(raw: assignments.joined(separator: "\n"))
+            }
+            """
     }
 }

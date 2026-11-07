@@ -3,21 +3,12 @@ public import ISO_9075_Foundation
 @dynamicMemberLookup
 public struct ColumnGroup<Root: Table, Values: Table>: _TableColumnExpression
 where Values.QueryOutput: Table {
-    public typealias Value = Values
-
-    public var _names: [String] { Values.TableColumns.allColumns.map(\.name) }
-
-    public typealias QueryValue = Values
 
     public let groupName: String
 
     private let _defaultValue: () -> Values.QueryOutput?
 
     private let _keyPath: () -> KeyPath<Root, Values.QueryOutput>
-
-    public var defaultValue: Values.QueryOutput? { _defaultValue() }
-
-    public var keyPath: KeyPath<Root, Values.QueryOutput> { _keyPath() }
 
     public init(
         _ name: String,
@@ -28,6 +19,18 @@ where Values.QueryOutput: Table {
         self._defaultValue = defaultValue
         self._keyPath = keyPath
     }
+}
+
+extension ColumnGroup {
+    public typealias Value = Values
+
+    public var _names: [String] { Values.TableColumns.allColumns.map(\.name) }
+
+    public typealias QueryValue = Values
+
+    public var defaultValue: Values.QueryOutput? { _defaultValue() }
+
+    public var keyPath: KeyPath<Root, Values.QueryOutput> { _keyPath() }
 
     public var queryFragment: ISO_9075.Fragment {
         _columns.map(\.queryFragment).joined(separator: ", ")
