@@ -56,7 +56,6 @@ where QueryValue: _OptionalPromotable, QueryValue._Optionalized.Wrapped: Numeric
             .queryFragment
         )
     }
-
 }
 
 extension QueryExpression where Self == AggregateFunctionExpression<Int> {
@@ -103,7 +102,9 @@ public struct AggregateFunctionExpression<QueryValue>: QueryExpression, Sendable
         self.order = order
         self.filter = filter
     }
+}
 
+extension AggregateFunctionExpression {
     public var queryFragment: ISO_9075.Fragment {
         var query: ISO_9075.Fragment = "\(name)("
         if isDistinct {

@@ -22,7 +22,9 @@ public struct TableAlias<
     Name: AliasName
 >: _OptionalPromotable {
     let base: Base
+}
 
+extension TableAlias {
     package subscript<Member: QueryRepresentable>(
         member _: KeyPath<Member, Member>,
         column keyPath: KeyPath<Base, Member.QueryOutput>
@@ -52,71 +54,76 @@ extension TableAlias: Table, PartialSelectStatement, Statement where Base: Table
 
     @dynamicMemberLookup
     public struct TableColumns: Sendable, TableDefinition {
-        public typealias QueryValue = TableAlias
-
-        public static var allColumns: [Column<TableAlias>] {
-            Base.TableColumns.allColumns.map { $0.aliased(Name.self) }
-        }
-
-        public static var writableColumns: [Column<TableAlias>] {
-            Base.TableColumns.writableColumns.map { $0.aliased(Name.self) }
-        }
-
-        public subscript<Member>(
-            dynamicMember keyPath: KeyPath<Base.TableColumns, TableColumn<Base, Member>>
-        ) -> TableColumn<TableAlias, Member> {
-            let column = Base.columns[keyPath: keyPath]
-            return TableColumn<TableAlias, Member>(
-                column.name,
-                keyPath: \.[member: \Member.self, column: column.keyPath]
-            )
-        }
-
-        public subscript<Member>(
-            dynamicMember keyPath: KeyPath<Base.TableColumns, GeneratedColumn<Base, Member>>
-        ) -> GeneratedColumn<TableAlias, Member> {
-            let column = Base.columns[keyPath: keyPath]
-            return GeneratedColumn<TableAlias, Member>(
-                column.name,
-                keyPath: \.[member: \Member.self, column: column.keyPath]
-            )
-        }
-
-        public subscript<Member>(
-            dynamicMember keyPath: KeyPath<Base.TableColumns, ColumnGroup<Base, Member>>
-        ) -> ColumnGroup<TableAlias, Member> {
-            let column = Base.columns[keyPath: keyPath]
-            return ColumnGroup<TableAlias, Member>(
-                column.groupName,
-                keyPath: \.[member: \Member.self, column: column.keyPath]
-            )
-        }
-
-        public subscript<Member>(
-            dynamicMember keyPath: KeyPath<Base.TableColumns, OptionalColumnGroup<Base, Member>>
-        ) -> OptionalColumnGroup<TableAlias, Member> {
-            let column = Base.columns[keyPath: keyPath]
-            return OptionalColumnGroup(
-                base: ColumnGroup<TableAlias, Member?>(
-                    column.groupName,
-                    keyPath: \.[member: \Member?.self, column: column.keyPath]
-                )
-            )
-        }
     }
 
     public struct Selection: TableExpression {
-        public typealias QueryValue = TableAlias
-
         fileprivate var base: Base.Selection
 
         public init(_ base: Base.Selection) {
             self.base = base
         }
+    }
+}
 
-        public var allColumns: [ISO_9075.Fragment] {
-            base.allColumns
-        }
+extension TableAlias.TableColumns {
+    public typealias QueryValue = TableAlias
+
+    public static var allColumns: [Column<TableAlias>] {
+        Base.TableColumns.allColumns.map { $0.aliased(Name.self) }
+    }
+
+    public static var writableColumns: [Column<TableAlias>] {
+        Base.TableColumns.writableColumns.map { $0.aliased(Name.self) }
+    }
+
+    public subscript<Member>(
+        dynamicMember keyPath: KeyPath<Base.TableColumns, TableColumn<Base, Member>>
+    ) -> TableColumn<TableAlias, Member> {
+        let column = Base.columns[keyPath: keyPath]
+        return TableColumn<TableAlias, Member>(
+            column.name,
+            keyPath: \.[member: \Member.self, column: column.keyPath]
+        )
+    }
+
+    public subscript<Member>(
+        dynamicMember keyPath: KeyPath<Base.TableColumns, GeneratedColumn<Base, Member>>
+    ) -> GeneratedColumn<TableAlias, Member> {
+        let column = Base.columns[keyPath: keyPath]
+        return GeneratedColumn<TableAlias, Member>(
+            column.name,
+            keyPath: \.[member: \Member.self, column: column.keyPath]
+        )
+    }
+
+    public subscript<Member>(
+        dynamicMember keyPath: KeyPath<Base.TableColumns, ColumnGroup<Base, Member>>
+    ) -> ColumnGroup<TableAlias, Member> {
+        let column = Base.columns[keyPath: keyPath]
+        return ColumnGroup<TableAlias, Member>(
+            column.groupName,
+            keyPath: \.[member: \Member.self, column: column.keyPath]
+        )
+    }
+
+    public subscript<Member>(
+        dynamicMember keyPath: KeyPath<Base.TableColumns, OptionalColumnGroup<Base, Member>>
+    ) -> OptionalColumnGroup<TableAlias, Member> {
+        let column = Base.columns[keyPath: keyPath]
+        return OptionalColumnGroup(
+            base: ColumnGroup<TableAlias, Member?>(
+                column.groupName,
+                keyPath: \.[member: \Member?.self, column: column.keyPath]
+            )
+        )
+    }
+}
+
+extension TableAlias.Selection {
+    public typealias QueryValue = TableAlias
+
+    public var allColumns: [ISO_9075.Fragment] {
+        base.allColumns
     }
 }
 
@@ -136,31 +143,34 @@ where Base.TableColumns: PrimaryKeyedTableDefinition {
     public typealias PrimaryKey = Base.PrimaryKey
 
     public struct PrimaryColumn: _TableColumnExpression {
-        public typealias Root = TableAlias
-
-        public typealias Value = Base.PrimaryKey
-
-        public var _names: [String] {
-            Base.columns.primaryKey._names
-        }
-
-        public var defaultValue: Base.PrimaryKey.QueryOutput? {
-            Base.columns.primaryKey.defaultValue
-        }
-
-        public var keyPath: KeyPath<TableAlias, Base.PrimaryKey.QueryOutput> {
-            \.[member: \Base.PrimaryKey.self, column: Base.columns.primaryKey.keyPath]
-        }
-
-        public var queryFragment: ISO_9075.Fragment {
-            Base.columns.primaryKey._names
-                .map { "\(TableAlias.self).\(quote: $0)" }
-                .joined(separator: ", ")
-        }
     }
 
     public var primaryKey: PrimaryColumn {
         PrimaryColumn()
+    }
+}
+
+extension TableAlias.TableColumns.PrimaryColumn {
+    public typealias Root = TableAlias
+
+    public typealias Value = Base.PrimaryKey
+
+    public var _names: [String] {
+        Base.columns.primaryKey._names
+    }
+
+    public var defaultValue: Base.PrimaryKey.QueryOutput? {
+        Base.columns.primaryKey.defaultValue
+    }
+
+    public var keyPath: KeyPath<TableAlias, Base.PrimaryKey.QueryOutput> {
+        \.[member: \Base.PrimaryKey.self, column: Base.columns.primaryKey.keyPath]
+    }
+
+    public var queryFragment: ISO_9075.Fragment {
+        Base.columns.primaryKey._names
+            .map { "\(TableAlias.self).\(quote: $0)" }
+            .joined(separator: ", ")
     }
 }
 
@@ -169,7 +179,6 @@ where Base.TableColumns.PrimaryColumn: TableColumnExpression {
     public var name: String {
         Base.columns.primaryKey.name
     }
-
 }
 
 extension TableAlias.TableColumns.PrimaryColumn: WritableTableColumnExpression

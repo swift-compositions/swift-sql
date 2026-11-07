@@ -3,14 +3,17 @@ public import ISO_9075_Foundation
 @dynamicMemberLookup
 public struct OptionalColumnGroup<Root: Table, Values: Table>: _TableColumnExpression
 where Values.QueryOutput: Table {
-    public typealias QueryValue = Values?
-    public typealias Value = Values?
-
     package let base: ColumnGroup<Root, Values?>
 
     package init(base: ColumnGroup<Root, Values?>) {
         self.base = base
     }
+}
+
+extension OptionalColumnGroup {
+    public typealias QueryValue = Values?
+
+    public typealias Value = Values?
 
     public var groupName: String { base.groupName }
 

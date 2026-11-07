@@ -82,7 +82,6 @@ extension QueryExpression where QueryValue: QueryRepresentable {
     ) -> some QueryExpression<Bool> where QueryValue: _OptionalProtocol {
         BinaryOperator(lhs: lhs, operator: "<>", rhs: rhs)
     }
-
 }
 
 extension QueryExpression where QueryValue: QueryRepresentable & QueryExpression {
@@ -102,7 +101,11 @@ extension QueryExpression where QueryValue: QueryRepresentable & QueryExpression
 }
 
 public struct _Null<Wrapped: QueryExpression>: QueryExpression {
+}
+
+extension _Null {
     public typealias QueryValue = Wrapped?
+
     public var queryFragment: ISO_9075.Fragment {
         Wrapped?.none.queryFragment
     }
@@ -490,7 +493,9 @@ public struct BinaryOperator<QueryValue>: QueryExpression {
         self.operator = `operator`
         self.rhs = rhs.queryFragment
     }
+}
 
+extension BinaryOperator {
     public var queryFragment: ISO_9075.Fragment {
         "(\(lhs)) \(`operator`) (\(rhs))"
     }

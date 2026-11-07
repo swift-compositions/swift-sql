@@ -33,16 +33,6 @@ public struct Update<From: Table, Returning> {
     var `where`: [ISO_9075.Fragment]
     var returning: [ISO_9075.Fragment]
 
-    public func returning<R>(fragments: [ISO_9075.Fragment]) -> Update<From, R> {
-        Update<From, R>(
-            isEmpty: isEmpty,
-            conflictResolution: conflictResolution,
-            updates: updates,
-            where: `where`,
-            returning: fragments
-        )
-    }
-
     package init(
         isEmpty: Bool,
         conflictResolution: ISO_9075.Fragment? = nil,
@@ -55,6 +45,18 @@ public struct Update<From: Table, Returning> {
         self.updates = updates
         self.where = `where`
         self.returning = returning
+    }
+}
+
+extension Update {
+    public func returning<R>(fragments: [ISO_9075.Fragment]) -> Update<From, R> {
+        Update<From, R>(
+            isEmpty: isEmpty,
+            conflictResolution: conflictResolution,
+            updates: updates,
+            where: `where`,
+            returning: fragments
+        )
     }
 
     public func `where`(
@@ -81,7 +83,6 @@ public struct Update<From: Table, Returning> {
         update.where.append(contentsOf: predicate(From.columns))
         return update
     }
-
 }
 
 public typealias UpdateOf<Base: Table> = Update<Base, ()>

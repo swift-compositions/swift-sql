@@ -1,11 +1,7 @@
 public import ISO_9075_Foundation
 
 public struct SQLQueryExpression<QueryValue>: Sendable, Statement {
-    public typealias From = Never
-
     public let queryFragment: ISO_9075.Fragment
-
-    public var query: ISO_9075.Fragment { queryFragment }
 
     public init(
         _ queryFragment: ISO_9075.Fragment,
@@ -26,4 +22,10 @@ public struct SQLQueryExpression<QueryValue>: Sendable, Statement {
     public init(_ statement: some Statement<QueryValue>) {
         self.queryFragment = statement.query
     }
+}
+
+extension SQLQueryExpression {
+    public typealias From = Never
+
+    public var query: ISO_9075.Fragment { queryFragment }
 }

@@ -10,7 +10,9 @@ public struct Case<Base, QueryValue: _OptionalPromotable> {
     }
 
     public init() where Base == Bool {}
+}
 
+extension Case {
     public func when(
         _ condition: some QueryExpression<Base>,
         then expression: some QueryExpression<QueryValue>
@@ -41,7 +43,9 @@ public struct Case<Base, QueryValue: _OptionalPromotable> {
 public struct Cases<Base, QueryValue: _OptionalProtocol>: QueryExpression {
     var base: ISO_9075.Fragment?
     var cases: [ISO_9075.Fragment]
+}
 
+extension Cases {
     public func when(
         _ condition: some QueryExpression<Base>,
         then expression: some QueryExpression<QueryValue>

@@ -458,19 +458,6 @@ public struct Insert<Into: Table, Returning> {
     var updateFilter: [ISO_9075.Fragment]
     var returning: [ISO_9075.Fragment]
 
-    public func returning<R>(fragments: [ISO_9075.Fragment]) -> Insert<Into, R> {
-        Insert<Into, R>(
-            conflictResolution: conflictResolution,
-            columnNames: columnNames,
-            conflictTargetColumnNames: conflictTargetColumnNames,
-            conflictTargetFilter: conflictTargetFilter,
-            values: values,
-            updates: updates,
-            updateFilter: updateFilter,
-            returning: fragments
-        )
-    }
-
     fileprivate init(
         conflictResolution: ISO_9075.Fragment?,
         columnNames: [String],
@@ -490,7 +477,21 @@ public struct Insert<Into: Table, Returning> {
         self.updateFilter = updateFilter
         self.returning = returning
     }
+}
 
+extension Insert {
+    public func returning<R>(fragments: [ISO_9075.Fragment]) -> Insert<Into, R> {
+        Insert<Into, R>(
+            conflictResolution: conflictResolution,
+            columnNames: columnNames,
+            conflictTargetColumnNames: conflictTargetColumnNames,
+            conflictTargetFilter: conflictTargetFilter,
+            values: values,
+            updates: updates,
+            updateFilter: updateFilter,
+            returning: fragments
+        )
+    }
 }
 
 extension Insert: Statement {
@@ -760,6 +761,9 @@ private func _writableRows<T: Table>(_ values: [T], primaryKeys: Set<String> = [
 }
 
 public struct _ExcludedName: AliasName {
+}
+
+extension _ExcludedName {
     public static var aliasName: String { "excluded" }
 }
 

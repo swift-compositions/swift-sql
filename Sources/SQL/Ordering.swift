@@ -22,8 +22,6 @@ public enum NullOrdering: Sendable, Hashable, CaseIterable {
 }
 
 public struct _OrderingTerm<Value>: QueryExpression, Sendable {
-    public typealias QueryValue = Never
-
     public var baseQueryFragment: ISO_9075.Fragment
 
     public let direction: Order.Direction
@@ -34,6 +32,10 @@ public struct _OrderingTerm<Value>: QueryExpression, Sendable {
         self.direction = direction
         self.nullOrdering = nullOrdering
     }
+}
+
+extension _OrderingTerm {
+    public typealias QueryValue = Never
 
     public var base: some QueryExpression<Value> & Sendable {
         SQLQueryExpression(baseQueryFragment)

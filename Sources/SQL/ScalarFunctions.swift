@@ -4,7 +4,6 @@ extension QueryExpression where QueryValue: Swift.Collection {
     public func length() -> some QueryExpression<Int> {
         QueryFunction("length", self)
     }
-
 }
 
 extension QueryExpression where QueryValue: FloatingPoint {
@@ -104,7 +103,6 @@ extension QueryExpression where QueryValue == String {
 }
 
 extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
-
     public func upper() -> some QueryExpression<QueryValue> {
         QueryFunction("upper", self)
     }
@@ -121,7 +119,9 @@ public struct QueryFunction<QueryValue>: QueryExpression {
         self.name = name
         self.arguments = Array(repeat each arguments)
     }
+}
 
+extension QueryFunction {
     public var queryFragment: ISO_9075.Fragment {
         "\(name)(\(arguments.joined(separator: ", ")))"
     }
@@ -133,7 +133,9 @@ public struct CoalesceFunction<QueryValue>: QueryExpression {
     fileprivate init(_ arguments: [ISO_9075.Fragment]) {
         self.arguments = arguments
     }
+}
 
+extension CoalesceFunction {
     public var queryFragment: ISO_9075.Fragment {
         "coalesce(\(arguments.joined(separator: ", ")))"
     }

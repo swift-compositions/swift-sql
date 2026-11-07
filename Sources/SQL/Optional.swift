@@ -88,7 +88,6 @@ extension Optional: QueryRepresentable where Wrapped: QueryRepresentable {
     public static func _queryFragment(jsonDecoding queryFragment: ISO_9075.Fragment) -> ISO_9075.Fragment {
         Wrapped._queryFragment(jsonDecoding: queryFragment)
     }
-
 }
 
 extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Table {
@@ -228,29 +227,32 @@ where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
     public typealias PrimaryKey = Wrapped.PrimaryKey?
 
     public struct PrimaryColumn: _TableColumnExpression {
-        public typealias Root = Optional
-
-        public typealias Value = Wrapped.PrimaryKey?
-
-        public var _names: [String] {
-            Wrapped.columns.primaryKey._names
-        }
-
-        public var defaultValue: Wrapped.PrimaryKey.QueryOutput?? {
-            Wrapped.columns.primaryKey.defaultValue
-        }
-
-        public var keyPath: KeyPath<Wrapped?, Wrapped.PrimaryKey.QueryOutput?> {
-            \.[member: \Wrapped.PrimaryKey.self, column: Wrapped.columns.primaryKey.keyPath]
-        }
-
-        public var queryFragment: ISO_9075.Fragment {
-            Wrapped.columns.primaryKey.queryFragment
-        }
     }
 
     public var primaryKey: PrimaryColumn {
         PrimaryColumn()
+    }
+}
+
+extension Optional.TableColumns.PrimaryColumn {
+    public typealias Root = Optional
+
+    public typealias Value = Wrapped.PrimaryKey?
+
+    public var _names: [String] {
+        Wrapped.columns.primaryKey._names
+    }
+
+    public var defaultValue: Wrapped.PrimaryKey.QueryOutput?? {
+        Wrapped.columns.primaryKey.defaultValue
+    }
+
+    public var keyPath: KeyPath<Wrapped?, Wrapped.PrimaryKey.QueryOutput?> {
+        \.[member: \Wrapped.PrimaryKey.self, column: Wrapped.columns.primaryKey.keyPath]
+    }
+
+    public var queryFragment: ISO_9075.Fragment {
+        Wrapped.columns.primaryKey.queryFragment
     }
 }
 
@@ -259,7 +261,6 @@ where Wrapped.TableColumns.PrimaryColumn: TableColumnExpression {
     public var name: String {
         Wrapped.columns.primaryKey.name
     }
-
 }
 
 extension Optional.TableColumns.PrimaryColumn: WritableTableColumnExpression
@@ -291,9 +292,11 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
 
 public struct _UnwrapExpression<Base: QueryExpression>: QueryExpression
 where Base.QueryValue: _OptionalProtocol {
-    public typealias QueryValue = Base.QueryValue.Wrapped
-
     let base: Base
+}
+
+extension _UnwrapExpression {
+    public typealias QueryValue = Base.QueryValue.Wrapped
 
     public var queryFragment: ISO_9075.Fragment { base.queryFragment }
 }

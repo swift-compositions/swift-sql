@@ -3,8 +3,6 @@
 public import ISO_9075_Foundation
 
 public struct Values<QueryValue>: PartialSelectStatement, _SelectSource {
-    public typealias From = Never
-
     private let rows: [[ISO_9075.Fragment]]
     package let _valuesElements: [ValuesElement]
 
@@ -13,6 +11,10 @@ public struct Values<QueryValue>: PartialSelectStatement, _SelectSource {
         rows = built.rows
         _valuesElements = built.elements
     }
+}
+
+extension Values {
+    public typealias From = Never
 
     public var query: ISO_9075.Fragment {
         guard !rows.isEmpty else { return "" }

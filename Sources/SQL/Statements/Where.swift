@@ -25,16 +25,18 @@ extension Table {
 
 @dynamicMemberLookup
 public struct Where<From: Table>: Sendable {
-    public static func + (lhs: Self, rhs: Self) -> Self {
-        Where(predicates: (lhs.predicates + rhs.predicates).removingDuplicates())
-    }
-
     var predicates: [ISO_9075.Fragment]
     var scope: Scope
 
     package init(predicates: [ISO_9075.Fragment] = [], scope: Scope = .default) {
         self.predicates = predicates
         self.scope = scope
+    }
+}
+
+extension Where {
+    public static func + (lhs: Self, rhs: Self) -> Self {
+        Where(predicates: (lhs.predicates + rhs.predicates).removingDuplicates())
     }
 
     public static subscript(dynamicMember keyPath: KeyPath<From.Type, Self>) -> Self {

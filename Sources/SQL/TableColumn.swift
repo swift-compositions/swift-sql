@@ -14,7 +14,6 @@ public protocol _TableColumnExpression<Root, Value>: QueryExpression where Value
 public protocol TableColumnExpression<Root, Value>: _TableColumnExpression
 where Value: QueryBindable {
     var name: String { get }
-
 }
 
 extension TableColumnExpression {
@@ -30,8 +29,6 @@ public protocol WritableTableColumnExpression<Root, Value>: TableColumnExpressio
 public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
     WritableTableColumnExpression
 {
-    public typealias QueryValue = Value
-
     public let name: String
 
     @usableFromInline
@@ -39,10 +36,6 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
 
     @usableFromInline
     let _keyPath: () -> KeyPath<Root, Value.QueryOutput>
-
-    public var defaultValue: Value.QueryOutput? { _defaultValue() }
-
-    public var keyPath: KeyPath<Root, Value.QueryOutput> { _keyPath() }
 
     @inlinable
     public init(
@@ -65,6 +58,14 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
         self._defaultValue = defaultValue
         self._keyPath = keyPath
     }
+}
+
+extension TableColumn {
+    public typealias QueryValue = Value
+
+    public var defaultValue: Value.QueryOutput? { _defaultValue() }
+
+    public var keyPath: KeyPath<Root, Value.QueryOutput> { _keyPath() }
 
     public var queryFragment: ISO_9075.Fragment {
         let column: ISO_9075.Fragment = "\(Root.self).\(quote: name)"
@@ -79,6 +80,9 @@ public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable
 }
 
 public enum _TableColumn<Root: Table, Value: QueryRepresentable> {
+}
+
+extension _TableColumn {
     @inlinable
     public static func `for`(
         _ name: String,
@@ -136,8 +140,6 @@ public enum GeneratedColumnStorage {
 public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
     TableColumnExpression
 {
-    public typealias QueryValue = Value
-
     public let name: String
 
     @usableFromInline
@@ -145,10 +147,6 @@ public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBind
 
     @usableFromInline
     let _keyPath: () -> KeyPath<Root, Value.QueryOutput>
-
-    public var defaultValue: Value.QueryOutput? { _defaultValue() }
-
-    public var keyPath: KeyPath<Root, Value.QueryOutput> { _keyPath() }
 
     @inlinable
     public init(
@@ -171,6 +169,14 @@ public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBind
         self._defaultValue = defaultValue
         self._keyPath = keyPath
     }
+}
+
+extension GeneratedColumn {
+    public typealias QueryValue = Value
+
+    public var defaultValue: Value.QueryOutput? { _defaultValue() }
+
+    public var keyPath: KeyPath<Root, Value.QueryOutput> { _keyPath() }
 
     public var queryFragment: ISO_9075.Fragment {
         let column: ISO_9075.Fragment = "\(Root.self).\(quote: name)"

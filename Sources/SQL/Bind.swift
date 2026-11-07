@@ -9,7 +9,9 @@ public struct BindQueryExpression<QueryValue: QueryRepresentable & QueryExpressi
     ) {
         self.base = QueryValue(queryOutput: queryOutput)
     }
+}
 
+extension BindQueryExpression {
     public var queryFragment: ISO_9075.Fragment {
         base.queryFragment
     }

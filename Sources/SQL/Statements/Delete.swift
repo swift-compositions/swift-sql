@@ -21,7 +21,9 @@ public struct Delete<From: Table, Returning> {
     var isEmpty: Bool
     var `where`: [ISO_9075.Fragment] = []
     var returning: [ISO_9075.Fragment] = []
+}
 
+extension Delete {
     public func returning<R>(fragments: [ISO_9075.Fragment]) -> Delete<From, R> {
         Delete<From, R>(isEmpty: isEmpty, where: `where`, returning: fragments)
     }
@@ -50,7 +52,6 @@ public struct Delete<From: Table, Returning> {
         update.where.append(contentsOf: predicate(From.columns))
         return update
     }
-
 }
 
 public typealias DeleteOf<From: Table> = Delete<From, ()>
