@@ -1,6 +1,4 @@
 // swift-format-ignore-file: AmbiguousTrailingClosureOverload
-// REASON: each clause has an expression-closure overload and a @QueryFragmentBuilder overload;
-// @_disfavoredOverload and the builder attribute resolve a trailing closure, so callers are not ambiguous.
 
 import ISO_9075_Foundation
 

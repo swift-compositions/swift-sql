@@ -19,7 +19,7 @@ extension Table {
 
 public struct TableAlias<
     Base,
-    Name: AliasName  // We should use a value generic here when it's possible.
+    Name: AliasName
 >: _OptionalPromotable {
     let base: Base
 

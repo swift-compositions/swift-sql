@@ -84,7 +84,7 @@ extension PrimaryKeyedTable {
     }
 
     public static func find(
-        _ primaryKeys: some Sequence<some QueryExpression<PrimaryKey>>
+        _ primaryKeys: some Swift.Sequence<some QueryExpression<PrimaryKey>>
     ) -> Where<Self> {
         Self.where { $0.primaryKey.in(primaryKeys) }
     }
@@ -102,7 +102,7 @@ extension TableDraft where SourceTable: PrimaryKeyedTable {
     }
 
     public static func find(
-        _ primaryKeys: some Sequence<some QueryExpression<SourceTable.PrimaryKey>>
+        _ primaryKeys: some Swift.Sequence<some QueryExpression<SourceTable.PrimaryKey>>
     ) -> Where<Self> {
         Self.where { $0.primaryKey.in(primaryKeys) }
     }
@@ -114,7 +114,7 @@ extension Where where From: PrimaryKeyedTable {
     }
 
     public func find(
-        _ primaryKeys: some Sequence<some QueryExpression<From.PrimaryKey>>
+        _ primaryKeys: some Swift.Sequence<some QueryExpression<From.PrimaryKey>>
     ) -> Self {
         self.where { $0.primaryKey.in(primaryKeys) }
     }
@@ -130,7 +130,7 @@ extension Where where From: TableDraft, From.SourceTable: PrimaryKeyedTable {
     }
 
     public func find(
-        _ primaryKeys: some Sequence<some QueryExpression<From.SourceTable.PrimaryKey>>
+        _ primaryKeys: some Swift.Sequence<some QueryExpression<From.SourceTable.PrimaryKey>>
     ) -> Self {
         self.where { $0.primaryKey.in(primaryKeys) }
     }
@@ -142,7 +142,7 @@ extension Select where From: PrimaryKeyedTable {
     }
 
     public func find(
-        _ primaryKeys: some Sequence<some QueryExpression<From.PrimaryKey>>
+        _ primaryKeys: some Swift.Sequence<some QueryExpression<From.PrimaryKey>>
     ) -> Self {
         and(From.find(primaryKeys))
     }
@@ -156,7 +156,7 @@ extension Select where From: TableDraft, From.SourceTable: PrimaryKeyedTable {
     }
 
     public func find(
-        _ primaryKeys: some Sequence<some QueryExpression<From.SourceTable.PrimaryKey>>
+        _ primaryKeys: some Swift.Sequence<some QueryExpression<From.SourceTable.PrimaryKey>>
     ) -> Self {
         and(From.find(primaryKeys))
     }
@@ -168,7 +168,7 @@ extension Update where From: PrimaryKeyedTable {
     }
 
     public func find(
-        _ primaryKeys: some Sequence<some QueryExpression<From.PrimaryKey>>
+        _ primaryKeys: some Swift.Sequence<some QueryExpression<From.PrimaryKey>>
     ) -> Self {
         self.where { $0.primaryKey.in(primaryKeys) }
     }
@@ -184,7 +184,7 @@ extension Update where From: TableDraft, From.SourceTable: PrimaryKeyedTable {
     }
 
     public func find(
-        _ primaryKeys: some Sequence<some QueryExpression<From.SourceTable.PrimaryKey>>
+        _ primaryKeys: some Swift.Sequence<some QueryExpression<From.SourceTable.PrimaryKey>>
     ) -> Self {
         self.where { $0.primaryKey.in(primaryKeys) }
     }
@@ -196,7 +196,7 @@ extension Delete where From: PrimaryKeyedTable {
     }
 
     public func find(
-        _ primaryKeys: some Sequence<some QueryExpression<From.PrimaryKey>>
+        _ primaryKeys: some Swift.Sequence<some QueryExpression<From.PrimaryKey>>
     ) -> Self {
         self.where { $0.primaryKey.in(primaryKeys) }
     }
@@ -212,7 +212,7 @@ extension Delete where From: TableDraft, From.SourceTable: PrimaryKeyedTable {
     }
 
     public func find(
-        _ primaryKeys: some Sequence<some QueryExpression<From.SourceTable.PrimaryKey>>
+        _ primaryKeys: some Swift.Sequence<some QueryExpression<From.SourceTable.PrimaryKey>>
     ) -> Self {
         self.where { $0.primaryKey.in(primaryKeys) }
     }

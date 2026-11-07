@@ -1,6 +1,6 @@
 public import ISO_9075_Foundation
 
-public struct Seeds: Sequence {
+public struct Seeds: Swift.Sequence {
     let seeds: [Seed]
 
     public init(@SeedsBuilder _ build: () -> [Seed]) {

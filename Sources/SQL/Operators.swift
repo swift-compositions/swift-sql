@@ -414,12 +414,12 @@ extension SQLQueryExpression<String> {
 }
 
 extension QueryExpression where QueryValue: QueryExpression {
-    public func `in`<S: Sequence>(_ expression: S) -> some QueryExpression<Bool>
+    public func `in`<S: Swift.Sequence>(_ expression: S) -> some QueryExpression<Bool>
     where S.Element: QueryExpression<QueryValue> {
         BinaryOperator(lhs: self, operator: "IN", rhs: S.Expression(elements: expression))
     }
 
-    public func notIn<S: Sequence>(_ expression: S) -> some QueryExpression<Bool>
+    public func notIn<S: Swift.Sequence>(_ expression: S) -> some QueryExpression<Bool>
     where S.Element: QueryExpression<QueryValue> {
         BinaryOperator(lhs: self, operator: "NOT IN", rhs: S.Expression(elements: expression))
     }
@@ -520,7 +520,7 @@ extension Sequence where Element: QueryExpression, Element.QueryValue: QueryExpr
     fileprivate typealias Expression = _SequenceExpression<Self>
 }
 
-private struct _SequenceExpression<S: Sequence>: QueryExpression
+private struct _SequenceExpression<S: Swift.Sequence>: QueryExpression
 where S.Element: QueryExpression, S.Element.QueryValue: QueryExpression {
     typealias QueryValue = S
     let queryFragment: ISO_9075.Fragment

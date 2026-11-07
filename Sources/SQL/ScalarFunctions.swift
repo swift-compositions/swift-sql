@@ -1,6 +1,6 @@
 public import ISO_9075_Foundation
 
-extension QueryExpression where QueryValue: Collection {
+extension QueryExpression where QueryValue: Swift.Collection {
     public func length() -> some QueryExpression<Int> {
         QueryFunction("length", self)
     }
