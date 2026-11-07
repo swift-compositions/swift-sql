@@ -10,17 +10,6 @@ extension Collation {
     }
 }
 
-public struct NamedCollation: Collation, Sendable {
-    public let name: String
-
-    public init(_ name: String) {
-        self.name = name
-    }
-
-    public init(_ collation: some Collation) {
-        self.name = collation.name
-    }
-}
 
 extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
     public func collate(_ collation: some Collation) -> some QueryExpression<QueryValue> {

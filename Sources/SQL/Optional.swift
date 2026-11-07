@@ -14,9 +14,6 @@ extension Optional: _OptionalProtocol {
     public static func _some(_ wrapped: Wrapped) -> Self { .some(wrapped) }
 }
 
-public protocol _OptionalPromotable<_Optionalized> {
-    associatedtype _Optionalized: _OptionalProtocol = Self?
-}
 
 extension Optional: _OptionalPromotable {
     public typealias _Optionalized = Self
@@ -113,101 +110,6 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
         self?[keyPath: keyPath]
     }
 
-    @dynamicMemberLookup
-    public struct TableColumns: TableDefinition {
-        public typealias QueryValue = Optional
-
-        public static var allColumns: [Column<Optional>] {
-            Wrapped.TableColumns.allColumns.map(\.optional)
-        }
-
-        public static var writableColumns: [Column<Optional>] {
-            Wrapped.TableColumns.writableColumns.map(\.optional)
-        }
-
-        public subscript<Member>(
-            dynamicMember keyPath: KeyPath<Wrapped.TableColumns, TableColumn<Wrapped, Member>>
-        ) -> TableColumn<Optional, Member?> {
-            let column = Wrapped.columns[keyPath: keyPath]
-            return TableColumn<Optional, Member?>(
-                column.name,
-                keyPath: \.[member: \Member.self, column: column.keyPath]
-            )
-        }
-
-        public subscript<Member>(
-            dynamicMember keyPath: KeyPath<Wrapped.TableColumns, GeneratedColumn<Wrapped, Member>>
-        ) -> GeneratedColumn<Optional, Member?> {
-            let column = Wrapped.columns[keyPath: keyPath]
-            return GeneratedColumn<Optional, Member?>(
-                column.name,
-                keyPath: \.[member: \Member.self, column: column.keyPath]
-            )
-        }
-
-        public subscript<Member>(
-            dynamicMember keyPath: KeyPath<Wrapped.TableColumns, ColumnGroup<Wrapped, Member>>
-        ) -> OptionalColumnGroup<Optional, Member> {
-            let column = Wrapped.columns[keyPath: keyPath]
-            return OptionalColumnGroup(
-                base: ColumnGroup<Optional, Member?>(
-                    column.groupName,
-                    keyPath: \.[member: \Member.self, column: column.keyPath]
-                )
-            )
-        }
-
-        public subscript<Member>(
-            dynamicMember keyPath: KeyPath<
-                Wrapped.TableColumns, OptionalColumnGroup<Wrapped, Member>
-            >
-        ) -> OptionalColumnGroup<Optional, Member> {
-            let column = Wrapped.columns[keyPath: keyPath]
-            return OptionalColumnGroup(
-                base: ColumnGroup<Optional, Member?>(
-                    column.groupName,
-                    keyPath: \.[flattenedMember: \Member.self, column: column.keyPath]
-                )
-            )
-        }
-
-        #if CasePaths
-            public subscript<Member>(
-                dynamicMember keyPath: KeyPath<Wrapped.TableColumns, CaseColumn<Wrapped, Member>>
-            ) -> TableColumn<Optional, Member??> {
-                let column = Wrapped.columns[keyPath: keyPath].base
-                return TableColumn<Optional, Member??>(
-                    column.name,
-                    keyPath: \.[member: \Member?.self, column: column.keyPath]
-                )
-            }
-
-            public subscript<Member>(
-                dynamicMember keyPath: KeyPath<
-                    Wrapped.TableColumns, CaseColumnGroup<Wrapped, Member>
-                >
-            ) -> ColumnGroup<Optional, Member??> {
-                let column = Wrapped.columns[keyPath: keyPath].base
-                return ColumnGroup<Optional, Member??>(
-                    column.groupName,
-                    keyPath: \.[member: \Member?.self, column: column.keyPath]
-                )
-            }
-        #endif
-
-        public subscript<Member: QueryExpression>(
-            dynamicMember keyPath: KeyPath<Wrapped.TableColumns, Member>
-        ) -> some QueryExpression<Member.QueryValue?> {
-            Member?.some(Wrapped.columns[keyPath: keyPath])
-        }
-
-        @_disfavoredOverload
-        public subscript<QueryValue>(
-            dynamicMember keyPath: KeyPath<Wrapped.TableColumns, some QueryExpression<QueryValue?>>
-        ) -> some QueryExpression<QueryValue?> {
-            Wrapped.columns[keyPath: keyPath]
-        }
-    }
 
     public typealias Selection = Wrapped.Selection?
 }
@@ -227,27 +129,6 @@ extension Optional.TableColumns: PrimaryKeyedTableDefinition
 where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
     public typealias PrimaryKey = Wrapped.PrimaryKey?
 
-    public struct PrimaryColumn: _TableColumnExpression {
-        public typealias Root = Optional
-
-        public typealias Value = Wrapped.PrimaryKey?
-
-        public var _names: [String] {
-            Wrapped.columns.primaryKey._names
-        }
-
-        public var defaultValue: Wrapped.PrimaryKey.QueryOutput?? {
-            Wrapped.columns.primaryKey.defaultValue
-        }
-
-        public var keyPath: KeyPath<Wrapped?, Wrapped.PrimaryKey.QueryOutput?> {
-            \.[member: \Wrapped.PrimaryKey.self, column: Wrapped.columns.primaryKey.keyPath]
-        }
-
-        public var queryFragment: ISO_9075.Fragment {
-            Wrapped.columns.primaryKey.queryFragment
-        }
-    }
 
     public var primaryKey: PrimaryColumn {
         PrimaryColumn()
@@ -289,11 +170,6 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
     }
 }
 
-public struct _UnwrapExpression<Base: QueryExpression>: QueryExpression
-where Base.QueryValue: _OptionalProtocol {
-
-    let base: Base
-}
 
 extension _UnwrapExpression {
     public typealias QueryValue = Base.QueryValue.Wrapped

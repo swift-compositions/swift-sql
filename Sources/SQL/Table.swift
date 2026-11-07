@@ -27,7 +27,6 @@ public protocol Table: QueryRepresentable, PartialSelectStatement, _SelectSource
     static var all: DefaultScope { get }
 }
 
-public protocol _Selection: Table {}
 
 extension Table {
     public static var unscoped: Where<Self> {

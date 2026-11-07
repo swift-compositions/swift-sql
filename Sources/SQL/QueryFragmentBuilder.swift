@@ -76,4 +76,3 @@ extension QueryFragmentBuilder<_StatementClause> {
     }
 }
 
-public enum _StatementClause {}

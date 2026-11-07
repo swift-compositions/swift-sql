@@ -11,11 +11,6 @@ public protocol _TableColumnExpression<Root, Value>: QueryExpression where Value
     var keyPath: KeyPath<Root, Value.QueryOutput> { get }
 }
 
-public protocol TableColumnExpression<Root, Value>: _TableColumnExpression
-where Value: QueryBindable {
-    var name: String { get }
-
-}
 
 extension TableColumnExpression {
     public var _names: [String] { [name] }
@@ -25,7 +20,6 @@ extension TableColumnExpression {
     }
 }
 
-public protocol WritableTableColumnExpression<Root, Value>: TableColumnExpression {}
 
 public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
     WritableTableColumnExpression
