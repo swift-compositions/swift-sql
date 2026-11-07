@@ -4,6 +4,11 @@ public protocol _SelectSource {
     static var _fromTable: _FromTable? { get }
 }
 
+public struct _FromTable: Sendable {
+    let columns: ISO_9075.Fragment
+    let reference: ISO_9075.Fragment
+    let alias: String?
+}
 
 extension _SelectSource {
     public static var _fromTable: _FromTable? { nil }

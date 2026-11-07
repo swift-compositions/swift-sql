@@ -11,6 +11,11 @@ extension Never: Table {
         public static var writableColumns: [Column<Never>] { [] }
     }
 
+    public struct Selection: TableExpression {
+        public typealias QueryValue = Never
+
+        public var allColumns: [ISO_9075.Fragment] { [] }
+    }
 
     public static var columns: TableColumns {
         TableColumns()
