@@ -55,7 +55,7 @@ extension Column {
         decoding("\(quote: name)")
     }
 
-    package var fieldOffset: Int? {
+    var fieldOffset: Int? {
         keyPath.flatMap { MemoryLayout<Root>.offset(of: $0) }
     }
 

@@ -28,7 +28,7 @@ extension PrimaryKeyedTable {
 
 public struct Update<From: Table, Returning> {
     var isEmpty: Bool
-    package var conflictResolution: ISO_9075.Fragment?
+    var conflictResolution: ISO_9075.Fragment?
     var updates: Updates<From>
     var `where`: [ISO_9075.Fragment]
     var returning: [ISO_9075.Fragment]

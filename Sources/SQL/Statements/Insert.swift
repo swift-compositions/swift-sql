@@ -445,7 +445,7 @@ private enum InsertValues {
 }
 
 public struct Insert<Into: Table, Returning> {
-    package var conflictResolution: ISO_9075.Fragment?
+    var conflictResolution: ISO_9075.Fragment?
     var columnNames: [String]
     var conflictTargetColumnNames: [String]
     var conflictTargetFilter: [ISO_9075.Fragment]

@@ -13,7 +13,7 @@
         case note(String)
     }
 
-    struct RenderedValues: QueryDecoder {
+    fileprivate struct RenderedValues: QueryDecoder {
         var values: [ISO_9075.Value]
 
         mutating func next() -> ISO_9075.Value {

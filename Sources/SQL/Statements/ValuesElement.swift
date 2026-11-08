@@ -3,7 +3,7 @@ public import ISO_9075_Foundation
 public struct ValuesElement: Sendable {
     package let offset: Int
     package let columns: [Column]
-    package let fieldOffsets: [Int]
+    let fieldOffsets: [Int]
 
     package init(offset: Int, columns: [Column], fieldOffsets: [Int] = []) {
         self.offset = offset
@@ -42,7 +42,7 @@ extension QueryRepresentable {
 }
 
 extension [ValuesElement] {
-    package func columnIndex<Value>(of keyPath: PartialKeyPath<Value>) -> Int? {
+    func columnIndex<Value>(of keyPath: PartialKeyPath<Value>) -> Int? {
         guard let target = MemoryLayout<Value>.offset(of: keyPath) else { return nil }
         var position = 0
         for element in self {
@@ -73,11 +73,11 @@ extension Table {
         TableColumns.allColumns.firstIndex { $0.keyPath == keyPath }
     }
 
-    package static var valuesElement: ValuesElement {
+    static var valuesElement: ValuesElement {
         ValuesElement(offset: 0, columns: _valuesColumns, fieldOffsets: _valuesFieldOffsets)
     }
 
-    package static var writableValuesElement: ValuesElement {
+    static var writableValuesElement: ValuesElement {
         ValuesElement(
             offset: 0,
             columns: TableColumns.writableColumns.map { ValuesElement.Column(name: $0.name, decoding: $0.decoding) }
