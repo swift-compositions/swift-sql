@@ -616,10 +616,10 @@ extension TableMacro: ExtensionMacro {
                     """
                 )
                 let caseArgumentLabel: String
-                if let firstName = parameter.firstName, firstName.tokenKind != .wildcard {
-                    caseArgumentLabel = "\(firstName.text.trimmingBackticks()): "
+                caseArgumentLabel = if let firstName = parameter.firstName, firstName.tokenKind != .wildcard {
+                    "\(firstName.text.trimmingBackticks()): "
                 } else {
-                    caseArgumentLabel = ""
+                    ""
                 }
                 decodingAssignments.append(
                     """
@@ -1574,12 +1574,12 @@ extension TableMacro: MemberAttributeMacro {
         }
 
         let checkAttribute: [AttributeSyntax]
-        if let columnType {
-            checkAttribute = ["@\(macrosModuleName)::ColumnCheck(\(columnType.trimmed).self)"]
+        checkAttribute = if let columnType {
+            ["@\(macrosModuleName)::ColumnCheck(\(columnType.trimmed).self)"]
         } else if let initializer = binding.initializer {
-            checkAttribute = ["@\(macrosModuleName)::ColumnCheck(\(initializer.value.trimmed))"]
+            ["@\(macrosModuleName)::ColumnCheck(\(initializer.value.trimmed))"]
         } else {
-            checkAttribute = []
+            []
         }
         return checkAttribute
     }

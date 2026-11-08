@@ -61,10 +61,10 @@ extension Optional: QueryRepresentable where Wrapped: QueryRepresentable {
 
     @inlinable
     public init(queryOutput: Wrapped.QueryOutput?) {
-        if let queryOutput {
-            self = Wrapped(queryOutput: queryOutput)
+        self = if let queryOutput {
+            Wrapped(queryOutput: queryOutput)
         } else {
-            self = nil
+            nil
         }
     }
 
