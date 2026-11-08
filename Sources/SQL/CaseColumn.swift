@@ -4,14 +4,17 @@
     public struct CaseColumn<Root: Table, Payload: QueryRepresentable & QueryBindable>:
         WritableTableColumnExpression
     {
-        public typealias QueryValue = Payload?
-        public typealias Value = Payload?
-
         package let base: TableColumn<Root, Payload?>
 
         package init(base: TableColumn<Root, Payload?>) {
             self.base = base
         }
+    }
+
+    extension CaseColumn {
+        public typealias QueryValue = Payload?
+
+        public typealias Value = Payload?
 
         public var name: String { base.name }
 
@@ -29,14 +32,17 @@
     @dynamicMemberLookup
     public struct CaseColumnGroup<Root: Table, Payload: Table>: _TableColumnExpression
     where Payload.QueryOutput: Table {
-        public typealias QueryValue = Payload?
-        public typealias Value = Payload?
-
         package let base: ColumnGroup<Root, Payload?>
 
         package init(base: ColumnGroup<Root, Payload?>) {
             self.base = base
         }
+    }
+
+    extension CaseColumnGroup {
+        public typealias QueryValue = Payload?
+
+        public typealias Value = Payload?
 
         public var groupName: String { base.groupName }
 
@@ -120,6 +126,9 @@
     }
 
     public enum _CaseColumn<Root: Table, Value> {
+    }
+
+    extension _CaseColumn {
         public static func `for`(
             _ name: String,
             keyPath: @autoclosure @escaping () -> KeyPath<Root, Value.QueryOutput?>,
@@ -237,6 +246,15 @@
             unavailable,
             message: "Assign the entire case, instead: '$0.enum = .case(value)'"
         )
+
+        @available(
+            *,
+            unavailable,
+            message: "Assign the entire case, instead: '$0.enum = .case(value)'"
+        )
+    }
+
+    extension _CaseGroupUpdate {
         public subscript<Member>(
             dynamicMember keyPath: KeyPath<
                 Payload.TableColumns, TableColumn<Payload.QueryOutput, Member>
@@ -246,11 +264,6 @@
             set {}
         }
 
-        @available(
-            *,
-            unavailable,
-            message: "Assign the entire case, instead: '$0.enum = .case(value)'"
-        )
         public subscript<Member>(
             dynamicMember keyPath: KeyPath<
                 Payload.TableColumns, ColumnGroup<Payload.QueryOutput, Member>

@@ -442,10 +442,6 @@ private enum InsertValues {
     case `default`
     case values([[ISO_9075.Fragment]])
     case selection(ISO_9075.Fragment, hasUpsertParsingAmbiguity: Bool)
-
-    static func select(_ statement: some PartialSelectStatement) -> Self {
-        .selection(statement.query, hasUpsertParsingAmbiguity: statement._hasUpsertParsingAmbiguity)
-    }
 }
 
 public struct Insert<Into: Table, Returning> {
@@ -789,3 +785,8 @@ extension Insert {
         return insert
     }
 }
+
+extension InsertValues {
+    static func select(_ statement: some PartialSelectStatement) -> Self {
+        .selection(statement.query, hasUpsertParsingAmbiguity: statement._hasUpsertParsingAmbiguity)
+    }}

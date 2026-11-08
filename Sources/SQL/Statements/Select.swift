@@ -223,62 +223,6 @@ public struct _SelectClauses: Sendable {
 public struct Select<Columns, From: _SelectSource, Joins>: Sendable {
     @CopyOnWrite var clauses = _SelectClauses()
 
-    fileprivate var isEmpty: Bool {
-        get { clauses.isEmpty }
-        set { clauses.isEmpty = newValue }
-        _modify { yield &clauses.isEmpty }
-    }
-    fileprivate var distinct: Bool {
-        get { clauses.distinct }
-        set { clauses.distinct = newValue }
-        _modify { yield &clauses.distinct }
-    }
-    fileprivate var columns: [ISO_9075.Fragment] {
-        get { clauses.columns }
-        set { clauses.columns = newValue }
-        _modify { yield &clauses.columns }
-    }
-    fileprivate var from: ISO_9075.Fragment? {
-        get { clauses.from }
-        set { clauses.from = newValue }
-        _modify { yield &clauses.from }
-    }
-    fileprivate var joins: [_JoinClause] {
-        get { clauses.joins }
-        set { clauses.joins = newValue }
-        _modify { yield &clauses.joins }
-    }
-    fileprivate var `where`: [ISO_9075.Fragment] {
-        get { clauses.where }
-        set { clauses.where = newValue }
-        _modify { yield &clauses.where }
-    }
-    fileprivate var group: [ISO_9075.Fragment] {
-        get { clauses.group }
-        set { clauses.group = newValue }
-        _modify { yield &clauses.group }
-    }
-    fileprivate var having: [ISO_9075.Fragment] {
-        get { clauses.having }
-        set { clauses.having = newValue }
-        _modify { yield &clauses.having }
-    }
-    fileprivate var window: [ISO_9075.Fragment] {
-        get { clauses.window }
-        set { clauses.window = newValue }
-        _modify { yield &clauses.window }
-    }
-    fileprivate var order: [ISO_9075.Fragment] {
-        get { clauses.order }
-        set { clauses.order = newValue }
-        _modify { yield &clauses.order }
-    }
-    fileprivate var limit: _LimitClause? {
-        get { clauses.limit }
-        set { clauses.limit = newValue }
-        _modify { yield &clauses.limit }
-    }
-
     fileprivate init(
         isEmpty: Bool,
         distinct: Bool,
@@ -308,40 +252,16 @@ public struct Select<Columns, From: _SelectSource, Joins>: Sendable {
     init(clauses: _SelectClauses) {
         self.clauses = clauses
     }
-
-    public var tableReference: ISO_9075.Fragment? {
-        get { clauses.from }
-        set { clauses.from = newValue }
-    }
 }
 
 @dynamicMemberLookup
 public struct ValuesColumns<Value>: QueryExpression, _SelectSource, Sendable {
-    public typealias QueryValue = Value
-
     let columns: [ISO_9075.Fragment]
     let elements: [ValuesElement]?
 
     package init(columns: [ISO_9075.Fragment], elements: [ValuesElement]? = nil) {
         self.columns = columns
         self.elements = elements
-    }
-
-    public var queryFragment: ISO_9075.Fragment {
-        columns.joined(separator: ", ")
-    }
-
-    public subscript<Member>(
-        dynamicMember keyPath: KeyPath<Value, Member>
-    ) -> SQLQueryExpression<Member> {
-        column(at: (elements ?? []).columnIndex(of: keyPath), as: Member.self)
-    }
-
-    private func column<Member>(at index: Int?, as _: Member.Type) -> SQLQueryExpression<Member> {
-        guard let index, columns.indices.contains(index) else {
-            preconditionFailure("Could not determine the column for the given key path")
-        }
-        return SQLQueryExpression(columns[index], as: Member.self)
     }
 }
 
@@ -1863,8 +1783,6 @@ public typealias SelectOf<From: Table, each Join: Table> =
     Select<(), From, (repeat each Join)>
 
 public struct _JoinClause: QueryExpression, Sendable {
-    public typealias QueryValue = Never
-
     struct Operator {
         static let full = Self(queryFragment: "FULL")
         static let inner = Self(queryFragment: "INNER")
@@ -1892,19 +1810,6 @@ public struct _JoinClause: QueryExpression, Sendable {
         self.tableReference = tableReference ?? table.tableFragment
     }
 
-    public var queryFragment: ISO_9075.Fragment {
-        var query: ISO_9075.Fragment = ""
-        if let `operator` {
-            query.append("\(`operator`) ")
-        }
-        query.append("JOIN \(tableReference) ")
-        if let tableAlias = tableAlias {
-            query.append("AS \(quote: tableAlias) ")
-        }
-        query.append("ON \(constraint)")
-        return query
-    }
-
     private init(
         constraint: ISO_9075.Fragment,
         operator: ISO_9075.Fragment?,
@@ -1918,6 +1823,122 @@ public struct _JoinClause: QueryExpression, Sendable {
         self.tableColumns = tableColumns
         self.tableReference = tableReference
     }
+}
+
+public struct _LimitClause: QueryExpression, Sendable {
+    let maxLength: ISO_9075.Fragment?
+    let offset: ISO_9075.Fragment?
+}
+
+@propertyWrapper
+private struct CopyOnWrite<Value> {
+    var storage: Storage
+    init(wrappedValue: Value) {
+        self.storage = Storage(value: wrappedValue)
+    }
+}
+
+extension CopyOnWrite: Sendable where Value: Sendable {}
+
+extension CopyOnWrite.Storage: @unchecked Sendable where Value: Sendable {}
+
+extension Select {
+    fileprivate var isEmpty: Bool {
+        get { clauses.isEmpty }
+        set { clauses.isEmpty = newValue }
+        _modify { yield &clauses.isEmpty }
+    }
+    fileprivate var distinct: Bool {
+        get { clauses.distinct }
+        set { clauses.distinct = newValue }
+        _modify { yield &clauses.distinct }
+    }
+    fileprivate var columns: [ISO_9075.Fragment] {
+        get { clauses.columns }
+        set { clauses.columns = newValue }
+        _modify { yield &clauses.columns }
+    }
+    fileprivate var from: ISO_9075.Fragment? {
+        get { clauses.from }
+        set { clauses.from = newValue }
+        _modify { yield &clauses.from }
+    }
+    fileprivate var joins: [_JoinClause] {
+        get { clauses.joins }
+        set { clauses.joins = newValue }
+        _modify { yield &clauses.joins }
+    }
+    fileprivate var `where`: [ISO_9075.Fragment] {
+        get { clauses.where }
+        set { clauses.where = newValue }
+        _modify { yield &clauses.where }
+    }
+    fileprivate var group: [ISO_9075.Fragment] {
+        get { clauses.group }
+        set { clauses.group = newValue }
+        _modify { yield &clauses.group }
+    }
+    fileprivate var having: [ISO_9075.Fragment] {
+        get { clauses.having }
+        set { clauses.having = newValue }
+        _modify { yield &clauses.having }
+    }
+    fileprivate var window: [ISO_9075.Fragment] {
+        get { clauses.window }
+        set { clauses.window = newValue }
+        _modify { yield &clauses.window }
+    }
+    fileprivate var order: [ISO_9075.Fragment] {
+        get { clauses.order }
+        set { clauses.order = newValue }
+        _modify { yield &clauses.order }
+    }
+    fileprivate var limit: _LimitClause? {
+        get { clauses.limit }
+        set { clauses.limit = newValue }
+        _modify { yield &clauses.limit }
+    }
+
+    public var tableReference: ISO_9075.Fragment? {
+        get { clauses.from }
+        set { clauses.from = newValue }
+    }}
+
+extension ValuesColumns {
+    public typealias QueryValue = Value
+
+    public var queryFragment: ISO_9075.Fragment {
+        columns.joined(separator: ", ")
+    }
+
+    public subscript<Member>(
+        dynamicMember keyPath: KeyPath<Value, Member>
+    ) -> SQLQueryExpression<Member> {
+        column(at: (elements ?? []).columnIndex(of: keyPath), as: Member.self)
+    }
+
+    private func column<Member>(at index: Int?, as _: Member.Type) -> SQLQueryExpression<Member> {
+        guard let index, columns.indices.contains(index) else {
+            preconditionFailure("Could not determine the column for the given key path")
+        }
+        return SQLQueryExpression(columns[index], as: Member.self)
+    }}
+
+extension _JoinClause {
+    public typealias QueryValue = Never
+
+    public var queryFragment: ISO_9075.Fragment {
+        var query: ISO_9075.Fragment = ""
+        if let `operator` {
+            query.append("\(`operator`) ")
+        }
+        query.append("JOIN \(tableReference) ")
+        if let tableAlias = tableAlias {
+            query.append("AS \(quote: tableAlias) ")
+        }
+        query.append("ON \(constraint)")
+        return query
+    }
 
     fileprivate func aliasing<T: Table, Name: AliasName>(
         _ table: T.Type,
@@ -1930,14 +1951,10 @@ public struct _JoinClause: QueryExpression, Sendable {
             tableColumns: tableColumns.aliasing(table, as: alias),
             tableReference: tableReference.aliasing(table, as: alias)
         )
-    }
-}
+    }}
 
-public struct _LimitClause: QueryExpression, Sendable {
+extension _LimitClause {
     public typealias QueryValue = Never
-
-    let maxLength: ISO_9075.Fragment?
-    let offset: ISO_9075.Fragment?
 
     public var queryFragment: ISO_9075.Fragment {
         var query: ISO_9075.Fragment = "LIMIT \(maxLength ?? "\(ISO_9075.Keyword.unboundedLimit)")"
@@ -1955,20 +1972,14 @@ public struct _LimitClause: QueryExpression, Sendable {
             maxLength: maxLength.map { $0.aliasing(table, as: alias) },
             offset: offset.map { $0.aliasing(table, as: alias) }
         )
-    }
-}
+    }}
 
-@propertyWrapper
-private struct CopyOnWrite<Value> {
+extension CopyOnWrite {
     final class Storage {
         var value: Value
         init(value: Value) {
             self.value = value
         }
-    }
-    var storage: Storage
-    init(wrappedValue: Value) {
-        self.storage = Storage(value: wrappedValue)
     }
     var wrappedValue: Value {
         get { storage.value }
@@ -1979,9 +1990,4 @@ private struct CopyOnWrite<Value> {
                 storage = Storage(value: newValue)
             }
         }
-    }
-}
-
-extension CopyOnWrite: Sendable where Value: Sendable {}
-
-extension CopyOnWrite.Storage: @unchecked Sendable where Value: Sendable {}
+    }}

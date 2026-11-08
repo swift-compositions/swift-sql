@@ -89,12 +89,13 @@ extension Cases {
 }
 
 private struct When: QueryExpression {
-    typealias QueryValue = Never
-
     let predicate: ISO_9075.Fragment
     let expression: ISO_9075.Fragment
+}
+
+extension When {
+    typealias QueryValue = Never
 
     public var queryFragment: ISO_9075.Fragment {
         "WHEN \(predicate) THEN \(expression)"
-    }
-}
+    }}

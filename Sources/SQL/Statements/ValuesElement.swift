@@ -10,7 +10,9 @@ public struct ValuesElement: Sendable {
         self.columns = columns
         self.fieldOffsets = fieldOffsets
     }
+}
 
+extension ValuesElement {
     public struct Column: Sendable {
         package let name: String?
         package let decoding: @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment
@@ -19,7 +21,6 @@ public struct ValuesElement: Sendable {
             self.name = name
             self.decoding = decoding
         }
-
     }
 
     package static func elements<each V: QueryRepresentable>(for types: repeat (each V).Type) -> [ValuesElement] {

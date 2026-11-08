@@ -473,10 +473,6 @@ private struct UnaryOperator<QueryValue>: QueryExpression {
         self.base = base.queryFragment
         self.separator = separator
     }
-
-    var queryFragment: ISO_9075.Fragment {
-        "\(`operator`)\(separator)(\(base))"
-    }
 }
 
 public struct BinaryOperator<QueryValue>: QueryExpression {
@@ -505,20 +501,9 @@ private struct LikeOperator<
     LHS: QueryExpression<String>,
     RHS: QueryExpression<String>
 >: QueryExpression {
-    typealias QueryValue = Bool
-
     let string: LHS
     let pattern: RHS
     let escape: Character?
-
-    var queryFragment: ISO_9075.Fragment {
-        var query: ISO_9075.Fragment = "(\(string.queryFragment) LIKE \(pattern.queryFragment)"
-        if let escape {
-            query.append(" ESCAPE \(bind: String(escape))")
-        }
-        query.append(")")
-        return query
-    }
 }
 
 extension Sequence where Element: QueryExpression, Element.QueryValue: QueryExpression {
@@ -527,9 +512,28 @@ extension Sequence where Element: QueryExpression, Element.QueryValue: QueryExpr
 
 private struct _SequenceExpression<S: Swift.Sequence>: QueryExpression
 where S.Element: QueryExpression, S.Element.QueryValue: QueryExpression {
-    typealias QueryValue = S
     let queryFragment: ISO_9075.Fragment
     init(elements: S) {
         queryFragment = elements.map { "(\($0.queryFragment))" }.joined(separator: ", ")
     }
 }
+
+extension UnaryOperator {
+    var queryFragment: ISO_9075.Fragment {
+        "\(`operator`)\(separator)(\(base))"
+    }}
+
+extension LikeOperator {
+    typealias QueryValue = Bool
+
+    var queryFragment: ISO_9075.Fragment {
+        var query: ISO_9075.Fragment = "(\(string.queryFragment) LIKE \(pattern.queryFragment)"
+        if let escape {
+            query.append(" ESCAPE \(bind: String(escape))")
+        }
+        query.append(")")
+        return query
+    }}
+
+extension _SequenceExpression {
+    typealias QueryValue = S}

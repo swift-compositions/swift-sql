@@ -7,10 +7,6 @@ public struct Seeds: Swift.Sequence {
         self.seeds = build()
     }
 
-    public func makeIterator() -> Iterator {
-        Iterator(seeds: seeds[...])
-    }
-
     public struct Iterator: IteratorProtocol {
         var seeds: ArraySlice<Seed>
 
@@ -23,4 +19,8 @@ public struct Seeds: Swift.Sequence {
     }
 }
 
+extension Seeds {
+    public func makeIterator() -> Iterator {
+        Iterator(seeds: seeds[...])
+    }}
 
