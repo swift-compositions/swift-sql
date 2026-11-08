@@ -13,15 +13,7 @@ public struct ValuesElement: Sendable {
 }
 
 extension ValuesElement {
-    public struct Column: Sendable {
-        package let name: String?
-        package let decoding: @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment
 
-        package init(name: String?, decoding: @escaping @Sendable (ISO_9075.Fragment) -> ISO_9075.Fragment) {
-            self.name = name
-            self.decoding = decoding
-        }
-    }
 
     package static func elements<each V: QueryRepresentable>(for types: repeat (each V).Type) -> [ValuesElement] {
         var elements: [ValuesElement] = []
