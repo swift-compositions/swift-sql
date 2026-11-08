@@ -64,9 +64,3 @@ extension QueryDecoder {
     }
 }
 
-public enum QueryDecodingError: Swift.Error, Hashable, Sendable {
-    case missingRequiredColumn
-    case typeMismatch(expected: String)
-    case dataCorrupted(String)
-    case overflow(String)
-}

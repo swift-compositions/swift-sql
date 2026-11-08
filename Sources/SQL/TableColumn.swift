@@ -11,10 +11,6 @@ public protocol _TableColumnExpression<Root, Value>: QueryExpression where Value
     var keyPath: KeyPath<Root, Value.QueryOutput> { get }
 }
 
-public protocol TableColumnExpression<Root, Value>: _TableColumnExpression
-where Value: QueryBindable {
-    var name: String { get }
-}
 
 extension TableColumnExpression {
     public var _names: [String] { [name] }
@@ -24,7 +20,6 @@ extension TableColumnExpression {
     }
 }
 
-public protocol WritableTableColumnExpression<Root, Value>: TableColumnExpression {}
 
 public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
     WritableTableColumnExpression
@@ -79,8 +74,6 @@ extension TableColumn {
     public var _writableColumns: [Column<Root>] { _columns }
 }
 
-public enum _TableColumn<Root: Table, Value: QueryRepresentable> {
-}
 
 extension _TableColumn {
     @inlinable
@@ -133,43 +126,7 @@ extension _TableColumn {
     }
 }
 
-public enum GeneratedColumnStorage {
-    case virtual, stored
-}
 
-public struct GeneratedColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
-    TableColumnExpression
-{
-    public let name: String
-
-    @usableFromInline
-    let _defaultValue: () -> Value.QueryOutput?
-
-    @usableFromInline
-    let _keyPath: () -> KeyPath<Root, Value.QueryOutput>
-
-    @inlinable
-    public init(
-        _ name: String,
-        keyPath: @autoclosure @escaping () -> KeyPath<Root, Value.QueryOutput>,
-        default defaultValue: @autoclosure @escaping () -> Value.QueryOutput? = nil
-    ) {
-        self.name = name
-        self._defaultValue = defaultValue
-        self._keyPath = keyPath
-    }
-
-    @inlinable
-    public init(
-        _ name: String,
-        keyPath: @autoclosure @escaping () -> KeyPath<Root, Value.QueryOutput>,
-        default defaultValue: @autoclosure @escaping () -> Value? = nil
-    ) where Value == Value.QueryOutput {
-        self.name = name
-        self._defaultValue = defaultValue
-        self._keyPath = keyPath
-    }
-}
 
 extension GeneratedColumn {
     public typealias QueryValue = Value

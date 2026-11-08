@@ -6,8 +6,6 @@ extension Never: Table {
     public struct TableColumns: TableDefinition {
     }
 
-    public struct Selection: TableExpression {
-    }
 
     public static var columns: TableColumns {
         TableColumns()

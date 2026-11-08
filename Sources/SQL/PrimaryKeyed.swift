@@ -10,11 +10,6 @@ where
     where PrimaryKey.QueryValue == PrimaryKey
 }
 
-public protocol TableDraft: Table {
-    associatedtype SourceTable: Table where SourceTable.Draft == Self
-
-    init(_ source: SourceTable)
-}
 
 extension TableDraft where SourceTable: PrimaryKeyedTable {
     public typealias PrimaryKey = SourceTable.PrimaryKey
@@ -49,15 +44,6 @@ package func project<Root, Value>(
     root[keyPath: keyPath]
 }
 
-public protocol PrimaryKeyedTableDefinition<PrimaryKey>: TableDefinition
-where QueryValue: PrimaryKeyedTable {
-    associatedtype PrimaryKey: QueryRepresentable & QueryExpression
-    where PrimaryKey.QueryValue == PrimaryKey
-
-    associatedtype PrimaryColumn: _TableColumnExpression<QueryValue, PrimaryKey>
-
-    var primaryKey: PrimaryColumn { get }
-}
 
 extension TableDefinition where QueryValue: TableDraft {
     public subscript<Member>(
