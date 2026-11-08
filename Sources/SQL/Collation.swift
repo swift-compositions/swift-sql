@@ -10,7 +10,6 @@ extension Collation {
     }
 }
 
-
 extension QueryExpression where QueryValue: _OptionalPromotable<String?> {
     public func collate(_ collation: some Collation) -> some QueryExpression<QueryValue> {
         SQLQueryExpression("\(self) COLLATE \(collation)")

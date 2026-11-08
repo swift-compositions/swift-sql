@@ -13,7 +13,7 @@
         case note(String)
     }
 
-    fileprivate struct RenderedValues: QueryDecoder {
+    private struct RenderedValues: QueryDecoder {
         var values: [ISO_9075.Value]
 
         mutating func next() -> ISO_9075.Value {
@@ -89,9 +89,9 @@
         func placeholder(_ offset: Int) -> String { "$\(offset)" }
     }
 
-enum `Enum Table Tests` {}
+    enum `Enum Table Tests` {}
 
-extension `Enum Table Tests` {
+    extension `Enum Table Tests` {
         @Suite struct `An enum table` {
             @Test func `binds the active case and nulls the others`() {
                 let rendering = Dollar().render(Attachment.insert { Attachment.note("Groceries") }.query)
@@ -112,5 +112,5 @@ extension `Enum Table Tests` {
                 #expect(rendering.sql.contains(#""attachment"."note""#))
             }
         }
-}
+    }
 #endif

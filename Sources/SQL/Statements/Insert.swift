@@ -789,4 +789,5 @@ extension Insert {
 extension InsertValues {
     static func select(_ statement: some PartialSelectStatement) -> Self {
         .selection(statement.query, hasUpsertParsingAmbiguity: statement._hasUpsertParsingAmbiguity)
-    }}
+    }
+}

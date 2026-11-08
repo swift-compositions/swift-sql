@@ -98,4 +98,5 @@ extension When {
 
     public var queryFragment: ISO_9075.Fragment {
         "WHEN \(predicate) THEN \(expression)"
-    }}
+    }
+}

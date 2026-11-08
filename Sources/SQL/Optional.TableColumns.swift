@@ -1,7 +1,6 @@
 public import Byte
 public import ISO_9075_Foundation
 
-
 extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Table {
     @dynamicMemberLookup
     public struct TableColumns: TableDefinition {

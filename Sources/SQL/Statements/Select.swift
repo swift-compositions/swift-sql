@@ -1902,7 +1902,8 @@ extension Select {
     public var tableReference: ISO_9075.Fragment? {
         get { clauses.from }
         set { clauses.from = newValue }
-    }}
+    }
+}
 
 extension ValuesColumns {
     public typealias QueryValue = Value
@@ -1922,7 +1923,8 @@ extension ValuesColumns {
             preconditionFailure("Could not determine the column for the given key path")
         }
         return SQLQueryExpression(columns[index], as: Member.self)
-    }}
+    }
+}
 
 extension _JoinClause {
     public typealias QueryValue = Never
@@ -1951,7 +1953,8 @@ extension _JoinClause {
             tableColumns: tableColumns.aliasing(table, as: alias),
             tableReference: tableReference.aliasing(table, as: alias)
         )
-    }}
+    }
+}
 
 extension _LimitClause {
     public typealias QueryValue = Never
@@ -1972,7 +1975,8 @@ extension _LimitClause {
             maxLength: maxLength.map { $0.aliasing(table, as: alias) },
             offset: offset.map { $0.aliasing(table, as: alias) }
         )
-    }}
+    }
+}
 
 extension CopyOnWrite {
     final class Storage {
@@ -1990,4 +1994,5 @@ extension CopyOnWrite {
                 storage = Storage(value: newValue)
             }
         }
-    }}
+    }
+}

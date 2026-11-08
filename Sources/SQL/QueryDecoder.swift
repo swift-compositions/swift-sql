@@ -63,4 +63,3 @@ extension QueryDecoder {
         try decode(column) ?? nil
     }
 }
-

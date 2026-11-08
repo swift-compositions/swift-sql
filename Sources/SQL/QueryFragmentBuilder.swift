@@ -75,4 +75,3 @@ extension QueryFragmentBuilder<_StatementClause> {
         first + rest.flatMap(\.self)
     }
 }
-

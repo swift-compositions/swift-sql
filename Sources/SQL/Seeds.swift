@@ -22,5 +22,5 @@ public struct Seeds: Swift.Sequence {
 extension Seeds {
     public func makeIterator() -> Iterator {
         Iterator(seeds: seeds[...])
-    }}
-
+    }
+}

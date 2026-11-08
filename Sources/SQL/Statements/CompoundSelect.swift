@@ -56,4 +56,5 @@ extension CompoundSelect {
         guard !lhs.isEmpty else { return rhs }
         guard !rhs.isEmpty else { return lhs }
         return "\(lhs)\(.newlineOrSpace)\(`operator`.indented())\(.newlineOrSpace)\(rhs)"
-    }}
+    }
+}

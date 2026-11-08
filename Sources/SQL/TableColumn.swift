@@ -11,7 +11,6 @@ public protocol _TableColumnExpression<Root, Value>: QueryExpression where Value
     var keyPath: KeyPath<Root, Value.QueryOutput> { get }
 }
 
-
 extension TableColumnExpression {
     public var _names: [String] { [name] }
 
@@ -19,7 +18,6 @@ extension TableColumnExpression {
         Value.queryFragment(decoding: "\(quote: name)")
     }
 }
-
 
 public struct TableColumn<Root: Table, Value: QueryRepresentable & QueryBindable>:
     WritableTableColumnExpression
@@ -74,7 +72,6 @@ extension TableColumn {
     public var _writableColumns: [Column<Root>] { _columns }
 }
 
-
 extension _TableColumn {
     @inlinable
     public static func `for`(
@@ -125,8 +122,6 @@ extension _TableColumn {
         OptionalColumnGroup(base: ColumnGroup(name, keyPath: keyPath(), default: defaultValue()))
     }
 }
-
-
 
 extension GeneratedColumn {
     public typealias QueryValue = Value

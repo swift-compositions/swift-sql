@@ -521,7 +521,8 @@ where S.Element: QueryExpression, S.Element.QueryValue: QueryExpression {
 extension UnaryOperator {
     var queryFragment: ISO_9075.Fragment {
         "\(`operator`)\(separator)(\(base))"
-    }}
+    }
+}
 
 extension LikeOperator {
     typealias QueryValue = Bool
@@ -533,7 +534,9 @@ extension LikeOperator {
         }
         query.append(")")
         return query
-    }}
+    }
+}
 
 extension _SequenceExpression {
-    typealias QueryValue = S}
+    typealias QueryValue = S
+}

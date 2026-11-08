@@ -4,7 +4,6 @@ public protocol _SelectSource {
     static var _fromTable: _FromTable? { get }
 }
 
-
 extension _SelectSource {
     public static var _fromTable: _FromTable? { nil }
 }

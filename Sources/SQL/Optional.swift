@@ -14,7 +14,6 @@ extension Optional: _OptionalProtocol {
     public static func _some(_ wrapped: Wrapped) -> Self { .some(wrapped) }
 }
 
-
 extension Optional: _OptionalPromotable {
     public typealias _Optionalized = Self
 }
@@ -61,11 +60,12 @@ extension Optional: QueryRepresentable where Wrapped: QueryRepresentable {
 
     @inlinable
     public init(queryOutput: Wrapped.QueryOutput?) {
-        self = if let queryOutput {
-            Wrapped(queryOutput: queryOutput)
-        } else {
-            nil
-        }
+        self =
+            if let queryOutput {
+                Wrapped(queryOutput: queryOutput)
+            } else {
+                nil
+            }
     }
 
     @inlinable
@@ -109,7 +109,6 @@ extension Optional: Table, PartialSelectStatement, Statement where Wrapped: Tabl
         self?[keyPath: keyPath]
     }
 
-
     public typealias Selection = Wrapped.Selection?
 }
 
@@ -127,7 +126,6 @@ extension Optional: TableDraft where Wrapped: TableDraft {
 extension Optional.TableColumns: PrimaryKeyedTableDefinition
 where Wrapped.TableColumns: PrimaryKeyedTableDefinition {
     public typealias PrimaryKey = Wrapped.PrimaryKey?
-
 
     public var primaryKey: PrimaryColumn {
         PrimaryColumn()
@@ -189,7 +187,6 @@ extension QueryExpression where QueryValue: _OptionalProtocol {
         SQLQueryExpression(transform(_UnwrapExpression(base: self)).queryFragment)
     }
 }
-
 
 extension _UnwrapExpression {
     public typealias QueryValue = Base.QueryValue.Wrapped

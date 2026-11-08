@@ -14,7 +14,6 @@ public struct ValuesElement: Sendable {
 
 extension ValuesElement {
 
-
     package static func elements<each V: QueryRepresentable>(for types: repeat (each V).Type) -> [ValuesElement] {
         var elements: [ValuesElement] = []
         var offset = 0

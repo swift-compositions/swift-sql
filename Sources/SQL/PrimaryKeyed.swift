@@ -10,7 +10,6 @@ where
     where PrimaryKey.QueryValue == PrimaryKey
 }
 
-
 extension TableDraft where SourceTable: PrimaryKeyedTable {
     public typealias PrimaryKey = SourceTable.PrimaryKey
 }
@@ -43,7 +42,6 @@ package func project<Root, Value>(
 ) -> Value {
     root[keyPath: keyPath]
 }
-
 
 extension TableDefinition where QueryValue: TableDraft {
     public subscript<Member>(

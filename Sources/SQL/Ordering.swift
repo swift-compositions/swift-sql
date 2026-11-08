@@ -21,7 +21,6 @@ public enum NullOrdering: Sendable, Hashable, CaseIterable {
     case last
 }
 
-
 extension _OrderingTerm {
     public typealias QueryValue = Never
 
