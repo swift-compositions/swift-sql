@@ -2,7 +2,7 @@ import SwiftCompilerPlugin
 import SwiftSyntaxMacros
 
 @main
-fileprivate struct SQLPlugin: CompilerPlugin {
+struct SQLPlugin: CompilerPlugin {
     let providingMacros: [any Macro.Type] =
         [
             BindMacro.self,

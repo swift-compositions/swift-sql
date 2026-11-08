@@ -4,16 +4,16 @@ import SwiftSyntaxBuilder
 
 extension ExprSyntax {
     var literalType: TypeSyntax? {
-        return if self.is(BooleanLiteralExprSyntax.self) {
-            "Swift.Bool"
+        if self.is(BooleanLiteralExprSyntax.self) {
+            return "Swift.Bool"
         } else if self.is(FloatLiteralExprSyntax.self) {
-            "Swift.Double"
+            return "Swift.Double"
         } else if self.is(IntegerLiteralExprSyntax.self) {
-            "Swift.Int"
+            return "Swift.Int"
         } else if self.is(StringLiteralExprSyntax.self) {
-            "Swift.String"
+            return "Swift.String"
         } else {
-            nil
+            return nil
         }
     }
 
