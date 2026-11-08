@@ -133,7 +133,7 @@ private func printTable(cellRows: [[String]], to output: inout some TextOutputSt
     output.write("─┐\n")
     for (offset, rowAndMaxRowSpan) in table.enumerated() {
         let (row, maxRowSpan) = rowAndMaxRowSpan
-        for rowOffset in 0..<maxRowSpan {
+        (0..<maxRowSpan).forEach { rowOffset in
             output.write("│ ")
             var line: [String] = []
             for (columns, maxColumnSpan) in zip(row, maxColumnSpan) {

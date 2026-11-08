@@ -41,7 +41,7 @@ extension `Values Tests` {
             let includeGoodbye = false
             assertInlineSnapshot(
                 of: Values {
-                    for n in 1...2 {
+                    (1...2).forEach { n in
                         (n, "Hello")
                     }
                     if includeGoodbye {
