@@ -240,21 +240,14 @@
     }
 
     @dynamicMemberLookup
-    public struct _CaseGroupUpdate<Payload: Table> where Payload.QueryOutput: Table {
-        @available(
-            *,
-            unavailable,
-            message: "Assign the entire case, instead: '$0.enum = .case(value)'"
-        )
-
-        @available(
-            *,
-            unavailable,
-            message: "Assign the entire case, instead: '$0.enum = .case(value)'"
-        )
-    }
+    public struct _CaseGroupUpdate<Payload: Table> where Payload.QueryOutput: Table {}
 
     extension _CaseGroupUpdate {
+        @available(
+            *,
+            unavailable,
+            message: "Assign the entire case, instead: '$0.enum = .case(value)'"
+        )
         public subscript<Member>(
             dynamicMember keyPath: KeyPath<
                 Payload.TableColumns, TableColumn<Payload.QueryOutput, Member>
@@ -264,6 +257,11 @@
             set {}
         }
 
+        @available(
+            *,
+            unavailable,
+            message: "Assign the entire case, instead: '$0.enum = .case(value)'"
+        )
         public subscript<Member>(
             dynamicMember keyPath: KeyPath<
                 Payload.TableColumns, ColumnGroup<Payload.QueryOutput, Member>

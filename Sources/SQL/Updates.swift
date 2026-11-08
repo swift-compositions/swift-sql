@@ -7,15 +7,6 @@ public struct Updates<Base: Table> {
     init(_ body: (inout Self) -> Void) {
         body(&self)
     }
-
-    @_disfavoredOverload
-    @available(
-        *,
-        unavailable,
-        message: """
-            Use '#bind' to explicitly wrap this value in a query expression: '$0.column = #bind(value)'
-            """
-    )
 }
 
 extension Updates {
@@ -45,6 +36,14 @@ extension Updates {
         set { updates.append((Base.columns[keyPath: keyPath].name, newValue.queryFragment)) }
     }
 
+    @_disfavoredOverload
+    @available(
+        *,
+        unavailable,
+        message: """
+            Use '#bind' to explicitly wrap this value in a query expression: '$0.column = #bind(value)'
+            """
+    )
     public subscript<Value: QueryExpression>(
         dynamicMember keyPath: KeyPath<Base.TableColumns, TableColumn<Base, Value>>
     ) -> Value.QueryOutput {

@@ -8,15 +8,6 @@ public struct UpdatesGroup<Base: Table, Values: Table> where Values.QueryOutput:
     package init(group: ColumnGroup<Base, Values>) {
         self.group = group
     }
-
-    @_disfavoredOverload
-    @available(
-        *,
-        unavailable,
-        message: """
-            Use '#bind' to explicitly wrap this value in a query expression: '$0.column = #bind(value)'
-            """
-    )
 }
 
 extension UpdatesGroup {
@@ -35,6 +26,14 @@ extension UpdatesGroup {
         set { updates.append((group[dynamicMember: keyPath].name, newValue.queryFragment)) }
     }
 
+    @_disfavoredOverload
+    @available(
+        *,
+        unavailable,
+        message: """
+            Use '#bind' to explicitly wrap this value in a query expression: '$0.column = #bind(value)'
+            """
+    )
     public subscript<Member: QueryExpression>(
         dynamicMember keyPath: KeyPath<Values.TableColumns, TableColumn<Values.QueryOutput, Member>>
     ) -> Member.QueryOutput {

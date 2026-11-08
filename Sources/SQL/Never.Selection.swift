@@ -1,6 +1,6 @@
 public import ISO_9075_Foundation
 
-extension Never: Table {
+extension Never {
     public struct Selection: TableExpression {
     }
 }

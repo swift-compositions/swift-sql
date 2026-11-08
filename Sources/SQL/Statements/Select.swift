@@ -1836,6 +1836,18 @@ private struct CopyOnWrite<Value> {
     init(wrappedValue: Value) {
         self.storage = Storage(value: wrappedValue)
     }
+
+    /// A property wrapper's `wrappedValue` has to be declared in its body.
+    var wrappedValue: Value {
+        get { storage.value }
+        set {
+            if isKnownUniquelyReferenced(&storage) {
+                storage.value = newValue
+            } else {
+                storage = Storage(value: newValue)
+            }
+        }
+    }
 }
 
 extension CopyOnWrite: Sendable where Value: Sendable {}
@@ -1983,16 +1995,6 @@ extension CopyOnWrite {
         var value: Value
         init(value: Value) {
             self.value = value
-        }
-    }
-    var wrappedValue: Value {
-        get { storage.value }
-        set {
-            if isKnownUniquelyReferenced(&storage) {
-                storage.value = newValue
-            } else {
-                storage = Storage(value: newValue)
-            }
         }
     }
 }

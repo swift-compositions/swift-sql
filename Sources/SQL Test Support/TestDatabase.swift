@@ -93,7 +93,7 @@ extension TestDatabase {
 }
 
 extension TestDatabase.Connection {
-    public var dialect: Dialect { Dialect() }
+    public var dialect: TestDatabase.Dialect { TestDatabase.Dialect() }
 
     public func execute(_ statement: ISO_9075.Rendering) throws(ISO_9075.Error) -> Int {
         database.record(statement).count
@@ -101,7 +101,7 @@ extension TestDatabase.Connection {
 
     public func fetchAll<Value>(
         _ statement: ISO_9075.Rendering,
-        decode: (Row) throws(ISO_9075.Error) -> Value
+        decode: (TestDatabase.Row) throws(ISO_9075.Error) -> Value
     ) throws(ISO_9075.Error) -> [Value] {
         try database.record(statement).map { row throws(ISO_9075.Error) in try decode(row) }
     }
