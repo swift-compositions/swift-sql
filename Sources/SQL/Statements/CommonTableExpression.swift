@@ -1,6 +1,9 @@
 public import ISO_9075_Foundation
 
 public struct With<Base: Statement>: Statement, Sendable {
+    public typealias QueryValue = Base.QueryValue
+    public typealias From = Never
+
     var ctes: [CommonTableExpressionClause]
     var statement: ISO_9075.Fragment
     var hasUpsertParsingAmbiguity: Bool
@@ -46,12 +49,6 @@ public struct With<Base: Statement>: Statement, Sendable {
         self.statement = statement.query
         hasUpsertParsingAmbiguity = statement._hasUpsertParsingAmbiguity
     }
-}
-
-extension With {
-    public typealias QueryValue = Base.QueryValue
-
-    public typealias From = Never
 
     public var _hasUpsertParsingAmbiguity: Bool { hasUpsertParsingAmbiguity }
 
@@ -74,6 +71,7 @@ extension ISO_9075.Fragment {
 }
 
 public struct CommonTableExpressionClause: QueryExpression, Sendable {
+    public typealias QueryValue = ()
     let tableName: ISO_9075.Fragment
     let select: ISO_9075.Fragment
     let materialization: Materialization?
@@ -83,10 +81,6 @@ public struct CommonTableExpressionClause: QueryExpression, Sendable {
         self.select = select
         self.materialization = materialization
     }
-}
-
-extension CommonTableExpressionClause {
-    public typealias QueryValue = ()
 
     public var queryFragment: ISO_9075.Fragment {
         guard !select.isEmpty else { return "" }
@@ -98,14 +92,12 @@ extension CommonTableExpressionClause {
     public enum Materialization: Hashable, Sendable {
         case materialized
         case notMaterialized
-    }
-}
 
-extension CommonTableExpressionClause.Materialization {
-    var queryFragment: ISO_9075.Fragment {
-        switch self {
-        case .materialized: "MATERIALIZED "
-        case .notMaterialized: "NOT MATERIALIZED "
+        var queryFragment: ISO_9075.Fragment {
+            switch self {
+            case .materialized: "MATERIALIZED "
+            case .notMaterialized: "NOT MATERIALIZED "
+            }
         }
     }
 }
