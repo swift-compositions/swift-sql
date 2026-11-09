@@ -22,9 +22,9 @@ extension `Public Draft Tests` {
             #expect(draft.isPinned == false)
         }
 
-        @Test func `takes every column by label`() {
+        @Test func `takes every column by label`() throws {
             let draft = Note.Draft(id: 1, title: "Taxes", body: "Q3", isPinned: true)
-            let rendering = Numbered().render(Note.insert { draft }.query)
+            let rendering = try Numbered().render(Note.insert { draft }.query)
             #expect(rendering.values == [.int(1), .text("Taxes"), .text("Q3"), .bool(true)])
         }
     }

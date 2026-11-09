@@ -19,8 +19,8 @@ enum `SQL Tests` {}
 
 extension `SQL Tests` {
     @Suite struct `Rendering statements` {
-        @Test func `a filtered select binds its values`() {
-            let rendering = Numbered().render(Reminder.where { $0.isCompleted.eq(true) }.select(\.title).query)
+        @Test func `a filtered select binds its values`() throws {
+            let rendering = try Numbered().render(Reminder.where { $0.isCompleted.eq(true) }.select(\.title).query)
             #expect(
                 rendering
                     == ISO_9075.Rendering(
@@ -34,8 +34,8 @@ extension `SQL Tests` {
             )
         }
 
-        @Test func `an insert binds each given column of its draft`() {
-            let rendering = Numbered().render(Reminder.insert { Reminder.Draft(title: "Groceries") }.query)
+        @Test func `an insert binds each given column of its draft`() throws {
+            let rendering = try Numbered().render(Reminder.insert { Reminder.Draft(title: "Groceries") }.query)
             #expect(rendering.values == [.text("Groceries"), .bool(false)])
             #expect(rendering.sql.hasPrefix(#"INSERT INTO "reminder""#))
         }
@@ -64,8 +64,8 @@ extension `SQL Tests` {
             Reminder.Draft(title: "Taxes")
         }
 
-        @Test func `renders as the standard DEFAULT`() {
-            let rendering = Numbered().render(insert.query)
+        @Test func `renders as the standard DEFAULT`() throws {
+            let rendering = try Numbered().render(insert.query)
             #expect(rendering.sql.hasSuffix("VALUES\n($1, $2, $3), (DEFAULT, $4, $5)"))
             #expect(rendering.values == [.int(1), .text("Groceries"), .bool(false), .text("Taxes"), .bool(false)])
         }
