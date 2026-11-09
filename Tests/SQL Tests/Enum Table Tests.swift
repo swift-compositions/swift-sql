@@ -93,8 +93,8 @@
 
     extension `Enum Table Tests` {
         @Suite struct `An enum table` {
-            @Test func `binds the active case and nulls the others`() {
-                let rendering = Dollar().render(Attachment.insert { Attachment.note("Groceries") }.query)
+            @Test func `binds the active case and nulls the others`() throws {
+                let rendering = try Dollar().render(Attachment.insert { Attachment.note("Groceries") }.query)
                 #expect(rendering.sql.hasPrefix(#"INSERT INTO "attachment""#))
                 #expect(rendering.sql.hasSuffix("(\"link\", \"note\")\nVALUES\n(NULL, $1)"))
                 #expect(rendering.values == [.text("Groceries")])
@@ -107,8 +107,8 @@
                 #expect(try Attachment(decoder: &link) == .link("https://example.com"))
             }
 
-            @Test func `filters on a case`() {
-                let rendering = Dollar().render(Attachment.where { $0.note.isNot(nil) }.query)
+            @Test func `filters on a case`() throws {
+                let rendering = try Dollar().render(Attachment.where { $0.note.isNot(nil) }.query)
                 #expect(rendering.sql.contains(#""attachment"."note""#))
             }
         }

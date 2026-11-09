@@ -417,14 +417,17 @@ extension SQLQueryExpression<String> {
 }
 
 extension QueryExpression where QueryValue: QueryExpression {
+    /// Whether the value is one of `expression`'s elements. With no elements it is false, rendered as `(1 = 0)`:
+    /// SQL has no empty list, and PostgreSQL refuses `IN ()`.
     public func `in`<S: Swift.Sequence>(_ expression: S) -> some QueryExpression<Bool>
     where S.Element: QueryExpression<QueryValue> {
-        BinaryOperator(lhs: self, operator: "IN", rhs: S.Expression(elements: expression))
+        Membership(lhs: self, negated: false, elements: Array(expression))
     }
 
+    /// Whether the value is none of `expression`'s elements. With no elements it is true, rendered as `(1 = 1)`.
     public func notIn<S: Swift.Sequence>(_ expression: S) -> some QueryExpression<Bool>
     where S.Element: QueryExpression<QueryValue> {
-        BinaryOperator(lhs: self, operator: "NOT IN", rhs: S.Expression(elements: expression))
+        Membership(lhs: self, negated: true, elements: Array(expression))
     }
 
     public func `in`(_ query: some Statement<QueryValue>) -> some QueryExpression<Bool> {
@@ -508,6 +511,26 @@ private struct LikeOperator<
 
 extension Sequence where Element: QueryExpression, Element.QueryValue: QueryExpression {
     fileprivate typealias Expression = _SequenceExpression<Self>
+}
+
+/// `lhs IN (…)` or `lhs NOT IN (…)` over a list of values, which renders as a constant when the list is empty.
+private struct Membership: QueryExpression {
+    typealias QueryValue = Bool
+
+    let queryFragment: ISO_9075.Fragment
+
+    init<Element: QueryExpression>(lhs: some QueryExpression, negated: Bool, elements: [Element])
+    where Element.QueryValue: QueryExpression {
+        guard !elements.isEmpty else {
+            queryFragment = negated ? "(1 = 1)" : "(1 = 0)"
+            return
+        }
+        queryFragment = BinaryOperator<Bool>(
+            lhs: lhs,
+            operator: negated ? "NOT IN" : "IN",
+            rhs: [Element].Expression(elements: elements)
+        ).queryFragment
+    }
 }
 
 private struct _SequenceExpression<S: Swift.Sequence>: QueryExpression
