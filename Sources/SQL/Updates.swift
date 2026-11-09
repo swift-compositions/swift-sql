@@ -113,4 +113,3 @@ extension Updates: QueryExpression {
         "SET \(updates.map { "\(quote: $0) = \($1)" }.joined(separator: ", "))"
     }
 }
-
