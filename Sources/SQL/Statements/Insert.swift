@@ -568,10 +568,12 @@ extension Insert: Statement {
         if !returning.isEmpty {
             query.append("\(.newlineOrSpace)RETURNING \(returning.joined(separator: ", "))")
         }
-        precondition(
-            !hasInvalidWhere,
-            "Insert statement has invalid update 'where': \(updateFilter.joined(separator: " AND ").debugDescription)"
-        )
+        if hasInvalidWhere {
+            let failure = ISO_9075.Value.Failure(
+                "Insert statement has an update 'where' without 'DO UPDATE' assignments: \(updateFilter.joined(separator: " AND ").debugDescription)"
+            )
+            query.append(ISO_9075.Fragment(segments: [.value(.invalid(failure))]))
+        }
         return query
     }
 }
