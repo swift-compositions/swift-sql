@@ -90,6 +90,9 @@ let package = Package(
             dependencies: [
                 .target(name: "SQL"),
                 .target(name: "SQL Macros"),
+                .product(name: "Byte", package: "swift-byte"),
+                .product(name: "Time", package: "swift-time"),
+                .product(name: "RFC 4122", package: "swift-rfc-4122"),
                 .product(name: "ISO 9075 Foundation", package: "swift-iso-9075"),
                 .product(name: "ISO 9075 Call-Level Interface", package: "swift-iso-9075"),
                 .product(name: "CustomDump", package: "swift-custom-dump"),

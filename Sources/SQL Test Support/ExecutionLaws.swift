@@ -1,6 +1,9 @@
+import Byte
 public import ISO_9075_Call_Level_Interface
+import RFC_4122
 public import SQL
 import SQL_Macros
+import Time
 
 public enum ExecutionLaws {
     @Table("sql_execution_laws_samples")
@@ -10,6 +13,9 @@ public enum ExecutionLaws {
         var ratio: Double
         var flag: Bool
         var note: String?
+        var bytes: [Byte]
+        var at: Time.Instant
+        var reference: RFC_4122.UUID
     }
 
     @Table("sql_execution_laws_tags")
@@ -20,15 +26,31 @@ public enum ExecutionLaws {
     }
 
     static let schema: [ISO_9075.Fragment] = [
-        #"CREATE TABLE "sql_execution_laws_samples" ("id" INTEGER PRIMARY KEY, "name" TEXT NOT NULL, "ratio" DOUBLE PRECISION NOT NULL, "flag" BOOLEAN NOT NULL, "note" TEXT)"#,
+        #"CREATE TABLE "sql_execution_laws_samples" ("id" INTEGER PRIMARY KEY, "name" TEXT NOT NULL, "ratio" DOUBLE PRECISION NOT NULL, "flag" BOOLEAN NOT NULL, "note" TEXT, "bytes" \#(ISO_9075.Keyword.binaryLargeObject) NOT NULL, "at" TIMESTAMP WITH TIME ZONE NOT NULL, "reference" UUID NOT NULL)"#,
         #"CREATE TABLE "sql_execution_laws_tags" ("id" INTEGER PRIMARY KEY, "sample" INTEGER NOT NULL, "label" TEXT NOT NULL)"#,
     ]
 
     static let samples = [
-        Sample(id: 1, name: "ada", ratio: 0.5, flag: true, note: nil),
-        Sample(id: 2, name: "grace", ratio: 2, flag: false, note: "compiler"),
-        Sample(id: 3, name: "edsger", ratio: -1.25, flag: true, note: ""),
+        Sample(id: 1, name: "ada", ratio: 0.5, flag: true, note: nil, bytes: [], at: instant(0), reference: uuid("00000000-0000-4000-8000-000000000001")),
+        Sample(id: 2, name: "grace", ratio: 2, flag: false, note: "compiler", bytes: [0x00, 0x7F, 0xFF].map(Byte.init(bitPattern:)), at: instant(1_767_225_600), reference: uuid("0190b8a4-8a4e-7d2e-9f1c-3b2a1d0e4f5a")),
+        Sample(id: 3, name: "edsger", ratio: -1.25, flag: true, note: "", bytes: Array(repeating: Byte(bitPattern: 0x2A), count: 4096), at: instant(-86_400), reference: uuid("ffffffff-ffff-4fff-bfff-ffffffffffff")),
     ]
+
+    static func instant(_ seconds: Int64) -> Time.Instant {
+        do {
+            return try Time.Instant(secondsSinceUnixEpoch: seconds, nanosecondFraction: 0)
+        } catch {
+            preconditionFailure("\(seconds) seconds since the epoch is an instant: \(error)")
+        }
+    }
+
+    static func uuid(_ text: String) -> RFC_4122.UUID {
+        do {
+            return try RFC_4122.UUID(text)
+        } catch {
+            preconditionFailure("\(text) is a UUID: \(error)")
+        }
+    }
 
     static let tags = [
         Tag(id: 1, sample: 1, label: "engine"),
@@ -83,12 +105,29 @@ public enum ExecutionLaws {
         expect("a delete leaves the other rows", try Tag.fetchCount(connection), 1)
         expect("an execute reports the rows it changed", try connection.execute(Sample.where { $0.flag }.update { $0.ratio = 0 }.query), 2)
         expect("an empty table fetches no row", try Tag.where { $0.id.eq(9) }.fetchAll(connection), [])
+        expect(
+            "a blob, an instant and a UUID come back as they were written",
+            try Sample.order(by: \.id).select { ($0.bytes, $0.at, $0.reference) }.fetchAll(connection).map { Typed(bytes: $0, at: $1, reference: $2) },
+            samples.map { Typed(bytes: $0.bytes, at: $0.at, reference: $0.reference) }
+        )
+        do throws(ISO_9075.Error) {
+            try Sample.insert { samples[0] }.execute(connection)
+            violations.append(Violation(law: "a duplicate key is refused", expected: "an error", actual: "the row was inserted"))
+        } catch {
+            expect("a duplicate key is refused as an integrity constraint violation", error.state?.class, ISO_9075.Diagnostic.State.integrityConstraintViolation.class)
+        }
         return violations
     }
 
     struct Pair: Equatable {
         let name: String
         let note: String?
+    }
+
+    struct Typed: Equatable {
+        let bytes: [Byte]
+        let at: Time.Instant
+        let reference: RFC_4122.UUID
     }
 
     struct Joined: Equatable {
