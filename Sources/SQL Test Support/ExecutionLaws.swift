@@ -60,6 +60,47 @@ public enum ExecutionLaws {
 
     public static func violations(of database: some ISO_9075.Database) async throws(ISO_9075.Error) -> [Violation] {
         try await database.withRollback { connection throws(ISO_9075.Error) in try Self.violations(on: connection) }
+            + Self.rollbacks(of: database)
+    }
+
+    struct Refusal: Swift.Error, Equatable {}
+
+    static func rollbacks(of database: some ISO_9075.Database) async throws(ISO_9075.Error) -> [Violation] {
+        var violations: [Violation] = []
+        func expect<Value: Equatable>(_ law: String, _ actual: Value, _ expected: Value) {
+            if actual != expected { violations.append(Violation(law: law, expected: "\(expected)", actual: "\(actual)")) }
+        }
+        func count() async throws(ISO_9075.Error) -> ISO_9075.Value? {
+            try await database.read { connection throws(ISO_9075.Error) in
+                try connection.fetchOne(#"SELECT COUNT(*) FROM "sql_execution_laws_rollbacks""#) { row throws(ISO_9075.Error) in
+                    try row.value(at: 0)
+                }
+            }
+        }
+        let insert: ISO_9075.Fragment = #"INSERT INTO "sql_execution_laws_rollbacks" ("id") VALUES (1)"#
+
+        _ = try await database.execute(#"CREATE TABLE "sql_execution_laws_rollbacks" ("id" INTEGER PRIMARY KEY)"#)
+        do throws(ISO_9075.Failure<Refusal>) {
+            try await database.write { connection throws(Refusal) in
+                _ = try? connection.execute(insert)
+                throw Refusal()
+            }
+            violations.append(Violation(law: "a write whose body throws its own error fails with it", expected: "the body's error", actual: "a commit"))
+        } catch {
+            expect("a write whose body throws its own error fails with it", error, .body(Refusal()))
+        }
+        expect("a write whose body throws its own error rolls back every statement it ran", try await count(), .int(0))
+
+        do throws(ISO_9075.Error) {
+            try await database.write { connection throws(ISO_9075.Error) in
+                _ = try connection.execute(insert)
+                _ = try connection.execute(#"SELECT "missing" FROM "sql_execution_laws_rollbacks""#)
+            }
+            violations.append(Violation(law: "a write whose second statement fails fails", expected: "an error", actual: "a commit"))
+        } catch {}
+        expect("a write whose second statement fails rolls back the first", try await count(), .int(0))
+        _ = try await database.execute(#"DROP TABLE "sql_execution_laws_rollbacks""#)
+        return violations
     }
 
     static func violations(on connection: some ISO_9075.Connection) throws(ISO_9075.Error) -> [Violation] {

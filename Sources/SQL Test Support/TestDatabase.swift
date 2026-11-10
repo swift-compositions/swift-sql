@@ -41,30 +41,37 @@ extension TestDatabase {
         state.withLock { $0.results.append(rows) }
     }
 
-    public func read<Value: Sendable>(
-        _ body: @Sendable (Connection) throws(ISO_9075.Error) -> Value
-    ) async throws(ISO_9075.Error) -> Value {
+    @_disfavoredOverload
+    public func read<Value: Sendable, Thrown: Swift.Error>(
+        _ body: @Sendable (Connection) throws(Thrown) -> Value
+    ) async throws(ISO_9075.Failure<Thrown>) -> Value {
         try scope(.read, body)
     }
 
-    public func write<Value: Sendable>(
-        _ body: @Sendable (Connection) throws(ISO_9075.Error) -> Value
-    ) async throws(ISO_9075.Error) -> Value {
+    @_disfavoredOverload
+    public func write<Value: Sendable, Thrown: Swift.Error>(
+        _ body: @Sendable (Connection) throws(Thrown) -> Value
+    ) async throws(ISO_9075.Failure<Thrown>) -> Value {
         try scope(.write, body)
     }
 
-    public func withRollback<Value: Sendable>(
-        _ body: @Sendable (Connection) throws(ISO_9075.Error) -> Value
-    ) async throws(ISO_9075.Error) -> Value {
+    @_disfavoredOverload
+    public func withRollback<Value: Sendable, Thrown: Swift.Error>(
+        _ body: @Sendable (Connection) throws(Thrown) -> Value
+    ) async throws(ISO_9075.Failure<Thrown>) -> Value {
         try scope(.rollback, body)
     }
 
-    private func scope<Value>(
+    private func scope<Value, Thrown: Swift.Error>(
         _ scope: Scope,
-        _ body: (Connection) throws(ISO_9075.Error) -> Value
-    ) throws(ISO_9075.Error) -> Value {
+        _ body: (Connection) throws(Thrown) -> Value
+    ) throws(ISO_9075.Failure<Thrown>) -> Value {
         state.withLock { $0.scopes.append(scope) }
-        return try body(Connection(database: self))
+        do {
+            return try body(Connection(database: self))
+        } catch {
+            throw .body(error)
+        }
     }
 
     fileprivate func record(_ statement: ISO_9075.Rendering) -> [Row] {
