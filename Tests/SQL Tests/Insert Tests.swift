@@ -21,6 +21,7 @@ extension `Insert Tests` {
             let insert = Reminder.insert(
                 values: { Reminder.Draft(title: "Groceries") },
                 onConflict: { $0.id },
+                where: { _ in return [] },
                 doUpdate: { row, excluded in row.title = excluded.title },
                 where: { row, _ in row.isCompleted.eq(true) }
             )

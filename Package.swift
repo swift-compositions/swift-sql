@@ -43,6 +43,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Standard Library Extensions", package: "swift-standard-library-extensions"),
                 .product(name: "ISO 9075 Foundation", package: "swift-iso-9075"),
+                .product(name: "ISO 9075 Call-Level Interface", package: "swift-iso-9075"),
                 .product(name: "Byte", package: "swift-byte"),
                 .product(name: "Order", package: "swift-order"),
                 .product(name: "Time", package: "swift-time"),
@@ -88,6 +89,7 @@ let package = Package(
             name: "SQL Test Support",
             dependencies: [
                 .target(name: "SQL"),
+                .target(name: "SQL Macros"),
                 .product(name: "ISO 9075 Foundation", package: "swift-iso-9075"),
                 .product(name: "ISO 9075 Call-Level Interface", package: "swift-iso-9075"),
                 .product(name: "CustomDump", package: "swift-custom-dump"),
