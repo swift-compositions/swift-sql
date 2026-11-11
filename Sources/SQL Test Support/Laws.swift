@@ -133,42 +133,42 @@ public enum Laws {
         try Sample.insert { samples }.execute(connection)
         try Tag.insert { tags }.execute(connection)
 
-        expect("a table counts its rows", try Sample.fetchCount(connection), 3)
-        expect("a table fetches every row it holds", try Sample.order(by: \.id).fetchAll(connection), samples)
-        expect("a filtered select fetches its one row", try Sample.where { $0.id.eq(2) }.fetchOne(connection), samples[1])
-        expect("a select with no row fetches none", try Sample.where { $0.id.eq(9) }.fetchOne(connection), nil)
-        expect("a filtered select counts its rows", try Sample.where { $0.flag }.fetchCount(connection), 2)
+        expect("a table counts its rows", try Sample.fetch.count(connection), 3)
+        expect("a table fetches every row it holds", try Sample.order(by: \.id).fetch.all(connection), samples)
+        expect("a filtered select fetches its one row", try Sample.where { $0.id.eq(2) }.fetch.one(connection), samples[1])
+        expect("a select with no row fetches none", try Sample.where { $0.id.eq(9) }.fetch.one(connection), nil)
+        expect("a filtered select counts its rows", try Sample.where { $0.flag }.fetch.count(connection), 2)
         expect(
             "a select of columns decodes each column, null included",
-            try Sample.order(by: \.id).select { ($0.name, $0.note) }.fetchAll(connection).map { Pair(name: $0, note: $1) },
+            try Sample.order(by: \.id).select { ($0.name, $0.note) }.fetch.all(connection).map { Pair(name: $0, note: $1) },
             samples.map { Pair(name: $0.name, note: $0.note) }
         )
         expect(
             "a select of one column fetches one value",
-            try Sample.where { $0.id.eq(3) }.select { $0.ratio }.fetchOne(connection),
+            try Sample.where { $0.id.eq(3) }.select { $0.ratio }.fetch.one(connection),
             -1.25
         )
         expect(
             "a join fetches each pair of rows",
-            try Sample.join(Tag.all) { $0.id.eq($1.sample) }.order { $1.id }.fetchAll(connection).map { Joined(sample: $0.id, tag: $1.label) },
+            try Sample.join(Tag.all) { $0.id.eq($1.sample) }.order { $1.id }.fetch.all(connection).map { Joined(sample: $0.id, tag: $1.label) },
             [Joined(sample: 1, tag: "engine"), Joined(sample: 2, tag: "cobol"), Joined(sample: 2, tag: "navy")]
         )
         expect(
             "an update returns what it changed",
-            try Sample.where { $0.id.eq(1) }.update { $0.name = "lovelace" }.returning { $0.name }.fetchAll(connection),
+            try Sample.where { $0.id.eq(1) }.update { $0.name = "lovelace" }.returning { $0.name }.fetch.all(connection),
             ["lovelace"]
         )
         expect(
             "a delete returns what it removed",
-            try Tag.where { $0.sample.eq(2) }.delete().returning { $0.label }.fetchAll(connection).sorted(),
+            try Tag.where { $0.sample.eq(2) }.delete().returning { $0.label }.fetch.all(connection).sorted(),
             ["cobol", "navy"]
         )
-        expect("a delete leaves the other rows", try Tag.fetchCount(connection), 1)
+        expect("a delete leaves the other rows", try Tag.fetch.count(connection), 1)
         expect("an execute reports the rows it changed", try connection.execute(Sample.where { $0.flag }.update { $0.ratio = 0 }.query), 2)
-        expect("an empty table fetches no row", try Tag.where { $0.id.eq(9) }.fetchAll(connection), [])
+        expect("an empty table fetches no row", try Tag.where { $0.id.eq(9) }.fetch.all(connection), [])
         expect(
             "a blob, an instant and a UUID come back as they were written",
-            try Sample.order(by: \.id).select { ($0.bytes, $0.at, $0.reference) }.fetchAll(connection).map { Typed(bytes: $0, at: $1, reference: $2) },
+            try Sample.order(by: \.id).select { ($0.bytes, $0.at, $0.reference) }.fetch.all(connection).map { Typed(bytes: $0, at: $1, reference: $2) },
             samples.map { Typed(bytes: $0.bytes, at: $0.at, reference: $0.reference) }
         )
         do throws(ISO_9075.Error) {
