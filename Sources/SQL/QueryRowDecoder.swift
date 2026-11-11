@@ -103,12 +103,14 @@ public struct QueryRowDecoder<Row: ISO_9075.Row>: QueryDecoder {
             switch value {
             case .timestamp(let instant):
                 return instant
+
             case .text(let text):
                 do throws(ISO_9075.Value.Failure) {
                     return try ISO_9075.Literal.instant(text)
                 } catch {
                     throw .dataCorrupted("\(error)")
                 }
+
             default:
                 return nil
             }
@@ -121,12 +123,14 @@ public struct QueryRowDecoder<Row: ISO_9075.Row>: QueryDecoder {
             switch value {
             case .uuid(let uuid):
                 return uuid
+
             case .text(let text):
                 do throws(RFC_4122.UUID.Error) {
                     return try RFC_4122.UUID(text)
                 } catch {
                     throw .dataCorrupted("\(error)")
                 }
+
             default:
                 return nil
             }
