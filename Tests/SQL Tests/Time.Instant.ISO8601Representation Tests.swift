@@ -18,7 +18,6 @@ extension `Time.Instant.ISO8601Representation Tests` {
             mutating func decode(_ columnType: Int64.Type) throws(QueryDecodingError) -> Int64? { throw .typeMismatch(expected: "text") }
             mutating func decode(_ columnType: UInt64.Type) throws(QueryDecodingError) -> UInt64? { throw .typeMismatch(expected: "text") }
             mutating func decode(_ columnType: Bool.Type) throws(QueryDecodingError) -> Bool? { throw .typeMismatch(expected: "text") }
-            mutating func decode(_ columnType: Int.Type) throws(QueryDecodingError) -> Int? { throw .typeMismatch(expected: "text") }
             mutating func decode(_ columnType: Time.Instant.Type) throws(QueryDecodingError) -> Time.Instant? { throw .typeMismatch(expected: "text") }
             mutating func decode(_ columnType: RFC_4122.UUID.Type) throws(QueryDecodingError) -> RFC_4122.UUID? { throw .typeMismatch(expected: "text") }
         }

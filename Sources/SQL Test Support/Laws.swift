@@ -5,7 +5,7 @@ public import SQL
 import SQL_Macros
 import Time
 
-public enum ExecutionLaws {
+public enum Laws {
     @Table("sql_execution_laws_samples")
     struct Sample: Equatable, Sendable {
         let id: Int
@@ -32,20 +32,34 @@ public enum ExecutionLaws {
 
     static let samples = [
         Sample(id: 1, name: "ada", ratio: 0.5, flag: true, note: nil, bytes: [], at: instant(0), reference: uuid("00000000-0000-4000-8000-000000000001")),
-        Sample(id: 2, name: "grace", ratio: 2, flag: false, note: "compiler", bytes: [0x00, 0x7F, 0xFF].map(Byte.init(bitPattern:)), at: instant(1_767_225_600), reference: uuid("0190b8a4-8a4e-7d2e-9f1c-3b2a1d0e4f5a")),
-        Sample(id: 3, name: "edsger", ratio: -1.25, flag: true, note: "", bytes: Array(repeating: Byte(bitPattern: 0x2A), count: 4096), at: instant(-86_400), reference: uuid("ffffffff-ffff-4fff-bfff-ffffffffffff")),
+        Sample(
+            id: 2,
+            name: "grace",
+            ratio: 2,
+            flag: false,
+            note: "compiler",
+            bytes: [0x00, 0x7F, 0xFF].map(Byte.init(bitPattern:)),
+            at: instant(1_767_225_600),
+            reference: uuid("0190b8a4-8a4e-7d2e-9f1c-3b2a1d0e4f5a")
+        ),
+        Sample(
+            id: 3,
+            name: "edsger",
+            ratio: -1.25,
+            flag: true,
+            note: "",
+            bytes: Array(repeating: Byte(bitPattern: 0x2A), count: 4096),
+            at: instant(-86_400),
+            reference: uuid("ffffffff-ffff-4fff-bfff-ffffffffffff")
+        ),
     ]
 
     static func instant(_ seconds: Int64) -> Time.Instant {
-        do {
-            return try Time.Instant(secondsSinceUnixEpoch: seconds, nanosecondFraction: 0)
-        } catch {
-            preconditionFailure("\(seconds) seconds since the epoch is an instant: \(error)")
-        }
+        Time.Instant(secondsSinceUnixEpoch: seconds)
     }
 
     static func uuid(_ text: String) -> RFC_4122.UUID {
-        do {
+        do throws(RFC_4122.UUID.Error) {
             return try RFC_4122.UUID(text)
         } catch {
             preconditionFailure("\(text) is a UUID: \(error)")
@@ -63,7 +77,9 @@ public enum ExecutionLaws {
             + Self.rollbacks(of: database)
     }
 
-    struct Refusal: Swift.Error, Equatable {}
+    struct Refusal: Swift.Error, Equatable {
+        var statement: ISO_9075.Error?
+    }
 
     static func rollbacks(of database: some ISO_9075.Database) async throws(ISO_9075.Error) -> [Violation] {
         var violations: [Violation] = []
@@ -82,12 +98,16 @@ public enum ExecutionLaws {
         _ = try await database.execute(#"CREATE TABLE "sql_execution_laws_rollbacks" ("id" INTEGER PRIMARY KEY)"#)
         do throws(ISO_9075.Failure<Refusal>) {
             try await database.write { connection throws(Refusal) in
-                _ = try? connection.execute(insert)
-                throw Refusal()
+                do throws(ISO_9075.Error) {
+                    _ = try connection.execute(insert)
+                } catch {
+                    throw Refusal(statement: error)
+                }
+                throw Refusal(statement: nil)
             }
             violations.append(Violation(law: "a write whose body throws its own error fails with it", expected: "the body's error", actual: "a commit"))
         } catch {
-            expect("a write whose body throws its own error fails with it", error, .body(Refusal()))
+            expect("a write whose body throws its own error fails with it", error, .body(Refusal(statement: nil)))
         }
         expect("a write whose body throws its own error rolls back every statement it ran", try await count(), .int(0))
 
@@ -177,7 +197,7 @@ public enum ExecutionLaws {
     }
 }
 
-extension ExecutionLaws {
+extension Laws {
     public struct Violation: Hashable, Sendable, CustomStringConvertible {
         public let law: String
         public let expected: String

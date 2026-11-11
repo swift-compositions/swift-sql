@@ -67,7 +67,7 @@ extension TestDatabase {
         _ body: (Connection) throws(Thrown) -> Value
     ) throws(ISO_9075.Failure<Thrown>) -> Value {
         state.withLock { $0.scopes.append(scope) }
-        do {
+        do throws(Thrown) {
             return try body(Connection(database: self))
         } catch {
             throw .body(error)

@@ -15,17 +15,17 @@ public struct QueryRowDecoder<Row: ISO_9075.Row>: QueryDecoder {
     @inlinable
     @usableFromInline
     mutating func next<Value>(
-        _ convert: (ISO_9075.Value) -> Value?
+        _ convert: (ISO_9075.Value) throws(QueryDecodingError) -> Value?
     ) throws(QueryDecodingError) -> Value? {
         defer { index += 1 }
         let value: ISO_9075.Value
-        do {
+        do throws(ISO_9075.Error) {
             value = try row.value(at: index)
         } catch {
             throw .dataCorrupted("\(error)")
         }
         guard value != .null else { return nil }
-        guard let converted = convert(value) else {
+        guard let converted = try convert(value) else {
             throw .typeMismatch(expected: "\(Value.self) in column \(index), found \(value)")
         }
         return converted
@@ -98,31 +98,37 @@ public struct QueryRowDecoder<Row: ISO_9075.Row>: QueryDecoder {
     }
 
     @inlinable
-    public mutating func decode(_ columnType: Int.Type) throws(QueryDecodingError) -> Int? {
-        try decode(Int64.self).map { value throws(QueryDecodingError) in
-            guard let int = Int(exactly: value) else { throw .overflow("\(value) as Int") }
-            return int
-        }
-    }
-
-    @inlinable
     public mutating func decode(_ columnType: Time.Instant.Type) throws(QueryDecodingError) -> Time.Instant? {
-        try next { value in
+        try next { value throws(QueryDecodingError) in
             switch value {
-            case .timestamp(let instant): instant
-            case .text(let text): try? ISO_9075.Literal.instant(text)
-            default: nil
+            case .timestamp(let instant):
+                return instant
+            case .text(let text):
+                do throws(ISO_9075.Value.Failure) {
+                    return try ISO_9075.Literal.instant(text)
+                } catch {
+                    throw .dataCorrupted("\(error)")
+                }
+            default:
+                return nil
             }
         }
     }
 
     @inlinable
     public mutating func decode(_ columnType: RFC_4122.UUID.Type) throws(QueryDecodingError) -> RFC_4122.UUID? {
-        try next { value in
+        try next { value throws(QueryDecodingError) in
             switch value {
-            case .uuid(let uuid): uuid
-            case .text(let text): try? RFC_4122.UUID(text)
-            default: nil
+            case .uuid(let uuid):
+                return uuid
+            case .text(let text):
+                do throws(RFC_4122.UUID.Error) {
+                    return try RFC_4122.UUID(text)
+                } catch {
+                    throw .dataCorrupted("\(error)")
+                }
+            default:
+                return nil
             }
         }
     }

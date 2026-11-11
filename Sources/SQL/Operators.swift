@@ -525,11 +525,12 @@ private struct Membership: QueryExpression {
             queryFragment = negated ? "(1 = 1)" : "(1 = 0)"
             return
         }
-        queryFragment = BinaryOperator<Bool>(
-            lhs: lhs,
-            operator: negated ? "NOT IN" : "IN",
-            rhs: [Element].Expression(elements: elements)
-        ).queryFragment
+        queryFragment =
+            BinaryOperator<Bool>(
+                lhs: lhs,
+                operator: negated ? "NOT IN" : "IN",
+                rhs: [Element].Expression(elements: elements)
+            ).queryFragment
     }
 }
 

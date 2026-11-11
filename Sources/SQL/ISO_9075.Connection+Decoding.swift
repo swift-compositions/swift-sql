@@ -9,7 +9,7 @@ extension ISO_9075.Connection {
     ) throws(ISO_9075.Error) -> [Value] {
         try fetchAll(statement) { row throws(ISO_9075.Error) in
             var decoder = QueryRowDecoder(row: row)
-            do {
+            do throws(QueryDecodingError) {
                 return try decoding(&decoder)
             } catch {
                 throw .decoding("\(error)")

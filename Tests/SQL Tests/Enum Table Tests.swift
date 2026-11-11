@@ -64,10 +64,6 @@
             }
         }
 
-        mutating func decode(_ columnType: Int.Type) throws(QueryDecodingError) -> Int? {
-            try decode(Int64.self).map(Int.init)
-        }
-
         mutating func decode(_ columnType: Time.Instant.Type) throws(QueryDecodingError) -> Time.Instant? {
             switch next() {
             case .null: nil
