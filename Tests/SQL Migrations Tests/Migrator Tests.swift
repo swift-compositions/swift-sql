@@ -41,6 +41,27 @@ extension `Migrator Tests` {
             #expect(database.executed.dropFirst(2).map(\.values) == [[.text("v2")]])
         }
 
+        @Test func `a name registered twice is refused before the database is touched`() async {
+            let database = TestDatabase()
+            var migrator = Migrator<TestDatabase>()
+            migrator.register("v1") { _ in }
+            migrator.register("v2") { _ in }
+            migrator.register("v1") { _ in }
+            #expect(migrator.duplicate == "v1")
+            await #expect(throws: Migrator<TestDatabase>.Error.duplicate(name: "v1")) {
+                try await migrator.migrate(database)
+            }
+            #expect(database.executed.isEmpty)
+        }
+
+        @Test func `a migrator that names its own table keeps its records there`() async throws {
+            let database = TestDatabase()
+            try await Migrator<TestDatabase>([Migration(name: "v1") { _ in }], table: ISO_9075.Identifier("_identity_migrations")).migrate(database)
+            #expect(database.executed.first?.sql.hasPrefix(#"CREATE TABLE IF NOT EXISTS "_identity_migrations""#) == true)
+            #expect(database.executed.dropFirst().first?.sql == #"SELECT "name" FROM "_identity_migrations""#)
+            #expect(database.executed.last?.sql.hasPrefix(#"INSERT INTO "_identity_migrations""#) == true)
+        }
+
         @Test func `a failing migration names itself and is not recorded`() async {
             let database = TestDatabase()
             let migrator = Migrator<TestDatabase>([Migration(name: "v1") { _ throws(ISO_9075.Error) in throw .execution("boom") }])
@@ -58,7 +79,7 @@ extension `Migrator Tests` {
             let database = TestDatabase()
             database.script([TestDatabase.Row(["name": .text("v1")]), TestDatabase.Row(["name": .text("v2")])])
             let applied = try await database.read { (connection: TestDatabase.Connection) throws(ISO_9075.Error) in
-                try Migrator<TestDatabase>.applied(in: connection)
+                try Migrator<TestDatabase>().applied(in: connection)
             }
             #expect(applied == ["v1", "v2"])
             #expect(database.executed.first?.sql == #"SELECT "name" FROM "_sql_migrations""#)
@@ -67,7 +88,7 @@ extension `Migrator Tests` {
         @Test func `record inserts the name in the caller's transaction`() async throws {
             let database = TestDatabase()
             try await database.write { (connection: TestDatabase.Connection) throws(ISO_9075.Error) in
-                try Migrator<TestDatabase>.record("v3", in: connection)
+                try Migrator<TestDatabase>().record("v3", in: connection)
             }
             #expect(database.executed.map(\.values) == [[.text("v3")]])
             #expect(database.executed.first?.sql.hasPrefix(#"INSERT INTO "_sql_migrations""#) == true)
