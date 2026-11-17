@@ -21,8 +21,4 @@ struct SQLPlugin: CompilerPlugin {
         + casePathsMacros
 }
 
-#if CasePaths
-    private let casePathsMacros: [any Macro.Type] = [CaseCheckFailMacro.self]
-#else
-    private let casePathsMacros: [any Macro.Type] = []
-#endif
+private let casePathsMacros: [any Macro.Type] = [CaseCheckFailMacro.self]

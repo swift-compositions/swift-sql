@@ -20,22 +20,20 @@ let package = Package(
         .library(name: "SQL Test Support", targets: ["SQL Test Support"]),
     ],
     traits: [
-        .trait(name: "Tagged", description: "SQL conformances for swift-atoms Tagged"),
-        .trait(name: "CasePaths", description: "Enum tables through CasePaths"),
+        .trait(name: "Tagged", description: "SQL conformances for swift-atoms Tagged")
     ],
     dependencies: [
         .package(url: "https://github.com/swift-atoms/swift-ascii.git", branch: "main", traits: ["Parser"]),
         .package(url: "https://github.com/swift-atoms/swift-byte.git", branch: "main"),
         .package(url: "https://github.com/swift-atoms/swift-cardinal.git", branch: "main"),
         .package(url: "https://github.com/swift-atoms/swift-order.git", branch: "main"),
-        .package(url: "https://github.com/pointfreeco/swift-case-paths.git", from: "1.7.2"),
-        .package(url: "https://github.com/pointfreeco/swift-custom-dump.git", from: "1.7.3"),
         .package(url: "https://github.com/swift-iso/swift-iso-9075.git", branch: "main"),
         .package(url: "https://github.com/swift-ietf/swift-rfc-4122.git", branch: "main"),
-        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing.git", from: "1.18.4"),
         .package(url: "https://github.com/swift-atoms/swift-standard-library-extensions.git", branch: "main"),
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "604.0.0"..<"605.0.0"),
         .package(url: "https://github.com/swift-atoms/swift-tagged.git", branch: "main"),
+        .package(url: "https://github.com/swift-molecules/swift-test.git", branch: "main"),
+        .package(url: "https://github.com/swift-compositions/swift-tests.git", branch: "main"),
         .package(url: "https://github.com/swift-atoms/swift-time.git", branch: "main"),
     ],
     targets: [
@@ -51,7 +49,6 @@ let package = Package(
                 .product(name: "Time", package: "swift-time"),
                 .product(name: "RFC 4122", package: "swift-rfc-4122"),
                 .product(name: "Tagged", package: "swift-tagged", condition: .when(traits: ["Tagged"])),
-                .product(name: "CasePaths", package: "swift-case-paths", condition: .when(traits: ["CasePaths"])),
             ]
         ),
         .macro(
@@ -59,7 +56,6 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-                .product(name: "CasePathsMacrosSupport", package: "swift-case-paths", condition: .when(traits: ["CasePaths"])),
             ]
         ),
         .target(
@@ -68,7 +64,6 @@ let package = Package(
                 .target(name: "SQL"),
                 .product(name: "ISO 9075 Foundation", package: "swift-iso-9075"),
                 .target(name: "SQL Macros Implementation"),
-                .product(name: "CasePaths", package: "swift-case-paths", condition: .when(traits: ["CasePaths"])),
             ]
         ),
         .target(
@@ -97,9 +92,7 @@ let package = Package(
                 .product(name: "RFC 4122", package: "swift-rfc-4122"),
                 .product(name: "ISO 9075 Foundation", package: "swift-iso-9075"),
                 .product(name: "ISO 9075 Call-Level Interface", package: "swift-iso-9075"),
-                .product(name: "CustomDump", package: "swift-custom-dump"),
-                .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
-                .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
+                .product(name: "Test", package: "swift-test"),
             ]
         ),
         .testTarget(
@@ -112,9 +105,8 @@ let package = Package(
                 .product(name: "Byte", package: "swift-byte"),
                 .product(name: "Time", package: "swift-time"),
                 .product(name: "RFC 4122", package: "swift-rfc-4122"),
-                .product(name: "CasePaths", package: "swift-case-paths", condition: .when(traits: ["CasePaths"])),
-                .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
-                .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
+                .product(name: "Tests Inline Snapshot", package: "swift-tests"),
+                .product(name: "Tests Apple Testing Bridge", package: "swift-tests"),
             ]
         ),
         .testTarget(

@@ -5,10 +5,6 @@ public import SwiftSyntax
 import SwiftSyntaxBuilder
 public import SwiftSyntaxMacros
 
-#if CasePaths
-    import CasePathsMacrosSupport
-#endif
-
 public enum TableMacro {}
 
 extension TableMacro: ExtensionMacro {
@@ -64,15 +60,7 @@ extension TableMacro: ExtensionMacro {
                 Diagnostic(
                     node: declaration.introducer,
                     message: MacroExpansionErrorMessage(
-                        declaration.is(EnumDeclSyntax.self)
-                            ? """
-                            '@\(attributeName)' can only be applied to enum types when the 'CasePaths' \
-                            package trait is enabled
-                            """
-                            : """
-                            '@\(attributeName)' can only be applied to struct types (and enum types with the \
-                            'CasePaths' package trait enabled)
-                            """
+                        "'@\(attributeName)' can only be applied to struct and enum types"
                     )
                 )
             )
@@ -602,7 +590,7 @@ extension TableMacro: ExtensionMacro {
                         \(raw: columnQueryValueType.trimmedDescription)\
                         >.for(\
                         \(columnName), \
-                        keyPath: \\QueryValue.\(identifier)\
+                        keyPath: \\QueryValue._$\(raw: identifier.text.trimmingBackticks())\
                         \(raw: defaultParameter)\
                         )
                         """
@@ -719,19 +707,6 @@ extension TableMacro: ExtensionMacro {
             )
             .cast(ExtensionDeclSyntax.self)
         ]
-        #if CasePaths
-            if declaration.is(EnumDeclSyntax.self) {
-                extensions += try CasePathableMacro.expansion(
-                    of: node,
-                    attachedTo: declaration,
-                    providingExtensionsOf: type,
-                    conformingTo: protocols.filter {
-                        ["CasePathable", "CasePathIterable"].contains($0.trimmedDescription)
-                    },
-                    in: context
-                )
-            }
-        #endif
         return extensions
     }
 }
@@ -759,6 +734,7 @@ extension TableMacro: MemberMacro {
         var codingKeys: [(identifier: TokenSyntax, rawValue: ExprSyntax?)] = []
         var codableEnumCases: [(identifier: TokenSyntax, label: TokenSyntax?, payloadType: TypeSyntax)] = []
         var enumColumnChecks: [DeclSyntax] = []
+        var caseAccessors: [DeclSyntax] = []
         var writableColumns: [TokenSyntax] = []
         var selectedColumns: [(name: TokenSyntax, type: TypeSyntax?)] = []
         var columnsProperties: [DeclSyntax] = []
@@ -1246,6 +1222,14 @@ extension TableMacro: MemberMacro {
                     }
                 }
 
+                caseAccessors.append(
+                    """
+                    public \(nonisolated)var _$\(raw: identifier.text.trimmingBackticks()): \(parameter.type.trimmed)? {
+                    guard case .\(identifier)(let value) = self else { return nil }
+                    return value
+                    }
+                    """
+                )
                 let checkIndex = enumColumnChecks.count / 2
                 enumColumnChecks.append(
                     """
@@ -1290,7 +1274,7 @@ extension TableMacro: MemberMacro {
                         \(raw: columnQueryValueType.trimmedDescription)\
                         >.for(\
                         \(columnName), \
-                        keyPath: \\QueryValue.\(identifier)\
+                        keyPath: \\QueryValue._$\(raw: identifier.text.trimmingBackticks())\
                         \(raw: defaultParameter)\
                         )
                         """
@@ -1495,6 +1479,7 @@ extension TableMacro: MemberMacro {
                 "public \(nonisolated)static var _columnWidth: Swift.Int { \(raw: columnWidth) }",
             ]
             + tableMembers
+        members += caseAccessors
         if !enumColumnChecks.isEmpty {
             members.append(
                 """
@@ -1504,15 +1489,6 @@ extension TableMacro: MemberMacro {
                 """
             )
         }
-        #if CasePaths
-            if declaration.is(EnumDeclSyntax.self) {
-                members += try CasePathableMacro.expansion(
-                    of: node,
-                    providingMembersOf: declaration,
-                    in: context
-                )
-            }
-        #endif
         return members
     }
 }
@@ -1531,11 +1507,9 @@ extension TableMacro: MemberAttributeMacro {
         if node.attributeName.identifier == "Selection", declaration.hasMacroApplication("Table") {
             return []
         }
-        #if CasePaths
-            if declaration.is(EnumDeclSyntax.self) {
-                return []
-            }
-        #endif
+        if declaration.is(EnumDeclSyntax.self) {
+            return []
+        }
         guard
             declaration.is(StructDeclSyntax.self),
             let property = member.as(VariableDeclSyntax.self),

@@ -2,11 +2,7 @@ import SwiftSyntax
 
 extension DeclGroupSyntax {
     var isTableMacroSupported: Bool {
-        #if CasePaths
-            self.is(StructDeclSyntax.self) || self.is(EnumDeclSyntax.self)
-        #else
-            self.is(StructDeclSyntax.self)
-        #endif
+        self.is(StructDeclSyntax.self) || self.is(EnumDeclSyntax.self)
     }
 
     var declarationName: TokenSyntax? {

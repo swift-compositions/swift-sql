@@ -1,183 +1,90 @@
 public import ISO_9075_Foundation
 public import SQL
 
-#if CasePaths
-    import CasePaths
-#endif
+@attached(
+    extension,
+    conformances: Table,
+    PartialSelectStatement,
+    _SelectSource,
+    PrimaryKeyedTable,
+    names: named(init(_:)),
+    named(init(decoder:))
+)
+@attached(
+    member,
+    conformances: Table,
+    PartialSelectStatement,
+    _SelectSource,
+    PrimaryKeyedTable,
+    names: named(_$ColumnTypes),
+    arbitrary,
+    named(_$ColumnWitness),
+    named(Draft),
+    named(From),
+    named(QueryValue),
+    named(Selection),
+    named(TableColumns),
+    named(_columnWidth),
+    named(columns),
+    named(schemaName),
+    named(tableName),
+    named(CodingKeys),
+    named(_$ColumnChecks),
+    named(init(from:)),
+    named(encode(to:))
+)
+@attached(memberAttribute)
+public macro Table(
+    _ name: String = "",
+    schema schemaName: String = ""
+) =
+    #externalMacro(
+        module: "SQL_Macros_Implementation",
+        type: "TableMacro"
+    )
 
-#if CasePaths
-    @attached(
-        extension,
-        conformances: Table,
-        PartialSelectStatement,
-        _SelectSource,
-        PrimaryKeyedTable,
-        CasePathable,
-        CasePathIterable,
-        names: named(init(_:)),
-        named(init(decoder:))
+@attached(
+    extension,
+    conformances: _Selection,
+    Table,
+    PartialSelectStatement,
+    _SelectSource,
+    PrimaryKeyedTable,
+    names: named(init(_:)),
+    named(init(decoder:))
+)
+@attached(
+    member,
+    conformances: _Selection,
+    Table,
+    PartialSelectStatement,
+    _SelectSource,
+    PrimaryKeyedTable,
+    names: named(_$ColumnTypes),
+    arbitrary,
+    named(_$ColumnWitness),
+    named(Draft),
+    named(From),
+    named(QueryValue),
+    named(Selection),
+    named(TableColumns),
+    named(_columnWidth),
+    named(columns),
+    named(schemaName),
+    named(tableName),
+    named(CodingKeys),
+    named(_$ColumnChecks),
+    named(init(from:)),
+    named(encode(to:))
+)
+@attached(memberAttribute)
+public macro Selection(
+    _ name: String = ""
+) =
+    #externalMacro(
+        module: "SQL_Macros_Implementation",
+        type: "TableMacro"
     )
-    @attached(
-        member,
-        conformances: Table,
-        PartialSelectStatement,
-        _SelectSource,
-        PrimaryKeyedTable,
-        names: named(_$ColumnTypes),
-        named(_$ColumnWitness),
-        named(Draft),
-        named(From),
-        named(QueryValue),
-        named(Selection),
-        named(TableColumns),
-        named(_columnWidth),
-        named(columns),
-        named(schemaName),
-        named(tableName),
-        named(CodingKeys),
-        named(_$ColumnChecks),
-        named(init(from:)),
-        named(encode(to:)),
-        named(AllCasePaths),
-        named(allCasePaths),
-        named(_$Element)
-    )
-    @attached(memberAttribute)
-    public macro Table(
-        _ name: String = "",
-        schema schemaName: String = ""
-    ) =
-        #externalMacro(
-            module: "SQL_Macros_Implementation",
-            type: "TableMacro"
-        )
-#else
-    @attached(
-        extension,
-        conformances: Table,
-        PartialSelectStatement,
-        _SelectSource,
-        PrimaryKeyedTable,
-        names: named(init(_:)),
-        named(init(decoder:))
-    )
-    @attached(
-        member,
-        conformances: Table,
-        PartialSelectStatement,
-        _SelectSource,
-        PrimaryKeyedTable,
-        names: named(_$ColumnTypes),
-        named(_$ColumnWitness),
-        named(Draft),
-        named(From),
-        named(QueryValue),
-        named(Selection),
-        named(TableColumns),
-        named(_columnWidth),
-        named(columns),
-        named(schemaName),
-        named(tableName),
-        named(CodingKeys)
-    )
-    @attached(memberAttribute)
-    public macro Table(
-        _ name: String = "",
-        schema schemaName: String = ""
-    ) =
-        #externalMacro(
-            module: "SQL_Macros_Implementation",
-            type: "TableMacro"
-        )
-#endif
-
-#if CasePaths
-    @attached(
-        extension,
-        conformances: _Selection,
-        Table,
-        PartialSelectStatement,
-        _SelectSource,
-        PrimaryKeyedTable,
-        CasePathable,
-        CasePathIterable,
-        names: named(init(_:)),
-        named(init(decoder:))
-    )
-    @attached(
-        member,
-        conformances: _Selection,
-        Table,
-        PartialSelectStatement,
-        _SelectSource,
-        PrimaryKeyedTable,
-        names: named(_$ColumnTypes),
-        named(_$ColumnWitness),
-        named(Draft),
-        named(From),
-        named(QueryValue),
-        named(Selection),
-        named(TableColumns),
-        named(_columnWidth),
-        named(columns),
-        named(schemaName),
-        named(tableName),
-        named(CodingKeys),
-        named(_$ColumnChecks),
-        named(init(from:)),
-        named(encode(to:)),
-        named(AllCasePaths),
-        named(allCasePaths),
-        named(_$Element)
-    )
-    @attached(memberAttribute)
-    public macro Selection(
-        _ name: String = ""
-    ) =
-        #externalMacro(
-            module: "SQL_Macros_Implementation",
-            type: "TableMacro"
-        )
-#else
-    @attached(
-        extension,
-        conformances: _Selection,
-        Table,
-        PartialSelectStatement,
-        _SelectSource,
-        PrimaryKeyedTable,
-        names: named(init(_:)),
-        named(init(decoder:))
-    )
-    @attached(
-        member,
-        conformances: _Selection,
-        Table,
-        PartialSelectStatement,
-        _SelectSource,
-        PrimaryKeyedTable,
-        names: named(_$ColumnTypes),
-        named(_$ColumnWitness),
-        named(Draft),
-        named(From),
-        named(QueryValue),
-        named(Selection),
-        named(TableColumns),
-        named(_columnWidth),
-        named(columns),
-        named(schemaName),
-        named(tableName),
-        named(CodingKeys)
-    )
-    @attached(memberAttribute)
-    public macro Selection(
-        _ name: String = ""
-    ) =
-        #externalMacro(
-            module: "SQL_Macros_Implementation",
-            type: "TableMacro"
-        )
-#endif
 
 @attached(peer)
 public macro Column(
@@ -241,6 +148,7 @@ public macro _ColumnDefault() =
 @attached(
     member,
     names: named(_$ColumnTypes),
+    arbitrary,
     named(_$ColumnWitness),
     named(From),
     named(QueryValue),
@@ -368,14 +276,12 @@ public macro ColumnCheck<T: QueryBindable & RawRepresentable>(_ value: T) =
     #externalMacro(module: "SQL_Macros_Implementation", type: "ColumnCheckPassMacro")
 where T.RawValue: QueryBindable
 
-#if CasePaths
-    @_documentation(visibility: private)
-    @attached(peer)
-    public macro CaseCheck<T>(_ type: T.Type) =
-        #externalMacro(module: "SQL_Macros_Implementation", type: "ColumnCheckPassMacro")
+@_documentation(visibility: private)
+@attached(peer)
+public macro CaseCheck<T>(_ type: T.Type) =
+    #externalMacro(module: "SQL_Macros_Implementation", type: "ColumnCheckPassMacro")
 
-    @_documentation(visibility: private)
-    @attached(peer)
-    public macro CaseCheck<T: SQL::_OptionalProtocol>(_ type: T.Type) =
-        #externalMacro(module: "SQL_Macros_Implementation", type: "CaseCheckFailMacro")
-#endif
+@_documentation(visibility: private)
+@attached(peer)
+public macro CaseCheck<T: SQL::_OptionalProtocol>(_ type: T.Type) =
+    #externalMacro(module: "SQL_Macros_Implementation", type: "CaseCheckFailMacro")

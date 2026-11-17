@@ -60,29 +60,27 @@ extension Optional where Wrapped: Table {
             )
         }
 
-        #if CasePaths
-            public subscript<Member>(
-                dynamicMember keyPath: KeyPath<Wrapped.TableColumns, CaseColumn<Wrapped, Member>>
-            ) -> TableColumn<Optional, Member??> {
-                let column = Wrapped.columns[keyPath: keyPath].base
-                return TableColumn<Optional, Member??>(
-                    column.name,
-                    keyPath: \.[member: \Member?.self, column: column.keyPath]
-                )
-            }
+        public subscript<Member>(
+            dynamicMember keyPath: KeyPath<Wrapped.TableColumns, CaseColumn<Wrapped, Member>>
+        ) -> TableColumn<Optional, Member??> {
+            let column = Wrapped.columns[keyPath: keyPath].base
+            return TableColumn<Optional, Member??>(
+                column.name,
+                keyPath: \.[member: \Member?.self, column: column.keyPath]
+            )
+        }
 
-            public subscript<Member>(
-                dynamicMember keyPath: KeyPath<
-                    Wrapped.TableColumns, CaseColumnGroup<Wrapped, Member>
-                >
-            ) -> ColumnGroup<Optional, Member??> {
-                let column = Wrapped.columns[keyPath: keyPath].base
-                return ColumnGroup<Optional, Member??>(
-                    column.groupName,
-                    keyPath: \.[member: \Member?.self, column: column.keyPath]
-                )
-            }
-        #endif
+        public subscript<Member>(
+            dynamicMember keyPath: KeyPath<
+                Wrapped.TableColumns, CaseColumnGroup<Wrapped, Member>
+            >
+        ) -> ColumnGroup<Optional, Member??> {
+            let column = Wrapped.columns[keyPath: keyPath].base
+            return ColumnGroup<Optional, Member??>(
+                column.groupName,
+                keyPath: \.[member: \Member?.self, column: column.keyPath]
+            )
+        }
 
         public subscript<Member: QueryExpression>(
             dynamicMember keyPath: KeyPath<Wrapped.TableColumns, Member>

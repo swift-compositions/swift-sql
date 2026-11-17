@@ -1,9 +1,9 @@
-import InlineSnapshotTesting
 import SQL
 import SQL_Macros
 import SQL_Test_Support
-import SnapshotTesting
 import Testing
+import Tests_Apple_Testing_Bridge
+import Tests_Inline_Snapshot
 
 enum `Values Tests` {}
 
@@ -11,12 +11,11 @@ extension `Values Tests` {
     @Suite(.snapshots(record: .missing))
     struct `VALUES statements` {
         @Test func `basics`() {
-            assertInlineSnapshot(
-                of: Values {
+            snapshot(as: .sql) {
+                Values {
                     (1, "Hello", true)
-                },
-                as: .sql
-            ) {
+                }
+            } matches: {
                 """
                 VALUES (1, 'Hello', TRUE)
                 """
@@ -24,13 +23,12 @@ extension `Values Tests` {
         }
 
         @Test func `multiple rows`() {
-            assertInlineSnapshot(
-                of: Values {
+            snapshot(as: .sql) {
+                Values {
                     (1, "Hello", true)
                     (2, "Goodbye", false)
-                },
-                as: .sql
-            ) {
+                }
+            } matches: {
                 """
                 VALUES (1, 'Hello', TRUE), (2, 'Goodbye', FALSE)
                 """
@@ -39,17 +37,16 @@ extension `Values Tests` {
 
         @Test func `control flow`() {
             let includeGoodbye = false
-            assertInlineSnapshot(
-                of: Values {
+            snapshot(as: .sql) {
+                Values {
                     for n in 1...2 {
                         (n, "Hello")
                     }
                     if includeGoodbye {
                         (3, "Goodbye")
                     }
-                },
-                as: .sql
-            ) {
+                }
+            } matches: {
                 """
                 VALUES (1, 'Hello'), (2, 'Hello')
                 """
@@ -57,15 +54,14 @@ extension `Values Tests` {
         }
 
         @Test func `single column`() {
-            assertInlineSnapshot(
-                of: rows(
+            snapshot(as: .sql) {
+                rows(
                     Values {
                         "Hello"
                         "Goodbye"
                     }
-                ),
-                as: .sql
-            ) {
+                )
+            } matches: {
                 """
                 VALUES ('Hello'), ('Goodbye')
                 """
@@ -73,17 +69,16 @@ extension `Values Tests` {
         }
 
         @Test func `union`() {
-            assertInlineSnapshot(
-                of: Values {
+            snapshot(as: .sql) {
+                Values {
                     (1, "Hello", true)
                 }
                 .union(
                     Values {
                         (2, "Goodbye", false)
                     }
-                ),
-                as: .sql
-            ) {
+                )
+            } matches: {
                 """
                 VALUES (1, 'Hello', TRUE)
                   UNION
@@ -93,16 +88,15 @@ extension `Values Tests` {
         }
 
         @Test func `select`() {
-            assertInlineSnapshot(
-                of: Select(
+            snapshot(as: .sql) {
+                Select(
                     Values {
                         (1, "Hello", true)
                         (2, "Goodbye", false)
                     }
                 )
-                .where(\.2),
-                as: .sql
-            ) {
+                .where(\.2)
+            } matches: {
                 """
                 SELECT "column1", "column2", "column3"
                 FROM (
@@ -114,16 +108,15 @@ extension `Values Tests` {
         }
 
         @Test func `select closure`() {
-            assertInlineSnapshot(
-                of: Select(
+            snapshot(as: .sql) {
+                Select(
                     Values {
                         (1, "Hello", true)
                         (2, "Goodbye", false)
                     }
                 )
-                .where { $2 },
-                as: .sql
-            ) {
+                .where { $2 }
+            } matches: {
                 """
                 SELECT "column1", "column2", "column3"
                 FROM (
@@ -135,16 +128,15 @@ extension `Values Tests` {
         }
 
         @Test func `select order`() {
-            assertInlineSnapshot(
-                of: Select(
+            snapshot(as: .sql) {
+                Select(
                     Values {
                         (1, "Hello", true)
                         (2, "Goodbye", false)
                     }
                 )
-                .order { first, second, _ in (first.desc(), second) },
-                as: .sql
-            ) {
+                .order { first, second, _ in (first.desc(), second) }
+            } matches: {
                 """
                 SELECT "column1", "column2", "column3"
                 FROM (
@@ -156,16 +148,15 @@ extension `Values Tests` {
         }
 
         @Test func `select order key path`() {
-            assertInlineSnapshot(
-                of: Select(
+            snapshot(as: .sql) {
+                Select(
                     Values {
                         (2, "Goodbye", false)
                         (1, "Hello", true)
                     }
                 )
-                .order(by: \.0),
-                as: .sql
-            ) {
+                .order(by: \.0)
+            } matches: {
                 """
                 SELECT "column1", "column2", "column3"
                 FROM (
@@ -177,17 +168,16 @@ extension `Values Tests` {
         }
 
         @Test func `select single column`() {
-            assertInlineSnapshot(
-                of: Select(
+            snapshot(as: .sql) {
+                Select(
                     rows(
                         Values {
                             1
                             2
                         }
                     )
-                ),
-                as: .sql
-            ) {
+                )
+            } matches: {
                 """
                 SELECT "column1"
                 FROM (
@@ -198,13 +188,12 @@ extension `Values Tests` {
         }
 
         @Test func `selection rows`() {
-            assertInlineSnapshot(
-                of: Values {
+            snapshot(as: .sql) {
+                Values {
                     HighScore.Columns(score: 100, player: "Blob")
                     HighScore.Columns(score: 50, player: "Blob Jr")
-                },
-                as: .sql
-            ) {
+                }
+            } matches: {
                 """
                 VALUES (100, 'Blob'), (50, 'Blob Jr')
                 """
@@ -212,16 +201,15 @@ extension `Values Tests` {
         }
 
         @Test func `select selection rows`() {
-            assertInlineSnapshot(
-                of: Select(
+            snapshot(as: .sql) {
+                Select(
                     Values {
                         HighScore.Columns(score: 100, player: "Blob")
                         HighScore.Columns(score: 50, player: "Blob Jr")
                     }
                 )
-                .where { $0.player.eq("Blob") },
-                as: .sql
-            ) {
+                .where { $0.player.eq("Blob") }
+            } matches: {
                 """
                 SELECT "column1" AS "score", "column2" AS "player"
                 FROM (
@@ -233,13 +221,12 @@ extension `Values Tests` {
         }
 
         @Test func `mixed rows`() {
-            assertInlineSnapshot(
-                of: Values {
+            snapshot(as: .sql) {
+                Values {
                     (1, HighScore.Columns(score: 100, player: "Blob"), true)
                     (2, HighScore.Columns(score: 50, player: "Blob Jr"), false)
-                },
-                as: .sql
-            ) {
+                }
+            } matches: {
                 """
                 VALUES (1, 100, 'Blob', TRUE), (2, 50, 'Blob Jr', FALSE)
                 """
@@ -247,17 +234,16 @@ extension `Values Tests` {
         }
 
         @Test func `select mixed rows`() {
-            assertInlineSnapshot(
-                of: Select(
+            snapshot(as: .sql) {
+                Select(
                     Values {
                         (1, HighScore.Columns(score: 100, player: "Blob"), true)
                         (2, HighScore.Columns(score: 50, player: "Blob Jr"), false)
                     }
                 )
                 .where(\.2)
-                .order(by: \.1.score),
-                as: .sql
-            ) {
+                .order(by: \.1.score)
+            } matches: {
                 """
                 SELECT "column1", "column2" AS "score", "column3" AS "player", "column4"
                 FROM (
@@ -270,17 +256,16 @@ extension `Values Tests` {
         }
 
         @Test func `select mixed rows positional`() {
-            assertInlineSnapshot(
-                of: Select(
+            snapshot(as: .sql) {
+                Select(
                     Values {
                         (1, HighScore.Columns(score: 100, player: "Blob"), true)
                         (2, HighScore.Columns(score: 50, player: "Blob Jr"), false)
                     }
                 )
                 .where { _, _, flag in flag }
-                .order { _, highScore, _ in highScore.player },
-                as: .sql
-            ) {
+                .order { _, highScore, _ in highScore.player }
+            } matches: {
                 """
                 SELECT "column1", "column2" AS "score", "column3" AS "player", "column4"
                 FROM (
@@ -293,16 +278,15 @@ extension `Values Tests` {
         }
 
         @Test func `select mixed rows multi key order`() {
-            assertInlineSnapshot(
-                of: Select(
+            snapshot(as: .sql) {
+                Select(
                     Values {
                         (1, HighScore.Columns(score: 100, player: "Blob"), true)
                         (2, HighScore.Columns(score: 50, player: "Blob Jr"), false)
                     }
                 )
-                .order { _, highScore, _ in highScore },
-                as: .sql
-            ) {
+                .order { _, highScore, _ in highScore }
+            } matches: {
                 """
                 SELECT "column1", "column2" AS "score", "column3" AS "player", "column4"
                 FROM (
@@ -314,16 +298,15 @@ extension `Values Tests` {
         }
 
         @Test func `select control flow selection rows`() {
-            assertInlineSnapshot(
-                of: Select(
+            snapshot(as: .sql) {
+                Select(
                     Values {
                         for score in [100, 50] {
                             HighScore.Columns(score: score, player: "Blob \(score)")
                         }
                     }
-                ),
-                as: .sql
-            ) {
+                )
+            } matches: {
                 """
                 SELECT "column1" AS "score", "column2" AS "player"
                 FROM (
@@ -334,8 +317,8 @@ extension `Values Tests` {
         }
 
         @Test func `selection common table expression`() {
-            assertInlineSnapshot(
-                of: With {
+            snapshot(as: .sql) {
+                With {
                     Select(
                         Values {
                             HighScore.Columns(score: 100, player: "Blob")
@@ -344,9 +327,8 @@ extension `Values Tests` {
                     )
                 } query: {
                     HighScore.all
-                },
-                as: .sql
-            ) {
+                }
+            } matches: {
                 """
                 WITH "highScore" AS (
                   SELECT "column1" AS "score", "column2" AS "player"
@@ -361,14 +343,13 @@ extension `Values Tests` {
         }
 
         @Test func `insert select`() {
-            assertInlineSnapshot(
-                of: Tag.insert {
+            snapshot(as: .sql) {
+                Tag.insert {
                     $0.title
                 } select: {
                     Select(Values { "vacation" })
-                },
-                as: .sql
-            ) {
+                }
+            } matches: {
                 """
                 INSERT INTO "tags"
                 ("title")
@@ -381,16 +362,15 @@ extension `Values Tests` {
         }
 
         @Test func `select order positional`() {
-            assertInlineSnapshot(
-                of: Select(
+            snapshot(as: .sql) {
+                Select(
                     Values {
                         (2, "Goodbye", false)
                         (1, "Hello", true)
                     }
                 )
-                .order { first, _, _ in first },
-                as: .sql
-            ) {
+                .order { first, _, _ in first }
+            } matches: {
                 """
                 SELECT "column1", "column2", "column3"
                 FROM (
