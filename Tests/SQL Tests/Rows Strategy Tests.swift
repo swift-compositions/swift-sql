@@ -63,6 +63,27 @@ extension `Rows Strategy Tests` {
             }
         }
 
+        @Test func `draws what the drawing returns, in a cell and in a property`() {
+            snapshot(
+                as: .rows(
+                    { _ in [(Row(id: 1, title: "One", note: "secret"), "secret")] },
+                    drawing: { ($0 as? String) == "secret" ? "<redacted>" : nil }
+                )
+            ) {
+                Row.all
+            } matches: {
+                """
+                ┌────────────────────┬────────────┐
+                │ Row(               │ <redacted> │
+                │   id: 1,           │            │
+                │   title: "One",    │            │
+                │   note: <redacted> │            │
+                │ )                  │            │
+                └────────────────────┴────────────┘
+                """
+            }
+        }
+
         @Test func `draws no rows as no results`() {
             snapshot(as: .rows { _ in [Int]() }) {
                 Row.all

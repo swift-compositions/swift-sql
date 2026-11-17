@@ -19,16 +19,18 @@ extension Test::Test.Snapshot.Strategy where Value: QueryExpression, Format == S
 extension Test::Test.Snapshot.Strategy where Format == Swift.String {
     /// The rows `execute` returns for the value, drawn as a table.
     ///
-    /// A tuple row has one column per element; any other row has one column. A cell is `nil` for an absent
+    /// A tuple row has one column per element; any other row has one column. A cell, and each stored property
+    /// a cell shows, is what `drawing` returns for it where that is not `nil`; otherwise `nil` for an absent
     /// value, a quoted literal for a string, the type's own description where it has one, the SQL literal it
-    /// binds as where it has none, and otherwise the value's type name with one line per stored property. No rows render as `(No results)`, and a thrown
-    /// error renders as its description.
+    /// binds as where it has none, and otherwise the value's type name with one line per stored property.
+    /// No rows render as `(No results)`, and a thrown error renders as its description.
     public static func rows<Row, Failure: Swift.Error>(
-        _ execute: @escaping (Value) throws(Failure) -> [Row]
+        _ execute: @escaping (Value) throws(Failure) -> [Row],
+        drawing: @escaping (Any) -> Swift.String? = { _ in nil }
     ) -> Self {
         Test::Test.Snapshot.Strategy<Swift.String, Swift.String>.lines.pullback { value in
             do throws(Failure) {
-                return Rows.table(try execute(value))
+                return Rows(drawing: drawing).table(try execute(value))
             } catch {
                 return Swift.String(describing: error)
             }
@@ -36,10 +38,12 @@ extension Test::Test.Snapshot.Strategy where Format == Swift.String {
     }
 }
 
-private enum Rows {}
+private struct Rows {
+    let drawing: (Any) -> Swift.String?
+}
 
 extension Rows {
-    static func table<Row>(_ rows: [Row]) -> Swift.String {
+    func table<Row>(_ rows: [Row]) -> Swift.String {
         guard !rows.isEmpty else { return "(No results)" }
         let cellRows: [[[Swift.String]]] = rows.map { row in
             let mirror = Mirror(reflecting: row)
@@ -74,7 +78,8 @@ extension Rows {
             .joined(separator: "\n")
     }
 
-    static func cell(_ value: Any) -> Swift.String {
+    func cell(_ value: Any) -> Swift.String {
+        if let drawn = drawing(value) { return drawn }
         let mirror = Mirror(reflecting: value)
         switch mirror.displayStyle {
         case .optional:
@@ -85,7 +90,9 @@ extension Rows {
                 !(value is any QueryBindable), !mirror.children.isEmpty
             else { return inline(value) }
             let fields = mirror.children.map { child in
-                "  \(child.label ?? "_"): \(inline(child.value))"
+                "  \(child.label ?? "_"): "
+                    + inline(child.value).split(separator: "\n", omittingEmptySubsequences: false)
+                    .joined(separator: "\n  ")
             }
             return "\(type(of: value))(\n" + fields.joined(separator: ",\n") + "\n)"
 
@@ -94,7 +101,8 @@ extension Rows {
         }
     }
 
-    static func inline(_ value: Any) -> Swift.String {
+    func inline(_ value: Any) -> Swift.String {
+        if let drawn = drawing(value) { return drawn }
         let mirror = Mirror(reflecting: value)
         if mirror.displayStyle == .optional {
             return mirror.children.first.map { inline($0.value) } ?? "nil"
