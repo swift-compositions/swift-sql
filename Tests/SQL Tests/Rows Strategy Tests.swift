@@ -2,9 +2,9 @@ import SQL
 import SQL_Macros
 import SQL_Test_Support
 import Testing
-import Time
 import Tests_Apple_Testing_Bridge
 import Tests_Inline_Snapshot
+import Time
 
 private struct Failure: Swift.Error, CustomStringConvertible {
     var description: String { "no such table" }
