@@ -2,6 +2,7 @@ import SQL
 import SQL_Macros
 import SQL_Test_Support
 import Testing
+import Time
 import Tests_Apple_Testing_Bridge
 import Tests_Inline_Snapshot
 
@@ -46,6 +47,18 @@ extension `Rows Strategy Tests` {
                 │   note: nil     │
                 │ )               │
                 └─────────────────┘
+                """
+            }
+        }
+
+        @Test func `draws a bindable value without a description as the literal it binds as`() {
+            snapshot(as: .rows { _ in [(1, Time.Instant(secondsSinceUnixEpoch: 42))] }) {
+                Row.all
+            } matches: {
+                """
+                ┌───┬─────────────────────────────────────┐
+                │ 1 │ TIMESTAMP '1970-01-01 00:00:42.000' │
+                └───┴─────────────────────────────────────┘
                 """
             }
         }

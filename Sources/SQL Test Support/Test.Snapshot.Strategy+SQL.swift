@@ -20,8 +20,8 @@ extension Test::Test.Snapshot.Strategy where Format == Swift.String {
     /// The rows `execute` returns for the value, drawn as a table.
     ///
     /// A tuple row has one column per element; any other row has one column. A cell is `nil` for an absent
-    /// value, a quoted literal for a string, the type's own description where it has one, and otherwise the
-    /// value's type name with one line per stored property. No rows render as `(No results)`, and a thrown
+    /// value, a quoted literal for a string, the type's own description where it has one, the SQL literal it
+    /// binds as where it has none, and otherwise the value's type name with one line per stored property. No rows render as `(No results)`, and a thrown
     /// error renders as its description.
     public static func rows<Row, Failure: Swift.Error>(
         _ execute: @escaping (Value) throws(Failure) -> [Row]
@@ -82,7 +82,7 @@ extension Rows {
 
         case .struct, .class:
             guard !(value is any CustomStringConvertible), !(value is any CustomDebugStringConvertible),
-                !mirror.children.isEmpty
+                !(value is any QueryBindable), !mirror.children.isEmpty
             else { return inline(value) }
             let fields = mirror.children.map { child in
                 "  \(child.label ?? "_"): \(inline(child.value))"
@@ -101,6 +101,9 @@ extension Rows {
         }
         if let string = value as? Swift.String {
             return Swift.String(reflecting: string)
+        }
+        if !(value is any CustomStringConvertible), let value = value as? any QueryBindable {
+            return value.queryFragment.debugDescription
         }
         return Swift.String(describing: value)
     }
